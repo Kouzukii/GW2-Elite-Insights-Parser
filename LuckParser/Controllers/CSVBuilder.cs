@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 using LuckParser.Models.DataModels;
 using LuckParser.Models.ParseModels;
 
@@ -86,7 +85,7 @@ namespace LuckParser.Controllers
             }
             string bossname = _log.FightData.Name;
             //header
-            WriteLine(new [] { "Elite Insights Version", Application.ProductVersion });
+            WriteLine(new [] { "Elite Insights Version", Program.Version });
             WriteLine(new [] { "ARC Version", _log.LogData.BuildVersion});
             WriteLine(new [] { "Boss ID", _log.FightData.ID.ToString() });
             WriteLine(new [] { "Recorded By", _log.LogData.PoV.Split(':')[0] });

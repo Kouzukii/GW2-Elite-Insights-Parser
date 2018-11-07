@@ -61,22 +61,23 @@ namespace LuckParser.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to const deadIcon = new Image();
+        ///   Looks up a localized string similar to /*jshint esversion: 6 */
+        ///const deadIcon = new Image();
         ///deadIcon.src = &quot;https://wiki.guildwars2.com/images/4/4a/Ally_death_%28interface%29.png&quot;;
         ///const downIcon = new Image();
         ///downIcon.src = &quot;https://wiki.guildwars2.com/images/c/c6/Downed_enemy.png&quot;;
+        ///const bgImage = new Image();
+        ///bgImage.onload = function () {
+        ///    animateCanvas();
+        ///    bgLoaded = true;
+        ///};
         ///let time = 0;
-        ///let inch = 0;
+        ///let inch = 10;
         ///let speed = 1;
         ///const times = [];
         ///const bossData = new Map();
         ///const playerData = new Map();
-        ///const trashMobData = new Map();
-        ///const mechanicActorData = new Set();
-        ///const rangeControl = new Map();
-        ///let selectedGroup = -1;
-        ///let selectedPlayer = null;
-        ///co [rest of string was truncated]&quot;;.
+        ///const trashMobData = n [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string combatreplay_js {
             get {
@@ -169,35 +170,14 @@ namespace LuckParser.Properties {
         /// <summary>
         ///   Looks up a localized string similar to &lt;div class=&quot;d-flex justify-content-around align-items-center justify-content-center&quot;&gt;
         ///    &lt;div class=&quot;d-flex flex-column flex-wrap&quot;&gt;
-        ///            &lt;canvas width=&quot;${canvasX}px&quot; height=&quot;${canvasY}px&quot;  id=&quot;replayCanvas&quot; class=&quot;replay&quot;&gt;
-        ///            &lt;/canvas&gt;
-        ///            &lt;div class=&quot;d-flex justify-content-center slidecontainer&quot;&gt;
-        ///                &lt;input style=&quot;min-width: 400px;&quot; oninput=&quot;updateTime(this.value)&quot; type=&quot;range&quot; min =&quot;0&quot; max=&quot;${maxTime}&quot; value=&quot;0&quot; class=&quot;slider&quot; id=&quot;timeRange&quot;&gt;
-        ///                &lt;inp [rest of string was truncated]&quot;;.
+        ///        &lt;canvas width=&quot;${canvasX}px&quot; height=&quot;${canvasY}px&quot; id=&quot;replayCanvas&quot; class=&quot;replay&quot;&gt;&lt;/canvas&gt;
+        ///        &lt;div class=&quot;d-flex justify-content-center slidecontainer&quot;&gt;
+        ///            &lt;input style=&quot;min-width: 400px;&quot; oninput=&quot;updateTime(this.value)&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;${maxTime}&quot; value=&quot;0&quot; class=&quot;slider&quot; id=&quot;timeRange&quot;&gt;
+        ///            &lt;input style=&quot;width: 70px; text-alig [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string template_replay_html {
             get {
                 return ResourceManager.GetString("template_replay_html", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap theme_cosmo {
-            get {
-                object obj = ResourceManager.GetObject("theme_cosmo", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap theme_slate {
-            get {
-                object obj = ResourceManager.GetObject("theme_slate", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -407,8 +387,7 @@ namespace LuckParser.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;label id=&quot;id ${instid}&quot; style=&quot;width: 150px;&quot; onclick=&quot;selectActor(${instid});&quot; class=&quot;btn btn-dark&quot;&gt;
-        ///    &lt;input class=&quot;invisible&quot; type=&quot;radio&quot; autocomplete=&quot;off&quot;&gt;
+        ///   Looks up a localized string similar to &lt;label id=&quot;id${instid}&quot; style=&quot;width: 150px;&quot; onclick=&quot;selectActor(${instid});&quot; class=&quot;btn btn-dark&quot;&gt;
         ///    ${playerName}
         ///    &lt;img src=&quot;${imageURL}&quot; alt=&quot;${prof}&quot; height=&quot;18&quot; width=&quot;18&quot;&gt;
         ///&lt;/label&gt; .

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using LuckParser.Models.DataModels;
 using LuckParser.Models.HtmlModels;
 using LuckParser.Models.ParseModels;
@@ -1388,7 +1387,7 @@ namespace LuckParser.Controllers
             html = html.Replace("${bossHealth}", _log.Boss.Health.ToString());
             html = html.Replace("${bossHealthLeft}", healthLeft.ToString());
             html = html.Replace("${fightIcon}", _log.FightData.Logic.IconUrl);
-            html = html.Replace("${eiVersion}", Application.ProductVersion);
+            html = html.Replace("${eiVersion}", Program.Version);
             html = html.Replace("${recordedBy}", _log.LogData.PoV.Split(':')[0]);
 
             return html;
