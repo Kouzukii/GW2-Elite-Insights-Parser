@@ -10,14 +10,15 @@ namespace LuckParser.Models.ParseModels
         public byte IsCondi { get; }
         public ParseEnum.Result Result { get; }
         public byte IsNinety { get; }
+        public byte IsFifty { get; }
         public byte IsMoving { get; }
         public byte IsFlanking { get; }
         public ParseEnum.Activation Activation { get; }
-        public byte IsShields { get; }
         public ulong SrcAgent { get; }
         public ushort SrcInstId { get; }
         public ulong DstAgent { get; }
         public ushort DstInstId { get; }
+        public uint ShieldDamage { get; }
 
         protected DamageLog(long time, CombatItem c)
         {
@@ -26,14 +27,15 @@ namespace LuckParser.Models.ParseModels
             IsCondi = c.IsBuff;
             Result = c.Result;
             IsNinety = c.IsNinety;
+            IsFifty = c.IsFifty;
             IsMoving = c.IsMoving;
             IsFlanking = c.IsFlanking;
             Activation = c.IsActivation;
             SrcAgent = c.SrcAgent;
             SrcInstId = c.SrcInstid;
-            IsShields = c.IsShields;
             DstAgent = c.DstAgent;
             DstInstId = c.DstInstid;
+            ShieldDamage = c.IsShields > 0 ? c.OverstackValue : 0;
         }
     }
 }

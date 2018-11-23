@@ -25,7 +25,7 @@ namespace LuckParser.Controllers
         private readonly SettingsContainer _settings;
         private List<CombatItem> _combatItems = new List<CombatItem>();
         private List<Player> _playerList = new List<Player>();
-        private Boss _boss;
+        private Target _target;
         private byte _revision;
 
         public Parser(SettingsContainer settings)
@@ -63,7 +63,7 @@ namespace LuckParser.Controllers
                     ParseLog(row, fs);
                 }
             }
-            return new ParsedLog(_logData, _fightData, _agentData, _skillData, new CombatData(_combatItems, _fightData), _playerList, _boss);
+            return new ParsedLog(_logData, _fightData, _agentData, _skillData, new CombatData(_combatItems, _fightData), _playerList, _target);
         }
 
         private void ParseLog(GridRow row, Stream stream)
@@ -71,7 +71,7 @@ namespace LuckParser.Controllers
             try
             {
                 row.BgWorker.ThrowIfCanceled(row);
-                row.BgWorker.UpdateProgress(row, "15% - Parsing boss data...", 15);
+                row.BgWorker.UpdateProgress(row, "15% - Parsing fight data...", 15);
                 ParseFightData(stream);
                 row.BgWorker.ThrowIfCanceled(row);
                 row.BgWorker.UpdateProgress(row, "20% - Parsing agent data...", 20);
@@ -117,7 +117,7 @@ namespace LuckParser.Controllers
 
         //sub Parse methods
         /// <summary>
-        /// Parses boss related data
+        /// Parses fight related data
         /// </summary>
         private void ParseFightData(Stream stream)
         {
@@ -130,7 +130,7 @@ namespace LuckParser.Controllers
                 // 1 byte: skip
                 _revision = reader.ReadByte();
 
-                // 2 bytes: boss instance ID
+                // 2 bytes: fight instance ID
                 ushort id = reader.ReadUInt16();
                 // 1 byte: position
                 ParseHelper.SafeSkip(stream, 1);
@@ -169,13 +169,13 @@ namespace LuckParser.Controllers
                     // 2 bytes: healing
                     uint healing = reader.ReadUInt16();
                     // 2 bytes: hitbox width
-                    uint hbWidth = reader.ReadUInt16();
+                    uint hbWidth = (uint) 2 * reader.ReadUInt16();
                     // 2 bytes: condition
                     uint condition = reader.ReadUInt16();
                     // 2 bytes: hitbox height
-                    uint hbHeight = reader.ReadUInt16();
+                    uint hbHeight = (uint)2 * reader.ReadUInt16();
                     // 68 bytes: name
-                    String name = ParseHelper.GetString(stream, 68, false);
+                    string name = ParseHelper.GetString(stream, 68, false);
                     //Save
                     Agent a = new Agent(agent, name, prof, isElite);
                     string agentProf = a.GetProf(_logData.BuildVersion, _aPIController);
@@ -416,7 +416,7 @@ namespace LuckParser.Controllers
         {
             if (combatItem.IsStateChange == ParseEnum.StateChange.HealthUpdate && combatItem.DstAgent > 20000)
             {
-                // DstAgent should be boss health % times 100, values higher than 10000 are unlikely. 
+                // DstAgent should be target health % times 100, values higher than 10000 are unlikely. 
                 // If it is more than 200% health ignore this record
                 return false;
             }
@@ -498,7 +498,7 @@ namespace LuckParser.Controllers
                     playerAgent.LastAware = _fightData.FightEnd;
                 }
                 List<CombatItem> lp = _combatItems.Where(x => x.IsStateChange == ParseEnum.StateChange.Despawn && x.SrcInstid == playerAgent.InstID && x.Time <= _fightData.FightEnd && x.Time >= _fightData.FightStart).ToList();
-                Player player = new Player(playerAgent, _fightData.Logic.Mode == BossLogic.ParseMode.Fractal);
+                Player player = new Player(playerAgent, _fightData.Logic.Mode == FightLogic.ParseMode.Fractal);
                 bool skip = false;
                 foreach (Player p in _playerList)
                 {
@@ -554,10 +554,10 @@ namespace LuckParser.Controllers
         {
             CompleteAgents();
             _fightData.Logic.ComputeFightTargets(_agentData, _fightData, _combatItems);
-            _boss = _fightData.Logic.Targets.Find(x => x.ID == _fightData.ID);
-            if (_boss == null)
+            _target = _fightData.Logic.Targets.Find(x => x.ID == _fightData.ID);
+            if (_target == null)
             {
-                _boss = new Boss(new AgentItem(0, "UNKNOWN"));
+                _target = new Target(new AgentItem(0, "UNKNOWN"));
             }
             // Dealing with special cases
             _fightData.Logic.SpecialParse(_fightData, _agentData, _combatItems);
@@ -575,10 +575,7 @@ namespace LuckParser.Controllers
                         break;
                     case ParseEnum.StateChange.LogStart:
                         _logData.SetLogStart(c.Value);
-                        if (_fightData.FightStart == 0)
-                        {
-                            _fightData.FightStart = c.Time;
-                        }
+                        _fightData.FightStart = c.Time;
                         break;
                     case ParseEnum.StateChange.LogEnd:
                         _logData.SetLogEnd(c.Value);

@@ -52,7 +52,7 @@ namespace LuckParser.Models.ParseModels
                         {
                             if (curCastLog.SkillId == c.SkillID)
                             {
-                                curCastLog.SetEndStatus(c.Value, c.IsActivation);
+                                curCastLog.SetEndStatus(c.Value, c.IsActivation, log.FightData.FightDuration);
                                 curCastLog = null;
                             }
                         }
@@ -63,6 +63,7 @@ namespace LuckParser.Models.ParseModels
 
         protected override void SetDamageTakenLogs(ParsedLog log)
         {
+            throw new InvalidOperationException();
         }
 
         /*protected override void setHealingLogs(ParsedLog log)
