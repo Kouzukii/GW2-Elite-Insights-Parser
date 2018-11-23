@@ -104,10 +104,14 @@ namespace LuckParser.Properties {
 
         public bool LegacyHtmlMode { get; set; } = false;
 
-        public bool NewHtmlExternalScripts { get; set; } = false;
+        public bool HtmlExternalScripts { get; set; } = false;
 
         public bool SkipFailedTries { get; set; } = false;
 
+        public bool AddPoVProf { get; set; } = false;
+
+        public bool AddDuration { get; set; } = false;
+        
         public bool AutoAdd { get; set; } = false;
 
         public bool AutoParse { get; set; } = false;

@@ -1,18 +1,13 @@
 ﻿using LuckParser.Models.DataModels;
 using LuckParser.Models.HtmlModels;
 using LuckParser.Models.ParseModels;
-using NUglify;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using LuckParser.Models.DataModels;
-using LuckParser.Models.ParseModels;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
 
 namespace LuckParser.Controllers
 {
@@ -98,304 +93,16 @@ namespace LuckParser.Controllers
             {
                 PlayerChartDataDto pChar = new PlayerChartDataDto()
                 {
-                    List<MechanicLog> filterdList = _log.MechanicData[mech].Where(x => phase.InInterval(x.Time)).ToList();
-                    sw.Write("{");
-                    sw.Write("y: [");
-
-                    int mechcount = 0;
-                    foreach (MechanicLog ml in filterdList)
-                    {
-                        double yValue;
-                        if (playersIds.Contains(ml.Player.InstID))
-                        {
-                            double time = (ml.Time - phase.Start) / 1000.0;
-                            Point check = GraphHelper.GetBossDPSGraph(_log, ml.Player, phaseIndex, phase, mode, _log.Boss).LastOrDefault(x => x.X <= time);
-                            if (check == Point.Empty)
-                            {
-                                check = new Point(0, GraphHelper.GetBossDPSGraph(_log, ml.Player, phaseIndex, phase, mode, _log.Boss).Last().Y);
-                            } else
-                            {
-                                int time1 = check.X;
-                                int y1 = check.Y;
-                                check = GraphHelper.GetBossDPSGraph(_log, ml.Player, phaseIndex, phase, mode, _log.Boss).FirstOrDefault(x => x.X >= time);
-                                if (check == Point.Empty)
-                                {
-                                    check.Y = y1;
-                                } else
-                                {
-                                    int time2 = check.X;
-                                    int y2 = check.Y;
-                                    if (time2 - time1 > 0)
-                                    {
-                                        check.Y = (int)Math.Round((time - time1) * (y2 - y1) / (time2 - time1) + y1);
-                                    }
-                                }
-                            }
-                            yValue = check.Y;
-                        }
-                        else
-                        {
-                            int timeInS = (int)(ml.Time / 1000);
-                            if (timeInS >= _statistics.BossHealth[_log.Boss].Length)
-                            {
-                                yValue = 0;
-                            } else
-                            {
-                                yValue = (_statistics.BossHealth[_log.Boss][timeInS] / 100.0) * maxDPS;
-                                if (timeInS < _statistics.BossHealth[_log.Boss].Length - 1)
-                                {
-                                    double nextY = (_statistics.BossHealth[_log.Boss][timeInS + 1] / 100.0) * maxDPS;
-                                    yValue = ((ml.Time / 1000.0) - timeInS) * (nextY - yValue) + yValue;
-                                }
-                            }
-                        }
-
-                        if (mechcount == filterdList.Count - 1)
-                        {
-                            sw.Write("'" + Math.Round(yValue, 2) + "'");
-                        }
-                        else
-                        {
-                            sw.Write("'" + Math.Round(yValue, 2) + "',");
-
-                        }
-
-                        mechcount++;
-                    }
-                    sw.Write("],");
-                    //add time axis
-                    sw.Write("x: [");
-                    mechcount = 0;
-                    foreach (MechanicLog ml in filterdList)
-                    {
-                        if (mechcount == filterdList.Count - 1)
-                        {
-                            sw.Write("'" + Math.Round((ml.Time - phase.Start) / 1000.0,4) + "'");
-                        }
-                        else
-                        {
-                            sw.Write("'" + Math.Round((ml.Time - phase.Start) / 1000.0,4) + "',");
-                        }
-
-                        mechcount++;
-                    }
-
-                    sw.Write("],");
-                    sw.Write(" mode: 'markers',");
-                    if (!(mech.SkillId == SkillItem.DeathId || mech.SkillId == SkillItem.DownId))
-                    {
-                        sw.Write("visible:'legendonly',");
-                    }
-                    sw.Write("type:'scatter'," +
-                            "marker:{" + "size: 15," + mech.PlotlyString +  "}," +
-                            "text:[");
-                    foreach (MechanicLog ml in filterdList)
-                    {
-                        if (mechcount == filterdList.Count - 1)
-                        {
-                            sw.Write("'" + ml.Player.Character.Replace("'"," ") + "'");
-                        }
-                        else
-                        {
-                            sw.Write("'" + ml.Player.Character.Replace("'", " ") + "',");
-                        }
-
-                        mechcount++;
-                    }
-
-                    sw.Write("]," +
-                            " name: '" + mech.PlotlyName.Replace("'", " ") + "'," +
-                            "hoverinfo: 'text'");
-                    sw.Write("},");
-                }
-                if (maxDPS > 0)
+                    total = ConvertGraph(GraphHelper.GetTotalDPSGraph(_log, p, phaseIndex, phase, GraphHelper.GraphMode.S1)),
+                    targets = new List<List<int>>()
+                };
+                foreach (Target target in phase.Targets)
                 {
-                    sw.Write("{");
-                    HTMLHelper.WriteBossHealthGraph(sw, maxDPS, phase, _statistics.BossHealth[_log.Boss]);
-                    sw.Write("}");
+                    pChar.targets.Add(ConvertGraph(GraphHelper.GetTargetDPSGraph(_log, p, phaseIndex, phase, GraphHelper.GraphMode.S1, target)));
                 }
-                else
-                {
-                    sw.Write("{}");
-                }
-                if (_settings.LightTheme)
-                {
-                    sw.Write("];" +
-                             "var layout = {" +
-                             "yaxis:{title:'DPS'}," +
-                             "xaxis:{title:'Time(sec)'}," +
-                             //"legend: { traceorder: 'reversed' }," +
-                             "hovermode: 'compare'," +
-                             "legend: {orientation: 'h', font:{size: 15}}," +
-                             // "yaxis: { title: 'DPS', domain: [0.51, 1] }," +
-                             "font: { color: '#000000' }," +
-                             "paper_bgcolor: 'rgba(255,255,255,0)'," +
-                             "plot_bgcolor: 'rgba(255,255,255,0)'" +
-                             "};");
-                }
-                else
-                {
-                    sw.Write("];" +
-                             "var layout = {" +
-                             "yaxis:{title:'DPS'}," +
-                             "xaxis:{title:'Time(sec)'}," +
-                             //"legend: { traceorder: 'reversed' }," +
-                             "hovermode: 'compare'," +
-                             "legend: {orientation: 'h', font:{size: 15}}," +
-                             // "yaxis: { title: 'DPS', domain: [0.51, 1] }," +
-                             "font: { color: '#ffffff' }," +
-                             "paper_bgcolor: 'rgba(0,0,0,0)'," +
-                             "plot_bgcolor: 'rgba(0,0,0,0)'" +
-                             "};");
-                }
-                sw.Write(
-                        "var lazyplot = document.querySelector(\"#" + plotID + "\");" +
-                        "if ('IntersectionObserver' in window) {" +
-                            "let lazyPlotObserver = new IntersectionObserver(function(entries, observer) {" +
-                                "entries.forEach(function(entry) {" +
-                                    "if (entry.isIntersecting)" +
-                                    "{" +
-                                        "Plotly.newPlot('" + plotID + "', data, layout);" +
-                                        "lazyPlotObserver.unobserve(entry.target);" +
-                                    "}" +
-                                "});" +
-                             "});" +
-                            "lazyPlotObserver.observe(lazyplot);" +
-                        "} else {"+
-                            "Plotly.newPlot('" + plotID + "', data, layout);" +
-                        "}");
+                list.Add(pChar);
             }
-            sw.Write("});");
-            sw.Write("</script> ");
-        }
-        private void GetRoles()
-        {
-            //tags: tank,healer,dps(power/condi)
-            //Roles:greenteam,green split,caconeers,flakkiter,eater,KCpusher,agony,epi,handkiter,golemkiter,orbs
-        }
-        private void PrintWeapons(StreamWriter sw, Player p)
-        {
-            //print weapon sets
-            string[] wep = p.GetWeaponsArray(_log);
-            sw.Write("<div>");
-            if (wep[0] != null)
-            {
-                sw.Write("<img src=\"" + HTMLHelper.GetLink(wep[0]) + "\" alt=\"" + wep[0] + "\" data-toggle=\"tooltip\" title=\"\" height=\"18\" width=\"18\" data-original-title=\"" + wep[0] + "\">");
-            }
-            else if (wep[1] != null)
-            {
-                sw.Write("<img src=\"" + HTMLHelper.GetLink("Question") + "\" alt=\"Unknown\"  data-toggle=\"tooltip\" title=\"\" height=\"18\" width=\"18\" data-original-title=\"Unknown\">");
-            }
-            if (wep[1] != null)
-            {
-                if (wep[1] != "2Hand")
-                {
-                    sw.Write("<img src=\"" + HTMLHelper.GetLink(wep[1]) + "\" alt=\"" + wep[1] + "\" data-toggle=\"tooltip\" title=\"\" height=\"18\" width=\"18\" data-original-title=\"" + wep[1] + "\">");
-                }
-            }
-            else
-            {
-                sw.Write("<img src=\"" + HTMLHelper.GetLink("Question") + "\" alt=\"Unknown\"  data-toggle=\"tooltip\" title=\"\" height=\"18\" width=\"18\" data-original-title=\"Unknown\">");
-            }
-            if (wep[2] == null && wep[3] == null)
-            {
-
-            }
-            else
-            {
-                sw.Write(" / ");
-            }
-
-            if (wep[2] != null)
-            {
-                sw.Write("<img src=\"" + HTMLHelper.GetLink(wep[2]) + "\" alt=\"" + wep[2] + "\"  data-toggle=\"tooltip\" title=\"\" height=\"18\" width=\"18\" data-original-title=\"" + wep[2] + "\">");
-            }
-            else if (wep[3] != null)
-            {
-                sw.Write("<img src=\"" + HTMLHelper.GetLink("Question") + "\" alt=\"Unknown\" height=\"18\" width=\"18\" >");
-            }
-            if (wep[3] != null)
-            {
-                if (wep[3] != "2Hand")
-                {
-                    sw.Write("<img src=\"" + HTMLHelper.GetLink(wep[3]) + "\" alt=\"" + wep[3] + "\"  data-toggle=\"tooltip\" title=\"\" height=\"18\" width=\"18\" data-original-title=\"" + wep[3] + "\">");
-                }
-            }
-            else
-            {
-                //sw.Write("<img src=\"" + HTMLHelper.GetLink("Question") + "\" alt=\"Unknown\" height=\"18\" width=\"18\" >");
-            }
-            sw.Write("<br>");
-            sw.Write("</div>");
-        }
-
-        /// <summary>
-        /// Creates the composition table
-        /// </summary>
-        /// <param name="sw">Stream writer</param>
-        private void CreateCompTable(StreamWriter sw)
-        {
-            int groupCount = 0;
-            int firstGroup = 50;
-            foreach (Player play in _log.PlayerList)
-            {
-                int playerGroup = play.Group;
-                if (playerGroup > groupCount)
-                {
-                    groupCount = playerGroup;
-                }
-                if (playerGroup < firstGroup)
-                {
-                    firstGroup = playerGroup;
-                }
-            }
-            //generate comp table
-            sw.Write("<table class=\"table\"");
-            {
-                sw.Write("<tbody>");
-                for (int n = firstGroup; n <= groupCount; n++)
-                {
-                    sw.Write("<tr>");
-                    List<Player> sortedList = _log.PlayerList.Where(x => x.Group == n).ToList();
-                    if (sortedList.Count > 0)
-                    {
-                        foreach (Player gPlay in sortedList)
-                        {
-                            string charName = gPlay.Character.Length > 10 ? gPlay.Character.Substring(0, 10) : gPlay.Character;
-                            //Getting Build
-                            string build = "";
-                            if (gPlay.Condition > 0)
-                            {
-                                build += "<img src=\"https://wiki.guildwars2.com/images/5/54/Condition_Damage.png\" alt=\"Condition Damage\" data-toggle=\"tooltip\" title=\"\" height=\"18\" width=\"18\" data-original-title=\"Condition Damage-" + gPlay.Condition + "\">";//"<span class=\"badge badge-warning\">Condi("+ gPlay.getCondition() + ")</span>";
-                            }
-                            if (gPlay.Concentration > 0)
-                            {
-                                build += "<img src=\"https://wiki.guildwars2.com/images/4/44/Boon_Duration.png\" alt =\"Concentration\" data-toggle=\"tooltip\" title=\"\" height=\"18\" width=\"18\" data-original-title=\"Concentration-" + gPlay.Concentration + "\">";//"<span class=\"badge badge-warning\">Condi("+ gPlay.getCondition() + ")</span>";
-                            }
-                            if (gPlay.Healing > 0)
-                            {
-                                build += "<img src=\"https://wiki.guildwars2.com/images/8/81/Healing_Power.png\" alt=\"Healing Power\" data-toggle=\"tooltip\" title=\"\" height=\"18\" width=\"18\" data-original-title=\"Healing Power-" + gPlay.Healing + "\">";//"<span class=\"badge badge-success\">Heal("+ gPlay.getHealing() + ")</span>";
-                            }
-                            if (gPlay.Toughness > 0)
-                            {
-                                build += "<img src=\"https://wiki.guildwars2.com/images/1/12/Toughness.png\" alt=\"Toughness\" data-toggle=\"tooltip\" title=\"\" height=\"18\" width=\"18\" data-original-title=\"Toughness-" + gPlay.Toughness + "\">";//"<span class=\"badge badge-secondary\">Tough("+ gPlay.getToughness() + ")</span>";
-                            }
-                            sw.Write("<td class=\"composition\">");
-                            {
-                                sw.Write("<img src=\"" + GeneralHelper.GetProfIcon(gPlay.Prof) + "\" alt=\"" + gPlay.Prof + "\" height=\"18\" width=\"18\" >");
-                                sw.Write(build);
-                                PrintWeapons(sw, gPlay);
-                                sw.Write(charName);
-                            }
-                            sw.Write("</td>");
-                        }
-                    }
-                    sw.Write("</tr>");
-                }
-                sw.Write("</tbody>");
-            }
-
-            sw.Write("</table>");
+            return list;
         }
         /// <summary>
         /// Creates the dps table
@@ -1500,7 +1207,7 @@ namespace LuckParser.Controllers
             html = html.Replace("${encounterEnd}", _log.LogData.LogEnd);
             html = html.Replace("${evtcVersion}", _log.LogData.BuildVersion);
             html = html.Replace("${fightID}", _log.FightData.ID.ToString());
-            html = html.Replace("${eiVersion}", Application.ProductVersion);
+            html = html.Replace("${eiVersion}", Program.Version);
             html = html.Replace("${recordedBy}", _log.LogData.PoV.Split(':')[0]);
 
             string uploadString = "";
