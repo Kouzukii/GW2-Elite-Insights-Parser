@@ -198,27 +198,14 @@ namespace LuckParser.Controllers
             foreach (Player player in _log.PlayerList)
             {
                 Statistics.FinalDPS dps = _statistics.DpsAll[player][phaseIndex];
+                Statistics.FinalDefenses defense = _statistics.Defenses[player][phaseIndex];
                 Statistics.FinalDPS dpsBoss = _statistics.DpsTarget[_log.LegacyTarget][player][phaseIndex];
-                Statistics.FinalStatsAll stats = _statistics.StatsAll[player][phaseIndex];
-                Statistics.FinalStats statsBoss = _statistics.StatsTarget[_log.LegacyTarget][player][phaseIndex];
-                string deathString = "";
+                string deathString = defense.DeadCount.ToString();
                 string deadthTooltip = "";
-                if (stats.Died != 0.0)
+                if (defense.DeadCount > 0)
                 {
-                    if (stats.Died < 0)
-                    {
-                        deathString = -stats.Died + " time(s)";
-                    }
-                    else
-                    {
-                        TimeSpan timedead = TimeSpan.FromMilliseconds(stats.Died);
-                        deathString = timedead.Minutes + " m " + timedead.Seconds + " s";
-                        deadthTooltip = Math.Round((timedead.TotalMilliseconds / phase.GetDuration()) * 100, 1) + "%";
-                    }
-                }
-                else
-                {
-                    deadthTooltip = "Never died";
+                    TimeSpan deathDuration = TimeSpan.FromMilliseconds(defense.DeadDuration);
+                    deadthTooltip = deathDuration.TotalSeconds + " seconds dead, " + (100.0 - Math.Round((deathDuration.TotalMilliseconds / phase.GetDuration()) * 100, 1)) + "% Alive";
                 }
                 string[] wep = player.GetWeaponsArray(_log);
                 string build = "";
@@ -241,7 +228,7 @@ namespace LuckParser.Controllers
                 WriteLine(new [] { player.Group.ToString(), player.Prof,build,player.Character, player.Account.TrimStart(':') ,wep[0],wep[1],wep[2],wep[3],
                 dpsBoss.Dps.ToString(),dpsBoss.Damage.ToString(),dpsBoss.PowerDps.ToString(),dpsBoss.PowerDamage.ToString(),dpsBoss.CondiDps.ToString(),dpsBoss.CondiDamage.ToString(),
                 dps.Dps.ToString(),dps.Damage.ToString(),dps.PowerDps.ToString(),dps.PowerDamage.ToString(),dps.CondiDps.ToString(),dps.CondiDamage.ToString(),
-                stats.DownCount.ToString(), deathString, deadthTooltip});
+                defense.DownCount.ToString(), deathString, deadthTooltip});
                 count++;
             }
             while (count < 15)//so each graph has equal spacing
@@ -270,8 +257,8 @@ namespace LuckParser.Controllers
 
                 WriteLine(new [] { player.Group.ToString(), player.Prof, player.Character,
                 Math.Round((double)(statsBoss.CriticalRate) / statsBoss.CritablePowerLoopCount * 100,1).ToString(), statsBoss.CriticalRate.ToString(),statsBoss.CriticalDmg.ToString(),
-                Math.Round((double)(statsBoss.ScholarRate) / statsBoss.PowerLoopCount * 100,1).ToString(),statsBoss.ScholarRate.ToString(),statsBoss.ScholarDmg.ToString(),Math.Round(100.0 * (statsBoss.PlayerPowerDamage / (double)(statsBoss.PlayerPowerDamage - statsBoss.ScholarDmg) - 1.0), 3).ToString(),
-                Math.Round((double)(statsBoss.MovingRate) / statsBoss.PowerLoopCount * 100,1).ToString(),statsBoss.MovingRate.ToString(),statsBoss.MovingDamage.ToString(),Math.Round(100.0 * (statsBoss.PlayerPowerDamage / (double)(statsBoss.PlayerPowerDamage - statsBoss.MovingDamage) - 1.0), 3).ToString(),
+                Math.Round((double)(statsBoss.ScholarRate) / statsBoss.PowerLoopCount * 100,1).ToString(),statsBoss.ScholarRate.ToString(),statsBoss.ScholarDmg.ToString(),Math.Round(100.0 * (statsBoss.PowerDamage / (double)(statsBoss.PowerDamage - statsBoss.ScholarDmg) - 1.0), 3).ToString(),
+                Math.Round((double)(statsBoss.MovingRate) / statsBoss.PowerLoopCount * 100,1).ToString(),statsBoss.MovingRate.ToString(),statsBoss.MovingDamage.ToString(),Math.Round(100.0 * (statsBoss.PowerDamage / (double)(statsBoss.PowerDamage - statsBoss.MovingDamage) - 1.0), 3).ToString(),
                 Math.Round(statsBoss.FlankingRate / (double)statsBoss.PowerLoopCount * 100,1).ToString(),statsBoss.FlankingRate.ToString(),
                 Math.Round(statsBoss.GlanceRate / (double)statsBoss.PowerLoopCount * 100,1).ToString(),statsBoss.GlanceRate.ToString(),
                 Math.Round(statsBoss.Missed / (double)statsBoss.PowerLoopCount * 100,1).ToString(),statsBoss.Missed.ToString(),
@@ -304,8 +291,8 @@ namespace LuckParser.Controllers
 
                 WriteLine(new [] { player.Group.ToString(), player.Prof, player.Character,
                 Math.Round((double)(stats.CriticalRate) / stats.CritablePowerLoopCount * 100,1).ToString(), stats.CriticalRate.ToString(),stats.CriticalDmg.ToString(),
-                Math.Round((double)(stats.ScholarRate) / stats.PowerLoopCount * 100,1).ToString(),stats.ScholarRate.ToString(),stats.ScholarDmg.ToString(),Math.Round(100.0 * (stats.PlayerPowerDamage / (double)(stats.PlayerPowerDamage - stats.ScholarDmg) - 1.0), 3).ToString(),
-                Math.Round((double)(stats.MovingRate) / stats.PowerLoopCount * 100,1).ToString(),stats.MovingRate.ToString(),stats.MovingDamage.ToString(),Math.Round(100.0 * (stats.PlayerPowerDamage / (double)(stats.PlayerPowerDamage - stats.MovingDamage) - 1.0), 3).ToString(),
+                Math.Round((double)(stats.ScholarRate) / stats.PowerLoopCount * 100,1).ToString(),stats.ScholarRate.ToString(),stats.ScholarDmg.ToString(),Math.Round(100.0 * (stats.PowerDamage / (double)(stats.PowerDamage - stats.ScholarDmg) - 1.0), 3).ToString(),
+                Math.Round((double)(stats.MovingRate) / stats.PowerLoopCount * 100,1).ToString(),stats.MovingRate.ToString(),stats.MovingDamage.ToString(),Math.Round(100.0 * (stats.PowerDamage / (double)(stats.PowerDamage - stats.MovingDamage) - 1.0), 3).ToString(),
                 Math.Round(stats.FlankingRate / (double)stats.PowerLoopCount * 100,1).ToString(),stats.FlankingRate.ToString(),
                 Math.Round(stats.GlanceRate / (double)stats.PowerLoopCount * 100,1).ToString(),stats.GlanceRate.ToString(),
                 Math.Round(stats.Missed / (double)stats.PowerLoopCount * 100,1).ToString(),stats.Missed.ToString(),
@@ -328,10 +315,9 @@ namespace LuckParser.Controllers
             foreach (Player player in _log.PlayerList)
             {
                 Statistics.FinalDefenses defenses = _statistics.Defenses[player][phaseIndex];
-                Statistics.FinalStatsAll stats = _statistics.StatsAll[player][phaseIndex];
 
                 WriteLine(new [] { player.Group.ToString(), player.Prof, player.Character,
-                defenses.DamageTaken.ToString(),defenses.DamageBarrier.ToString(),defenses.BlockedCount.ToString(),defenses.InvulnedCount.ToString(),defenses.EvadedCount.ToString(),stats.DodgeCount.ToString() });
+                defenses.DamageTaken.ToString(),defenses.DamageBarrier.ToString(),defenses.BlockedCount.ToString(),defenses.InvulnedCount.ToString(),defenses.EvadedCount.ToString(),defenses.DodgeCount.ToString() });
                 count++;
             }
             while (count < 15)//so each graph has equal spacing
@@ -377,29 +363,27 @@ namespace LuckParser.Controllers
             int count = 0;
             foreach (Player player in _log.PlayerList)
             {
-                Dictionary<long, Statistics.FinalBoonUptime> boons = _statistics.SelfBoons[player][phaseIndex];
+                Dictionary<long, Statistics.FinalBuffs> uptimes = _statistics.SelfBuffs[player][phaseIndex];
 
                 WriteCell(player.Character);
                 WriteCell(Math.Round(_statistics.StatsAll[player][phaseIndex].AvgBoons, 1).ToString());
                 foreach (Boon boon in listToUse)
                 {
-                    if (boons.ContainsKey(boon.ID))
+                    if (uptimes.TryGetValue(boon.ID, out var value))
                     {
-
                         if (boon.Type == Boon.BoonType.Duration)
                         {
-                            WriteCell(boons[boon.ID].Uptime + "%");
+                            WriteCell(value.Uptime + "%");
                         }
                         else if (boon.Type == Boon.BoonType.Intensity)
                         {
-                            WriteCell(boons[boon.ID].Uptime.ToString());
+                            WriteCell(value.ToString());
                         }
 
                     }
                     else
                     {
                         WriteCell("0");
-
                     }
                 }
                 NewLine();
@@ -425,28 +409,29 @@ namespace LuckParser.Controllers
             int count = 0;
             foreach (Player player in _log.PlayerList)
             {
-                Dictionary<long, Statistics.FinalBoonUptime> uptimes = _statistics.SelfBoons[player][phaseIndex];
+                Dictionary<long, Statistics.FinalBuffs> uptimes = _statistics.SelfBuffs[player][phaseIndex];
 
                 WriteCell(player.Character);
                 foreach (Boon boon in listToUse)
                 {
                     string rate = "0";
                     string overstack = "0";
-                    Statistics.FinalBoonUptime uptime = uptimes[boon.ID];
-                    if (uptime.Generation > 0 || uptime.Overstack > 0)
+                    if (uptimes.TryGetValue(boon.ID, out var uptime))
                     {
-                        if (boon.Type == Boon.BoonType.Duration)
+                        if (uptime.Generation > 0 || uptime.Overstack > 0)
                         {
-                            rate = uptime.Generation.ToString() + "%";
-                            overstack = uptime.Overstack.ToString() + "%";
+                            if (boon.Type == Boon.BoonType.Duration)
+                            {
+                                rate = uptime.Generation.ToString() + "%";
+                                overstack = uptime.Overstack.ToString() + "%";
+                            }
+                            else if (boon.Type == Boon.BoonType.Intensity)
+                            {
+                                rate = uptime.Generation.ToString();
+                                overstack = uptime.Overstack.ToString();
+                            }
                         }
-                        else if (boon.Type == Boon.BoonType.Intensity)
-                        {
-                            rate = uptime.Generation.ToString();
-                            overstack = uptime.Overstack.ToString();
-                        }
-
-                    }
+                    }                
                     WriteCell(rate);
                     WriteCell(overstack);
                 }
@@ -473,28 +458,30 @@ namespace LuckParser.Controllers
             int count = 0;
             foreach (Player player in _log.PlayerList)
             {
-                Dictionary<long, Statistics.FinalBoonUptime> boons =
-                            _statistics.GroupBoons[player][phaseIndex];
+                Dictionary<long, Statistics.FinalBuffs> boons =
+                            _statistics.GroupBuffs[player][phaseIndex];
 
                 WriteCell(player.Character);
                 foreach (Boon boon in listToUse)
                 {
                     string rate = "0";
                     string overstack = "0";
-                    Statistics.FinalBoonUptime uptime = boons[boon.ID];
-                    if (uptime.Generation > 0 || uptime.Overstack > 0)
+                    if (boons.TryGetValue(boon.ID, out var uptime))
                     {
-                        if (boon.Type == Boon.BoonType.Duration)
+                        if (uptime.Generation > 0 || uptime.Overstack > 0)
                         {
-                            rate = uptime.Generation.ToString() + "%";
-                            overstack = uptime.Overstack.ToString() + "%";
-                        }
-                        else if (boon.Type == Boon.BoonType.Intensity)
-                        {
-                            rate = uptime.Generation.ToString();
-                            overstack = uptime.Overstack.ToString();
-                        }
+                            if (boon.Type == Boon.BoonType.Duration)
+                            {
+                                rate = uptime.Generation.ToString() + "%";
+                                overstack = uptime.Overstack.ToString() + "%";
+                            }
+                            else if (boon.Type == Boon.BoonType.Intensity)
+                            {
+                                rate = uptime.Generation.ToString();
+                                overstack = uptime.Overstack.ToString();
+                            }
 
+                        }
                     }
                     WriteCell(rate);
                     WriteCell(overstack);
@@ -522,28 +509,30 @@ namespace LuckParser.Controllers
             int count = 0;
             foreach (Player player in _log.PlayerList)
             {
-                Dictionary<long, Statistics.FinalBoonUptime> boons =
-                              _statistics.OffGroupBoons[player][phaseIndex];
+                Dictionary<long, Statistics.FinalBuffs> boons =
+                              _statistics.OffGroupBuffs[player][phaseIndex];
 
                 WriteCell(player.Character);
                 foreach (Boon boon in listToUse)
                 {
                     string rate = "0";
                     string overstack = "0";
-                    Statistics.FinalBoonUptime uptime = boons[boon.ID];
-                    if (uptime.Generation > 0 || uptime.Overstack > 0)
+                    if (boons.TryGetValue(boon.ID, out var uptime))
                     {
-                        if (boon.Type == Boon.BoonType.Duration)
+                        if (uptime.Generation > 0 || uptime.Overstack > 0)
                         {
-                            rate = uptime.Generation.ToString() + "%";
-                            overstack = uptime.Overstack.ToString() + "%";
-                        }
-                        else if (boon.Type == Boon.BoonType.Intensity)
-                        {
-                            rate = uptime.Generation.ToString();
-                            overstack = uptime.Overstack.ToString();
-                        }
+                            if (boon.Type == Boon.BoonType.Duration)
+                            {
+                                rate = uptime.Generation.ToString() + "%";
+                                overstack = uptime.Overstack.ToString() + "%";
+                            }
+                            else if (boon.Type == Boon.BoonType.Intensity)
+                            {
+                                rate = uptime.Generation.ToString();
+                                overstack = uptime.Overstack.ToString();
+                            }
 
+                        }
                     }
                     WriteCell(rate);
                     WriteCell(overstack);
@@ -571,27 +560,29 @@ namespace LuckParser.Controllers
             int count = 0;
             foreach (Player player in _log.PlayerList)
             {
-                Dictionary<long, Statistics.FinalBoonUptime> boons =
-                            _statistics.SquadBoons[player][phaseIndex];
+                Dictionary<long, Statistics.FinalBuffs> boons =
+                            _statistics.SquadBuffs[player][phaseIndex];
                 WriteCell(player.Character);
                 foreach (Boon boon in listToUse)
                 {
                     string rate = "0";
                     string overstack = "0";
-                    Statistics.FinalBoonUptime uptime = boons[boon.ID];
-                    if (uptime.Generation > 0 || uptime.Overstack > 0)
+                    if (boons.TryGetValue(boon.ID, out var uptime))
                     {
-                        if (boon.Type == Boon.BoonType.Duration)
+                        if (uptime.Generation > 0 || uptime.Overstack > 0)
                         {
-                            rate = uptime.Generation.ToString() + "%";
-                            overstack = uptime.Overstack.ToString() + "%";
-                        }
-                        else if (boon.Type == Boon.BoonType.Intensity)
-                        {
-                            rate = uptime.Generation.ToString();
-                            overstack = uptime.Overstack.ToString();
-                        }
+                            if (boon.Type == Boon.BoonType.Duration)
+                            {
+                                rate = uptime.Generation.ToString() + "%";
+                                overstack = uptime.Overstack.ToString() + "%";
+                            }
+                            else if (boon.Type == Boon.BoonType.Intensity)
+                            {
+                                rate = uptime.Generation.ToString();
+                                overstack = uptime.Overstack.ToString();
+                            }
 
+                        }
                     }
                     WriteCell(rate);
                     WriteCell(overstack);
@@ -683,7 +674,7 @@ namespace LuckParser.Controllers
             Target boss = _log.LegacyTarget;
             List<PhaseData> phases = _statistics.Phases;
             long fightDuration = phases[phaseIndex].GetDuration();
-            Dictionary<long, Statistics.FinalTargetBoon> conditions = _statistics.TargetConditions[_log.LegacyTarget][phaseIndex];
+            Dictionary<long, Statistics.FinalTargetBuffs> conditions = _statistics.TargetBuffs[_log.LegacyTarget][phaseIndex];
 
             WriteCell("Name");
             WriteCell("Avg");
@@ -698,13 +689,20 @@ namespace LuckParser.Controllers
             WriteCell(Math.Round(_statistics.AvgTargetConditions[_log.LegacyTarget][phaseIndex], 1).ToString());
             foreach (Boon boon in _statistics.PresentConditions)
             {
-                if (boon.Type == Boon.BoonType.Duration)
+                if (conditions.TryGetValue(boon.ID, out var uptime))
                 {
-                    WriteCell(conditions[boon.ID].Uptime.ToString() + "%");
+                    if (boon.Type == Boon.BoonType.Duration)
+                    {
+                        WriteCell(uptime.Uptime.ToString() + "%");
+                    }
+                    else
+                    {
+                        WriteCell(uptime.Uptime.ToString());
+                    }
                 }
                 else
                 {
-                    WriteCell(conditions[boon.ID].Uptime.ToString());
+                    WriteCell("0");
                 }
             }
             count++;
@@ -719,7 +717,7 @@ namespace LuckParser.Controllers
         {
             Target boss = _log.LegacyTarget;
             List<PhaseData> phases = _statistics.Phases;
-            Dictionary<long, Statistics.FinalTargetBoon> conditions = _statistics.TargetConditions[_log.LegacyTarget][phaseIndex];
+            Dictionary<long, Statistics.FinalTargetBuffs> conditions = _statistics.TargetBuffs[_log.LegacyTarget][phaseIndex];
             WriteCell("Name");
             WriteCell("Avg");
             foreach (Boon boon in _statistics.PresentBoons)
@@ -732,13 +730,20 @@ namespace LuckParser.Controllers
             WriteCell(boss.Character);
             foreach (Boon boon in _statistics.PresentBoons)
             {
-                if (boon.Type == Boon.BoonType.Duration)
+                if (conditions.TryGetValue(boon.ID, out var uptime))
                 {
-                    WriteCell(conditions[boon.ID].Uptime.ToString() + "%");
+                    if (boon.Type == Boon.BoonType.Duration)
+                    {
+                        WriteCell(uptime.Uptime.ToString() + "%");
+                    }
+                    else
+                    {
+                        WriteCell(uptime.Uptime.ToString());
+                    }
                 }
                 else
                 {
-                    WriteCell(conditions[boon.ID].Uptime.ToString());
+                    WriteCell("0");
                 }
             }
             count++;
@@ -752,7 +757,7 @@ namespace LuckParser.Controllers
         private void CreateCondiGen(int phaseIndex)
         {
             List<PhaseData> phases = _statistics.Phases;
-            Dictionary<long, Statistics.FinalTargetBoon> conditions = _statistics.TargetConditions[_log.LegacyTarget][phaseIndex];
+            Dictionary<long, Statistics.FinalTargetBuffs> conditions = _statistics.TargetBuffs[_log.LegacyTarget][phaseIndex];
             //bool hasBoons = false;
             int count = 0;
             WriteCell("Name");
@@ -767,15 +772,23 @@ namespace LuckParser.Controllers
                 WriteCell(player.Character);
                 foreach (Boon boon in _statistics.PresentConditions)
                 {
-                    if (boon.Type == Boon.BoonType.Duration)
+                    if (conditions.TryGetValue(boon.ID, out var uptime))
                     {
-                        WriteCell(conditions[boon.ID].Generated[player].ToString() + "%");
-                        WriteCell(conditions[boon.ID].Overstacked[player].ToString() + "%");
+                        if (boon.Type == Boon.BoonType.Duration)
+                        {
+                            WriteCell(conditions[boon.ID].Generated[player].ToString() + "%");
+                            WriteCell(conditions[boon.ID].Overstacked[player].ToString() + "%");
+                        }
+                        else
+                        {
+                            WriteCell(conditions[boon.ID].Generated[player].ToString());
+                            WriteCell(conditions[boon.ID].Overstacked[player].ToString());
+                        }
                     }
                     else
                     {
-                        WriteCell(conditions[boon.ID].Generated[player].ToString());
-                        WriteCell(conditions[boon.ID].Overstacked[player].ToString());
+                        WriteCell("0");
+                        WriteCell("0");
                     }
                 }
                 NewLine();

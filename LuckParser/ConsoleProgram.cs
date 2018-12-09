@@ -63,8 +63,7 @@ namespace LuckParser
                 SettingsContainer settings = new SettingsContainer(Properties.Settings.Default);
                 Parser control = new Parser(settings);
 
-                if (fInfo.Extension.Equals(".evtc", StringComparison.OrdinalIgnoreCase) ||
-                    fInfo.Name.EndsWith(".evtc.zip", StringComparison.OrdinalIgnoreCase))
+                if (GeneralHelper.IsSupportedFormat(fInfo.Name))
                 {
                     //Process evtc here
                     ParsedLog log = control.ParseLog(row, fInfo.FullName);
@@ -167,15 +166,15 @@ namespace LuckParser
                     StatisticsCalculator.Switches switches = new StatisticsCalculator.Switches();
                     if (Properties.Settings.Default.SaveOutHTML)
                     {
-                        LegacyHTMLBuilder.UpdateStatisticSwitches(switches);
+                        HTMLBuilder.UpdateStatisticSwitches(switches);
                     }
                     if (Properties.Settings.Default.SaveOutCSV)
                     {
                         CSVBuilder.UpdateStatisticSwitches(switches);
                     }
-                    if (Properties.Settings.Default.SaveOutJSON)
+                    if (Properties.Settings.Default.SaveOutJSON || Properties.Settings.Default.SaveOutXML)
                     {
-                        JSONBuilder.UpdateStatisticSwitches(switches);
+                        RawFormatBuilder.UpdateStatisticSwitches(switches);
                     }
                     Statistics statistics = statisticsCalculator.CalculateStatistics(log, switches);
                     Console.Write("Statistics Computed\n");
@@ -192,15 +191,8 @@ namespace LuckParser
                         {
                             using (StreamWriter sw = new StreamWriter(fs))
                             {
-                                if (!Properties.Settings.Default.LegacyHtmlMode)
-                                {
-                                    var builder = new HTMLBuilder(log, settings, statistics, uploadresult);
-                                    builder.CreateHTML(sw, saveDirectory.FullName);
-                                } else
-                                {
-                                    var builder = new LegacyHTMLBuilder(log, settings, statistics, uploadresult);
-                                    builder.CreateHTML(sw);
-                                }
+                                var builder = new HTMLBuilder(log, settings, statistics, uploadresult);
+                                builder.CreateHTML(sw, saveDirectory.FullName);
                             }
                         }
                     }
@@ -230,8 +222,24 @@ namespace LuckParser
                         {
                             using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
                             {
-                                var builder = new JSONBuilder(sw, log, settings, statistics, uploadresult);
+                                var builder = new RawFormatBuilder(sw, log, settings, statistics, uploadresult);
                                 builder.CreateJSON();
+                            }
+                        }
+                    }
+
+                    if (Properties.Settings.Default.SaveOutXML)
+                    {
+                        string outputFile = Path.Combine(
+                            saveDirectory.FullName,
+                            $"{fName}.xml"
+                        );
+                        using (FileStream fs = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
+                        {
+                            using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                            {
+                                var builder = new RawFormatBuilder(sw, log, settings, statistics, uploadresult);
+                                builder.CreateXML();
                             }
                         }
                     }

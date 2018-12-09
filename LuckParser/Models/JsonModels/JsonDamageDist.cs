@@ -8,13 +8,12 @@ namespace LuckParser.Models
 {
     public class JsonDamageDist
     {
-        public int Damage;
-        public int Min;
-        public int Max;
-        public int Hits;
-        public double Crit;
-        public double Glance;
-        public double Flank;
-        public int Condi;
+        public int damage;
+        public int min;
+        public int max;
+        public int hits;
+        public int crit;
+        public int glance;
+        public int flank;
     }
 }

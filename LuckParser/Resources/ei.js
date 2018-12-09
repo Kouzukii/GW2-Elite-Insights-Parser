@@ -8,17 +8,30 @@ window.onload = function () {
     }
     // make some additional variables reactive
     var i;
+    var simpleLogData = {
+        phases: [],
+        players: [],
+        targets: []
+    };
     for (i = 0; i < logData.phases.length; i++) {
-        logData.phases[i].active = i === 0;
-        logData.phases[i].focus = null;
+        simpleLogData.phases.push({
+            active: i === 0,
+            focus: null
+        });
     }
     for (i = 0; i < logData.targets.length; i++) {
-        logData.targets[i].active = true;
+        simpleLogData.targets.push({
+            active: true
+        });
+        logData.targets[i].id = i;
     }
     for (i = 0; i < logData.players.length; i++) {
+        simpleLogData.players.push({
+            active: false
+        });
         var playerData = logData.players[i];
-        playerData.active = false;
         playerData.icon = urls[playerData.profession];
+        playerData.id = i;
     }
 
     var layout = compileLayout();
@@ -33,12 +46,13 @@ window.onload = function () {
     new Vue({
         el: "#content",
         data: {
-            logdata: logData,
+            logdata: simpleLogData,
             layout: layout,
             datatypes: DataTypes,
             combatreplay: logData.combatReplay,
             light: logData.lightTheme,
-            mode: 0
+            mode: 0,
+            animate: false
         },
         methods: {
             switchCombatReplayButtons: function(from, to) {          
@@ -60,7 +74,20 @@ window.onload = function () {
                 var theme = document.getElementById('theme');
                 theme.href = themes[newStyle];              
                 this.switchCombatReplayButtons(this.light ? 'btn-dark' : 'btn-light', this.light ? 'btn-light' : 'btn-dark');
-            }
+            },
+            changeMode: function(iMode) {
+                if (this.mode === iMode) {
+                    return;
+                }
+                var oldMode = this.mode;
+                this.mode = iMode;
+                if (this.mode !== 1 && oldMode === 1) {
+                    this.animate = animation !== null;
+                    stopAnimate();
+                } else if (this.mode === 1 && this.animate) {
+                    startAnimate();
+                }
+            },
         },
         computed: {
             activePhase: function () {
@@ -99,10 +126,9 @@ window.onload = function () {
             },
             activePhaseTargets: function () {
                 var res = [];
-                var targets = this.logdata.targets;
-                var activePhase = this.logdata.phases[this.activePhase];
+                var activePhase = logData.phases[this.activePhase];
                 for (var i = 0; i < activePhase.targets.length; i++) {
-                    var target = targets[activePhase.targets[i]];
+                    var target = this.logdata.targets[activePhase.targets[i]];
                     if (target.active) {
                         res.push(i);
                     }

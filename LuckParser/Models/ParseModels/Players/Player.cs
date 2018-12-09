@@ -26,12 +26,28 @@ namespace LuckParser.Models.ParseModels
                 Stack = 1;
             }
         }
+
+        public class DeathRecap
+        {
+            public class DeathRecapDamageItem
+            {
+                public long Skill;
+                public int Condi;
+                public string Src;
+                public int Damage;
+                public int Time;
+            }
+
+            public int Time;
+            public List<DeathRecapDamageItem> ToDown;
+            public List<DeathRecapDamageItem> ToKill;
+        }
         // Fields
         public readonly string Account;
         public readonly int Group;
-        public long Disconnected { get; set; }//time in ms the player dcd
        
         private readonly List<Consumable> _consumeList = new List<Consumable>();
+        private List<DeathRecap> _deathRecaps = new List<DeathRecap>();
         //weaponslist
         private string[] _weaponsArray;
 
@@ -69,6 +85,20 @@ namespace LuckParser.Models.ParseModels
             }
             return reses;
         }
+
+        public List<DeathRecap> GetDeathRecaps(ParsedLog log)
+        {
+            if(_deathRecaps == null)
+            {
+                return null;
+            }
+            if (_deathRecaps.Count == 0)
+            {
+                SetDeathRecaps(log);
+            }
+            return _deathRecaps;
+        }
+
         public string[] GetWeaponsArray(ParsedLog log)
         {
             if (_weaponsArray == null)
@@ -88,6 +118,97 @@ namespace LuckParser.Models.ParseModels
         }
         
         // Private Methods
+
+        private void SetDeathRecaps(ParsedLog log)
+        {
+            List<DeathRecap> res = _deathRecaps;
+            List<CombatItem> deads = log.CombatData.GetStates(InstID, ParseEnum.StateChange.ChangeDead, log.FightData.FightStart, log.FightData.FightEnd);
+            List<CombatItem> downs = log.CombatData.GetStates(InstID, ParseEnum.StateChange.ChangeDown, log.FightData.FightStart, log.FightData.FightEnd);
+            long lastTime = log.FightData.FightStart;
+            List<DamageLog> damageLogs = GetDamageTakenLogs(null, log, 0, log.FightData.FightDuration);
+            foreach (CombatItem dead in deads)
+            {
+                DeathRecap recap = new DeathRecap()
+                {
+                    Time = (int)(log.FightData.ToFightSpace(dead.Time))
+                };
+                CombatItem downed = downs.LastOrDefault(x => x.Time <= dead.Time && x.Time >= lastTime);
+                if (downed != null)
+                {
+                    List<DamageLog> damageToDown = damageLogs.Where(x => x.Time < log.FightData.ToFightSpace(downed.Time) && x.Damage > 0 && x.Time > log.FightData.ToFightSpace(lastTime)).ToList();
+                    recap.ToDown = damageToDown.Count > 0 ? new List<DeathRecap.DeathRecapDamageItem>() : null;
+                    int damage = 0;
+                    for (int i = damageToDown.Count - 1; i >= 0; i--)
+                    {
+                        DamageLog dl = damageToDown[i];
+                        AgentItem ag = log.AgentData.GetAgentByInstID(dl.SrcInstId, log.FightData.ToLogSpace(dl.Time));
+                        DeathRecap.DeathRecapDamageItem item = new DeathRecap.DeathRecapDamageItem()
+                        {
+                            Time = (int)dl.Time,
+                            Condi = dl.IsCondi,
+                            Skill = dl.SkillId,
+                            Damage = dl.Damage,
+                            Src = ag != null ? ag.Name.Replace("\u0000", "").Split(':')[0] : ""
+                        };
+                        damage += dl.Damage;
+                        recap.ToDown.Add(item);
+                        if (damage > 20000)
+                        {
+                            break;
+                        }
+                    }
+                    List<DamageLog> damageToKill = damageLogs.Where(x => x.Time > log.FightData.ToFightSpace(downed.Time) && x.Time < log.FightData.ToFightSpace(dead.Time) && x.Damage > 0 && x.Time > log.FightData.ToFightSpace(lastTime)).ToList();
+                    recap.ToKill = damageToKill.Count > 0 ? new List<DeathRecap.DeathRecapDamageItem>() : null;
+                    for (int i = damageToKill.Count - 1; i >= 0; i--)
+                    {
+                        DamageLog dl = damageToKill[i];
+                        AgentItem ag = log.AgentData.GetAgentByInstID(dl.SrcInstId, log.FightData.ToLogSpace(dl.Time));
+                        DeathRecap.DeathRecapDamageItem item = new DeathRecap.DeathRecapDamageItem()
+                        {
+                            Time = (int)dl.Time,
+                            Condi = dl.IsCondi,
+                            Skill = dl.SkillId,
+                            Damage = dl.Damage,
+                            Src = ag != null ? ag.Name.Replace("\u0000", "").Split(':')[0] : ""
+                        };
+                        recap.ToKill.Add(item);
+                    }
+                }
+                else
+                {
+                    recap.ToDown = null;
+                    List<DamageLog> damageToKill = damageLogs.Where(x => x.Time < log.FightData.ToFightSpace(dead.Time) && x.Damage > 0 && x.Time > log.FightData.ToFightSpace(lastTime)).ToList();
+                    recap.ToKill = damageToKill.Count > 0 ? new List<DeathRecap.DeathRecapDamageItem>() : null;
+                    int damage = 0;
+                    for (int i = damageToKill.Count - 1; i >= 0; i--)
+                    {
+                        DamageLog dl = damageToKill[i];
+                        AgentItem ag = log.AgentData.GetAgentByInstID(dl.SrcInstId, log.FightData.ToLogSpace(dl.Time));
+                        DeathRecap.DeathRecapDamageItem item = new DeathRecap.DeathRecapDamageItem()
+                        {
+                            Time = (int)dl.Time,
+                            Condi = dl.IsCondi,
+                            Skill = dl.SkillId,
+                            Damage = dl.Damage,
+                            Src = ag != null ? ag.Name.Replace("\u0000", "").Split(':')[0] : ""
+                        };
+                        damage += dl.Damage;
+                        recap.ToKill.Add(item);
+                        if (damage > 20000)
+                        {
+                            break;
+                        }
+                    }
+                }
+                lastTime = dead.Time;
+                res.Add(recap);
+            }
+            if (_deathRecaps.Count == 0)
+            {
+                _deathRecaps = null;
+            }
+        }
+
         private void EstimateWeapons(ParsedLog log)
         {
             if (Prof == "Sword")
@@ -124,7 +245,7 @@ namespace LuckParser.Models.ParseModels
                 {
                     if (apiskill.type == "Weapon" && apiskill.professions.Count() > 0 && (apiskill.categories == null || (apiskill.categories.Count() == 1 && apiskill.categories[0] == "Phantasm")))
                     {
-                        if (apiskill.dual_wield != null)
+                        if (apiskill.dual_wield != null && apiskill.dual_wield != "None")
                         {
                             if (swapped == 4)
                             {
@@ -209,8 +330,7 @@ namespace LuckParser.Models.ParseModels
         private void SetConsumablesList(ParsedLog log)
         {
             List<Boon> consumableList = Boon.GetConsumableList();
-            long timeStart = log.FightData.FightStart;
-            long fightDuration = log.FightData.FightEnd - timeStart;
+            long fightDuration = log.FightData.FightDuration;
             foreach (Boon consumable in consumableList)
             {
                 foreach (CombatItem c in log.GetBoonData(consumable.ID))
@@ -222,7 +342,7 @@ namespace LuckParser.Models.ParseModels
                     long time = 0;
                     if (c.IsBuff != 18)
                     {
-                        time = c.Time - timeStart;
+                        time = log.FightData.ToFightSpace(c.Time);
                     }
                     if (time <= fightDuration)
                     {
@@ -245,47 +365,10 @@ namespace LuckParser.Models.ParseModels
         {
             CombatReplay.Icon = GeneralHelper.GetProfIcon(Prof);
             // Down and deads
-            List<CombatItem> status = log.CombatData.GetStates(InstID, ParseEnum.StateChange.ChangeDown, log.FightData.FightStart, log.FightData.FightEnd);
-            status.AddRange(log.CombatData.GetStates(InstID, ParseEnum.StateChange.ChangeUp, log.FightData.FightStart, log.FightData.FightEnd));
-            status.AddRange(log.CombatData.GetStates(InstID, ParseEnum.StateChange.ChangeDead, log.FightData.FightStart, log.FightData.FightEnd));
-            status.AddRange(log.CombatData.GetStates(InstID, ParseEnum.StateChange.Spawn, log.FightData.FightStart, log.FightData.FightEnd));
-            status.AddRange(log.CombatData.GetStates(InstID, ParseEnum.StateChange.Despawn, log.FightData.FightStart, log.FightData.FightEnd));
-            status = status.OrderBy(x => x.Time).ToList();
             List<Tuple<long, long>> dead = CombatReplay.Deads;
             List<Tuple<long, long>> down = CombatReplay.Downs;
             List<Tuple<long, long>> dc = CombatReplay.DCs;
-            for (var i = 0; i < status.Count -1;i++)
-            {
-                CombatItem cur = status[i];
-                CombatItem next = status[i + 1];
-                if (cur.IsStateChange.IsDown())
-                {
-                    down.Add(new Tuple<long, long>(cur.Time - log.FightData.FightStart, next.Time - log.FightData.FightStart));
-                } else if (cur.IsStateChange.IsDead())
-                {
-                    dead.Add(new Tuple<long, long>(cur.Time - log.FightData.FightStart, next.Time - log.FightData.FightStart));
-                } else if (cur.IsStateChange.IsDespawn())
-                {
-                    dc.Add(new Tuple<long, long>(cur.Time - log.FightData.FightStart, next.Time - log.FightData.FightStart));
-                }
-            }
-            // check last value
-            if (status.Count > 0)
-            {
-                CombatItem cur = status.Last();
-                if (cur.IsStateChange.IsDown())
-                {
-                    down.Add(new Tuple<long, long>(cur.Time - log.FightData.FightStart, log.FightData.FightDuration));
-                }
-                else if (cur.IsStateChange.IsDead())
-                {
-                    dead.Add(new Tuple<long, long>(cur.Time - log.FightData.FightStart, log.FightData.FightDuration));
-                }
-                else if (cur.IsStateChange.IsDespawn())
-                {
-                    dc.Add(new Tuple<long, long>(cur.Time - log.FightData.FightStart, log.FightData.FightDuration));
-                }
-            }
+            log.CombatData.GetAgentStatus(FirstAware, LastAware, InstID, dead, down, dc);
             // Fight related stuff
             log.FightData.Logic.ComputeAdditionalPlayerData(this, log);
         }

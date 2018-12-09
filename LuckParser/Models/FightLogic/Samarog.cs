@@ -14,31 +14,31 @@ namespace LuckParser.Models
             MechanicList.AddRange(new List<Mechanic>
             {
 
-            new Mechanic(37996, "Shockwave", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'circle',color:'rgb(0,0,255)'", "Shkwv","Shockwave from Spears", "Shockwave",0),
-            new Mechanic(38168, "Prisoner Sweep", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'hexagon',color:'rgb(0,0,255)'", "Swp","Prisoner Sweep (horizontal)", "Sweep",0),
-            new Mechanic(37797, "Trampling Rush", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'triangle-right',color:'rgb(255,0,0)'", "Trmpl","Trampling Rush (hit by stampede towards home)", "Trampling Rush",0),
-            new Mechanic(38305, "Bludgeon", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'triangle-down',color:'rgb(0,0,255)'", "Slm","Bludgeon (vertical Slam)", "Slam",0),
-            new Mechanic(37868, "Fixate: Samarog", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Samarog, "symbol:'star',color:'rgb(255,0,255)'", "S.Fix","Fixated by Samarog", "Fixate: Samarog",0),
-            new Mechanic(38223, "Fixate: Guldhem", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Samarog, "symbol:'star-open',color:'rgb(255,100,0)'", "G.Fix","Fixated by Guldhem", "Fixate: Guldhem",0),
-            new Mechanic(37693, "Fixate: Rigom", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Samarog, "symbol:'star-open',color:'rgb(255,0,0)'", "R.Fix","Fixated by Rigom", "Fixate: Rigom",0),
-            new Mechanic(37966, "Big Hug", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Samarog, "symbol:'circle',color:'rgb(0,128,0)'", "BgGrn","Big Green (friends mechanic)", "Big Green",0), 
-            new Mechanic(38247, "Small Hug", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Samarog, "symbol:'circle-open',color:'rgb(0,128,0)'", "SmGrn","Small Green (friends mechanic)", "Small Green",0),
-            new Mechanic(38180, "Spear Return", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'triangle-left',color:'rgb(255,0,0)'", "SprRtn","Hit by Spear Return", "Spear Return",0),
-            new Mechanic(38260, "Inevitable Betrayal", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'circle',color:'rgb(255,0,0)'", "G.Fail","Inevitable Betrayal (failed Green)", "Failed Green",0),
-            new Mechanic(37851, "Inevitable Betrayal", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'circle',color:'rgb(255,0,0)'", "G.Fail","Inevitable Betrayal (failed Green)", "Failed Green",0),
-            new Mechanic(37901, "Effigy Pulse", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'triangle-down-open',color:'rgb(255,0,0)'", "S.Pls","Effigy Pulse (Stood in Spear AoE)", "Spear Aoe",0),
-            new Mechanic(37816, "Spear Impact", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'triangle-down',color:'rgb(255,0,0)'", "S.Spwn","Spear Impact (hit by spawning Spear)", "Spear Spawned",0),
-            new Mechanic(38199, "Brutalize", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Samarog, "symbol:'diamond-tall',color:'rgb(255,0,255)'","Brtlz","Brutalize (jumped upon by Samarog->Breakbar)", "Brutalize",0),
-            new Mechanic(38136, "Brutalize (Jump End)", Mechanic.MechType.EnemyCastEnd, ParseEnum.TargetIDS.Samarog, "symbol:'diamond-tall',color:'rgb(0,160,150)'","CC","Brutalize (Breakbar)", "Breakbar",0),
-            new Mechanic(38013, "Brutalize", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'diamond-tall',color:'rgb(255,0,0)'", "CC.Fail","Brutalize (Failed CC)", "CC Fail",0,(condition => condition.DamageLog.Result == ParseEnum.Result.KillingBlow)),
-            new Mechanic(38013, "Brutalize", Mechanic.MechType.EnemyCastEnd, ParseEnum.TargetIDS.Samarog, "symbol:'diamond-tall',color:'rgb(0,160,0)'", "CC.End","Ended Brutalize", "CC Ended",0,(condition => (condition.CombatItem.IsActivation == ParseEnum.Activation.CancelCancel || condition.CombatItem.IsActivation == ParseEnum.Activation.CancelFire))),
-            //new Mechanic(38199, "Brutalize", Mechanic.MechType.PlayerBoonRemove, ParseEnum.BossIDS.Samarog, "symbol:'diamond-tall',color:'rgb(0,160,0)'", "CCed","Ended Brutalize (Breakbar broken)", "CCEnded",0),//(condition => condition.getCombatItem().IsBuffRemove == ParseEnum.BuffRemove.Manual)),
-            //new Mechanic(38199, "Brutalize", Mechanic.MechType.EnemyBoonStrip, ParseEnum.BossIDS.Samarog, "symbol:'diamond-tall',color:'rgb(110,160,0)'", "CCed1","Ended Brutalize (Breakbar broken)", "CCed1",0),//(condition => condition.getCombatItem().IsBuffRemove == ParseEnum.BuffRemove.All)),
-            new Mechanic(37892, "Soul Swarm", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Samarog, "symbol:'x-thin-open',color:'rgb(0,255,255)'","Wall","Soul Swarm (stood in or beyond Spear Wall)", "Spear Wall",0),
-            new Mechanic(38231, "Impaling Stab", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'hourglass',color:'rgb(0,0,255)'","ShWv.Ctr","Impaling Stab (hit by Spears causing Shockwave)", "Shockwave Center",0),
-            new Mechanic(38314, "Anguished Bolt", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Samarog, "symbol:'circle',color:'rgb(255,140,0)'","Stun","Anguished Bolt (AoE Stun Circle by Guldhem)", "Guldhem's Stun",0),
+            new Mechanic(37996, "Shockwave", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(0,0,255)"), "Shkwv","Shockwave from Spears", "Shockwave",0),
+            new Mechanic(38168, "Prisoner Sweep", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("hexagon","rgb(0,0,255)"), "Swp","Prisoner Sweep (horizontal)", "Sweep",0),
+            new Mechanic(37797, "Trampling Rush", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("triangle-right","rgb(255,0,0)"), "Trmpl","Trampling Rush (hit by stampede towards home)", "Trampling Rush",0),
+            new Mechanic(38305, "Bludgeon", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("triangle-down","rgb(0,0,255)"), "Slm","Bludgeon (vertical Slam)", "Slam",0),
+            new Mechanic(37868, "Fixate: Samarog", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("star","rgb(255,0,255)"), "S.Fix","Fixated by Samarog", "Fixate: Samarog",0),
+            new Mechanic(38223, "Fixate: Guldhem", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("star-open","rgb(255,100,0)"), "G.Fix","Fixated by Guldhem", "Fixate: Guldhem",0),
+            new Mechanic(37693, "Fixate: Rigom", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("star-open","rgb(255,0,0)"), "R.Fix","Fixated by Rigom", "Fixate: Rigom",0),
+            new Mechanic(37966, "Big Hug", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("circle","rgb(0,128,0)"), "BgGrn","Big Green (friends mechanic)", "Big Green",0), 
+            new Mechanic(38247, "Small Hug", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("circle-open","rgb(0,128,0)"), "SmGrn","Small Green (friends mechanic)", "Small Green",0),
+            new Mechanic(38180, "Spear Return", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("triangle-left","rgb(255,0,0)"), "SprRtn","Hit by Spear Return", "Spear Return",0),
+            new Mechanic(38260, "Inevitable Betrayal", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(255,0,0)"), "G.Fail","Inevitable Betrayal (failed Green)", "Failed Green",0),
+            new Mechanic(37851, "Inevitable Betrayal", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(255,0,0)"), "G.Fail","Inevitable Betrayal (failed Green)", "Failed Green",0),
+            new Mechanic(37901, "Effigy Pulse", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("triangle-down-open","rgb(255,0,0)"), "S.Pls","Effigy Pulse (Stood in Spear AoE)", "Spear Aoe",0),
+            new Mechanic(37816, "Spear Impact", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("triangle-down","rgb(255,0,0)"), "S.Spwn","Spear Impact (hit by spawning Spear)", "Spear Spawned",0),
+            new Mechanic(38199, "Brutalize", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("diamond-tall","rgb(255,0,255)"),"Brtlz","Brutalize (jumped upon by Samarog->Breakbar)", "Brutalize",0),
+            new Mechanic(38136, "Brutalize (Jump End)", Mechanic.MechType.EnemyCastEnd, new MechanicPlotlySetting("diamond-tall","rgb(0,160,150)"),"CC","Brutalize (Breakbar)", "Breakbar",0),
+            new Mechanic(38013, "Brutalize", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("diamond-tall","rgb(255,0,0)"), "CC.Fail","Brutalize (Failed CC)", "CC Fail",0,(condition => condition.DamageLog.Result == ParseEnum.Result.KillingBlow)),
+            new Mechanic(38013, "Brutalize", Mechanic.MechType.EnemyCastEnd, new MechanicPlotlySetting("diamond-tall","rgb(0,160,0)"), "CC.End","Ended Brutalize", "CC Ended",0,(condition => (condition.CombatItem.IsActivation == ParseEnum.Activation.CancelCancel || condition.CombatItem.IsActivation == ParseEnum.Activation.CancelFire))),
+            //new Mechanic(38199, "Brutalize", Mechanic.MechType.PlayerBoonRemove, ParseEnum.BossIDS.Samarog, new MechanicPlotlySetting("diamond-tall","rgb(0,160,0)"), "CCed","Ended Brutalize (Breakbar broken)", "CCEnded",0),//(condition => condition.getCombatItem().IsBuffRemove == ParseEnum.BuffRemove.Manual)),
+            //new Mechanic(38199, "Brutalize", Mechanic.MechType.EnemyBoonStrip, ParseEnum.BossIDS.Samarog, new MechanicPlotlySetting("diamond-tall","rgb(110,160,0)"), "CCed1","Ended Brutalize (Breakbar broken)", "CCed1",0),//(condition => condition.getCombatItem().IsBuffRemove == ParseEnum.BuffRemove.All)),
+            new Mechanic(37892, "Soul Swarm", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("x-thin-open","rgb(0,255,255)"),"Wall","Soul Swarm (stood in or beyond Spear Wall)", "Spear Wall",0),
+            new Mechanic(38231, "Impaling Stab", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("hourglass","rgb(0,0,255)"),"ShWv.Ctr","Impaling Stab (hit by Spears causing Shockwave)", "Shockwave Center",0),
+            new Mechanic(38314, "Anguished Bolt", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(255,140,0)"),"Stun","Anguished Bolt (AoE Stun Circle by Guldhem)", "Guldhem's Stun",0),
             
-            //  new Mechanic(37816, "Brutalize", Mechanic.MechType.SkillOnPlayer, ParseEnum.BossIDS.Samarog, "symbol:'star-square',color:'rgb(255,0,0)'", "CC Target", casted without dmg odd
+            //  new Mechanic(37816, "Brutalize", Mechanic.MechType.SkillOnPlayer, ParseEnum.BossIDS.Samarog, new MechanicPlotlySetting("star-square","rgb(255,0,0)"), "CC Target", casted without dmg odd
             });
             Extension = "sam";
             IconUrl = "https://wiki.guildwars2.com/images/f/f0/Mini_Samarog.png";
@@ -76,7 +76,7 @@ namespace LuckParser.Models
                 CombatItem c = invulsSam[i];
                 if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                 {
-                    end = c.Time - log.FightData.FightStart;
+                    end = log.FightData.ToFightSpace(c.Time);
                     phases.Add(new PhaseData(start, end));
                     if (i == invulsSam.Count - 1)
                     {
@@ -85,7 +85,7 @@ namespace LuckParser.Models
                 }
                 else
                 {
-                    start = c.Time - log.FightData.FightStart;
+                    start = log.FightData.ToFightSpace(c.Time);
                     phases.Add(new PhaseData(end, start));
                     mainTarget.AddCustomCastLog(new CastLog(end, -5, (int)(start - end), ParseEnum.Activation.None, (int)(start - end), ParseEnum.Activation.None), log);
                 }
@@ -140,11 +140,11 @@ namespace LuckParser.Models
                     {
                         if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                         {
-                            brutStart = (int)(c.Time - log.FightData.FightStart);
+                            brutStart = (int)(log.FightData.ToFightSpace(c.Time));
                         }
                         else
                         {
-                            int brutEnd = (int)(c.Time - log.FightData.FightStart);
+                            int brutEnd = (int)(log.FightData.ToFightSpace(c.Time));
                             replay.Actors.Add(new CircleActor(true, 0, 120, new Tuple<int, int>(brutStart, brutEnd), "rgba(0, 180, 255, 0.3)", new AgentConnector(target)));
                         }
                     }
@@ -164,7 +164,7 @@ namespace LuckParser.Models
             List<CombatItem> bigbomb = log.GetBoonData(37966).Where(x => (x.DstInstid == p.InstID && x.IsBuffRemove == ParseEnum.BuffRemove.None)).ToList();
             foreach (CombatItem c in bigbomb)
             {
-                int bigStart = (int)(c.Time - log.FightData.FightStart);
+                int bigStart = (int)(log.FightData.ToFightSpace(c.Time));
                 int bigEnd = bigStart + 6000;
                 replay.Actors.Add(new CircleActor(true, 0, 300, new Tuple<int, int>(bigStart, bigEnd), "rgba(150, 80, 0, 0.2)", new AgentConnector(p)));
                 replay.Actors.Add(new CircleActor(true, bigEnd, 300, new Tuple<int, int>(bigStart, bigEnd), "rgba(150, 80, 0, 0.2)", new AgentConnector(p)));
@@ -173,7 +173,7 @@ namespace LuckParser.Models
             List<CombatItem> smallbomb = log.GetBoonData(38247).Where(x => (x.DstInstid == p.InstID && x.IsBuffRemove == ParseEnum.BuffRemove.None)).ToList();
             foreach (CombatItem c in smallbomb)
             {
-                int smallStart = (int)(c.Time - log.FightData.FightStart);
+                int smallStart = (int)(log.FightData.ToFightSpace(c.Time));
                 int smallEnd = smallStart + 6000;
                 replay.Actors.Add(new CircleActor(true, 0, 80, new Tuple<int, int>(smallStart, smallEnd), "rgba(80, 150, 0, 0.3)", new AgentConnector(p)));
             }
@@ -184,11 +184,11 @@ namespace LuckParser.Models
             {
                 if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                 {
-                    fixatedSamStart = Math.Max((int)(c.Time - log.FightData.FightStart), 0);
+                    fixatedSamStart = Math.Max((int)(log.FightData.ToFightSpace(c.Time)), 0);
                 }
                 else
                 {
-                    int fixatedSamEnd = (int)(c.Time - log.FightData.FightStart);
+                    int fixatedSamEnd = (int)(log.FightData.ToFightSpace(c.Time));
                     replay.Actors.Add(new CircleActor(true, 0, 80, new Tuple<int, int>(fixatedSamStart, fixatedSamEnd), "rgba(255, 80, 255, 0.3)", new AgentConnector(p)));
                 }
             }
@@ -200,12 +200,12 @@ namespace LuckParser.Models
             {
                 if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                 {
-                    fixationGuldhemStart = (int)(c.Time - log.FightData.FightStart);
+                    fixationGuldhemStart = (int)(log.FightData.ToFightSpace(c.Time));
                     guldhem = Targets.FirstOrDefault(x => x.ID == (ushort)ParseEnum.TrashIDS.Guldhem && c.Time >= x.FirstAware && c.Time <= x.LastAware);
                 }
                 else
                 {
-                    int fixationGuldhemEnd = (int)(c.Time - log.FightData.FightStart);
+                    int fixationGuldhemEnd = (int)(log.FightData.ToFightSpace(c.Time));
                     Tuple<int, int> duration = new Tuple<int, int>(fixationGuldhemStart, fixationGuldhemEnd);
                     if (guldhem != null)
                     {
@@ -221,12 +221,12 @@ namespace LuckParser.Models
             {
                 if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                 {
-                    fixationRigomStart = (int)(c.Time - log.FightData.FightStart);
+                    fixationRigomStart = (int)(log.FightData.ToFightSpace(c.Time));
                     rigom = Targets.FirstOrDefault(x => x.ID == (ushort)ParseEnum.TrashIDS.Rigom && c.Time >= x.FirstAware && c.Time <= x.LastAware);
                 }
                 else
                 {
-                    int fixationRigomEnd = (int)(c.Time - log.FightData.FightStart);
+                    int fixationRigomEnd = (int)(log.FightData.ToFightSpace(c.Time));
                     Tuple<int, int> duration = new Tuple<int, int>(fixationRigomStart, fixationRigomEnd);
                     if (rigom != null)
                     {

@@ -3,7 +3,7 @@
 var compilePlayerTab = function () {
     // Base stuff
     Vue.component('dmgdist-player-component', {
-        props: ['player', 'playerindex', 'phase',
+        props: ['playerindex', 
             'phaseindex', 'activetargets'
         ],
         template: "#tmplDamageDistPlayer",
@@ -15,6 +15,12 @@ var compilePlayerTab = function () {
             };
         },
         computed: {
+            phase: function() {
+                return logData.phases[this.phaseindex];
+            },
+            player : function() {
+                return logData.players[this.playerindex];
+            },
             actor: function () {
                 if (this.distmode === -1) {
                     return this.player;
@@ -80,7 +86,7 @@ var compilePlayerTab = function () {
     });
 
     Vue.component("player-graph-tab-component", {
-        props: ["playerindex", "player", "phase", "phases", "phaseindex", "activetargets", "targets", "graph", "light"],
+        props: ["playerindex", "phaseindex", "activetargets", "light"],
         data: function () {
             return {
                 dpsmode: 0,
@@ -117,7 +123,7 @@ var compilePlayerTab = function () {
             var oldOffset = this.playerOffset;
             this.playerOffset += computeBuffData(this.player.details.boonGraph[this.phaseindex], this.data);
             var dpsY = oldOffset === this.playerOffset ? 'y2' : 'y3';
-            this.playerOffset += computeTargetHealthData(this.graph, this.targets, this.phase, this.data, dpsY);
+            this.playerOffset += computeTargetHealthData(this.graph, logData.targets, this.phase, this.data, dpsY);
             this.data.push({
                 y: [],
                 mode: 'lines',
@@ -126,6 +132,7 @@ var compilePlayerTab = function () {
                     color: this.player.colTotal,
                 },
                 yaxis: dpsY,
+                hoverinfo: 'name+y',
                 name: 'Total DPS'
             });
             this.data.push({
@@ -136,6 +143,7 @@ var compilePlayerTab = function () {
                     color: this.player.colTarget,
                 },
                 yaxis: dpsY,
+                hoverinfo: 'name+y',
                 name: 'Target DPS'
             });
             this.data.push({
@@ -146,12 +154,22 @@ var compilePlayerTab = function () {
                     color: this.player.colCleave,
                 },
                 yaxis: dpsY,
+                hoverinfo: 'name+y',
                 name: 'Cleave DPS'
             });
             this.layout = getActorGraphLayout(images, this.light ? '#495057' : '#cccccc');
             computePhaseMarkups(this.layout.shapes, this.layout.annotations, this.phase, this.light ? '#495057' : '#cccccc');
         },
         computed: {
+            phase: function() {
+                return logData.phases[this.phaseindex];
+            },
+            player : function() {
+                return logData.players[this.playerindex];
+            },
+            graph: function() {
+                return graphData.phases[this.phaseindex];
+            },
             graphid: function () {
                 return "playergraph-" + this.playerindex + '-' + this.phaseindex;
             },
@@ -164,7 +182,7 @@ var compilePlayerTab = function () {
                 var res = [];
                 if (this.phase.subPhases) {
                     for (var i = 0; i < this.phase.subPhases.length; i++) {
-                        var subPhase = this.phases[this.phase.subPhases[i]];
+                        var subPhase = logData.phases[this.phase.subPhases[i]];
                         res[Math.floor(subPhase.start - this.phase.start)] = true;
                         res[Math.floor(subPhase.end - this.phase.start)] = true;
                     }
@@ -192,21 +210,17 @@ var compilePlayerTab = function () {
                 if (this.dpsCache.has(cacheID)) {
                     return this.dpsCache.get(cacheID);
                 }
-                var maxDPS = {
-                    total: 0,
-                    target: 0,
-                    cleave: 0
-                };
-                var playerDPS = [];
+                var data;
+                var graphData = this.graph.players[this.playerindex];
                 if (this.dpsmode < 3) {
                     var lim = (this.dpsmode === 0 ? 0 : (this.dpsmode === 1 ? 10 : 30));
-                    computePlayerDPS(this.playerindex, this.graph, playerDPS, maxDPS, null, lim, null, this.activetargets);
+                    data = computePlayerDPS(this.player, graphData, lim, null, this.activetargets, cacheID + '-' + this.phaseindex);
                 } else {
-                    computePlayerDPS(this.playerindex, this.graph, playerDPS, maxDPS, null, 0, this.computePhaseBreaks, this.activetargets);
+                    data = computePlayerDPS(this.player, graphData, 0, this.computePhaseBreaks, this.activetargets, cacheID + '-' + this.phaseindex);
                 }
                 var res = {
-                    maxDPS: maxDPS.total,
-                    playerDPS: playerDPS[0]
+                    maxDPS: data.maxDPS.total,
+                    playerDPS: data.dps
                 };
                 this.dpsCache.set(cacheID, res);
                 return res;
@@ -239,14 +253,21 @@ var compilePlayerTab = function () {
     });
 
     Vue.component("food-component", {
-        props: ["food", "phase"],
+        props: ["phaseindex", "playerindex"],
         template: "#tmplFood",
         data: function () {
             return {
                 cache: new Map()
             };
         },
+        mixins: [roundingComponent],
         computed: {
+            phase: function() {
+                return logData.phases[this.phaseindex];
+            },
+            food: function() {
+                return logData.players[this.playerindex].details.food;
+            },
             data: function () {
                 if (this.cache.has(this.phase)) {
                     return this.cache.get(this.phase);
@@ -277,13 +298,18 @@ var compilePlayerTab = function () {
     });
 
     Vue.component("simplerotation-component", {
-        props: ["rotation"],
+        props: ["playerindex", "phaseindex"],
         template: "#tmplSimpleRotation",
         data: function () {
             return {
                 autoattack: true,
                 small: false
             };
+        },
+        computed: {
+            rotation: function() {
+                return logData.players[this.playerindex].details.rotation[this.phaseindex];
+            }
         },
         methods: {
             getSkill: function (id) {
@@ -293,9 +319,15 @@ var compilePlayerTab = function () {
     });
 
     Vue.component("deathrecap-component", {
-        props: ["recaps", "playerindex", "phase"],
+        props: ["playerindex", "phaseindex"],
         template: "#tmplDeathRecap",
         computed: {
+            phase: function() {
+                return logData.phases[this.phaseindex];
+            },
+            recaps: function() {
+                return logData.players[this.playerindex].details.deathRecap;
+            },
             data: function () {
                 if (!this.recaps) {
                     return null;
@@ -319,12 +351,13 @@ var compilePlayerTab = function () {
                         x: [],
                         type: 'bar',
                         text: [],
+                        hoverinfo: 'text',
                         marker: {
                             color: []
                         }
                     };
                     var j, totalSec, totalDamage;
-                    if (recap.toDown !== null) {
+                    if (recap.toDown) {
                         totalSec = (recap.toDown[0][0] - recap.toDown[recap.toDown.length - 1][0]) / 1000;
                         totalDamage = 0;
                         for (j = recap.toDown.length - 1; j >= 0; j--) {
@@ -337,7 +370,7 @@ var compilePlayerTab = function () {
                         res.totalSeconds.down[i] = totalSec;
                         res.totalDamage.down[i] = totalDamage;
                     }
-                    if (recap.toKill !== null) {
+                    if (recap.toKill) {
                         totalSec = (recap.toKill[0][0] - recap.toKill[recap.toKill.length - 1][0]) / 1000;
                         totalDamage = 0;
                         for (j = recap.toKill.length - 1; j >= 0; j--) {
@@ -389,9 +422,17 @@ var compilePlayerTab = function () {
     });
     // tab
     Vue.component('player-tab-component', {
-        props: ['player', 'playerindex', 'phase', 'tabmode',
-            'phaseindex', 'activetargets', 'targets', 'phases', 'light'
+        props: ['playerindex', 'tabmode',
+            'phaseindex', 'activetargets', 'light'
         ],
+        computed: {    
+            phases: function() {
+                return logData.phases;
+            },          
+            player: function() {
+                return logData.players[this.playerindex];
+            }
+        },
         data: function () {
             return {
                 graphdata: graphData
@@ -401,12 +442,25 @@ var compilePlayerTab = function () {
     });
     // stats
     Vue.component("player-stats-component", {
-        props: ["players", "phaseindex", "phase", 'activetargets', 'activeplayer', 'targets', 'phases', 'light'],
+        props: ["phaseindex", 'activetargets', 'activeplayer', 'light'],
         template: "#tmplPlayerStats",
         data: function () {
             return {
                 tabmode: 0
             };
         },
+        computed: {
+            players: function() {
+                return logData.players;
+            },
+            hasDeaths: function() {
+                for (var i = 0; i < this.players.length; i++) {
+                    if (!!this.players[i].details.deathRecap) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
     });
 };

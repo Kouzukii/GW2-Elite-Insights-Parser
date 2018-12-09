@@ -114,6 +114,30 @@ function getTargetCacheID(activetargets) {
 
 function computeRotationData(rotationData, images, data) {
     if (rotationData) {
+        var rotaTrace = {
+            x: [],
+            base: [],
+            y: [],
+            name: 'Rotation',
+            text: [],
+            orientation: 'h',
+            mode: 'markers',
+            type: 'bar',
+            width: [],
+            hoverinfo: 'text',
+            hoverlabel: {
+                namelength: '-1'
+            },
+            marker: {
+                color: [],
+                width: '5',
+                line: {
+                    color: [],
+                    width: '1'
+                }
+            },
+            showlegend: false
+        }
         for (var i = 0; i < rotationData.length; i++) {
             var item = rotationData[i];
             var x = item[0];
@@ -155,31 +179,16 @@ function computeRotationData(rotationData, images, data) {
             else if (endType == 3) fillColor = 'rgb(40,220,40)';
             else fillColor = 'rgb(220,220,0)';
 
-            data.push({
-                x: [duration/1000.0],
-                base: x,
-                y: [1.2],
-                name: name + ': ' + duration + 'ms',
-                orientation: 'h',
-                mode: 'markers',
-                type: 'bar',
-                width: aa ? 0.5 : 1,
-                hoverinfo: 'name',
-                hoverlabel: {
-                    namelength: '-1'
-                },
-                marker: {
-                    color: fillColor,
-                    width: '5',
-                    line: {
-                        color: quick ? 'rgb(220,40,220)' : 'rgb(20,20,20)',
-                        width: '1'
-                    }
-                },
-                showlegend: false
-            });
+            rotaTrace.x.push(duration / 1000.0);
+            rotaTrace.base.push(x);
+            rotaTrace.y.push(1.2);
+            rotaTrace.text.push(name + ': ' + duration + 'ms');
+            rotaTrace.width.push(aa ? 0.5 : 1.0);
+            rotaTrace.marker.color.push(fillColor);
+            rotaTrace.marker.line.color.push(quick ? 'rgb(220,40,220)' : 'rgb(20,20,20)');
         }
-        return rotationData.length;
+        data.push(rotaTrace);
+        return 1;
     }
     return 0;
 }
@@ -270,15 +279,25 @@ function computePhaseMarkups(shapes, annotations, phase, linecolor) {
     }
 }
 
-function computePlayerDPS(playerid, graph, playerDPS, maxDPS, allDPS, lim, phasebreaks, activetargets) {
+
+function computePlayerDPS(player, dpsData,lim, phasebreaks, activetargets, cacheID) {
+    if (!player.dpsGraphCache) {
+        player.dpsGraphCache = new Map();
+    }
+    if (player.dpsGraphCache.has(cacheID)) {
+        return player.dpsGraphCache.get(cacheID);
+    }
     var totalDamage = 0;
     var targetDamage = 0;
     var totalDPS = [0];
     var cleaveDPS = [0];
     var targetDPS = [0];
-    var dpsData = graph.players[playerid];
+    var maxDPS = {
+        total: 0,
+        cleave: 0,
+        target: 0
+    };
     var start = 0;
-
     for (var j = 1; j < dpsData.total.length; j++) {
         var limID = 0;
         if (lim > 0) {
@@ -298,15 +317,10 @@ function computePlayerDPS(playerid, graph, playerDPS, maxDPS, allDPS, lim, phase
         totalDPS[j] = Math.round(totalDamage / (j - start));
         targetDPS[j] = Math.round(targetDamage / (j - start));
         cleaveDPS[j] = Math.round((totalDamage - targetDamage) / (j - start));
-        if (allDPS) {
-            allDPS.total[j] = totalDPS[j] + (allDPS.total[j] || 0);
-            allDPS.target[j] = targetDPS[j] + (allDPS.target[j] || 0);
-            allDPS.cleave[j] = cleaveDPS[j] + (allDPS.cleave[j] || 0);
-        }
         maxDPS.total = Math.max(maxDPS.total, totalDPS[j]);
         maxDPS.target = Math.max(maxDPS.target, targetDPS[j]);
         maxDPS.cleave = Math.max(maxDPS.cleave, cleaveDPS[j]);
-    }
+    }   
     if (maxDPS.total < 1e-6) {
         maxDPS.total = 10;
     }
@@ -316,11 +330,16 @@ function computePlayerDPS(playerid, graph, playerDPS, maxDPS, allDPS, lim, phase
     if (maxDPS.cleave < 1e-6) {
         maxDPS.cleave = 10;
     }
-    playerDPS.push({
-        total: totalDPS,
-        target: targetDPS,
-        cleave: cleaveDPS
-    });
+    var res = {
+        dps: {
+            total: totalDPS,
+            target: targetDPS,
+            cleave: cleaveDPS
+        },
+        maxDPS: maxDPS
+    };
+    player.dpsGraphCache.set(cacheID, res);
+    return res;
 }
 
 function getActorGraphLayout(images, color) {
@@ -339,6 +358,7 @@ function getActorGraphLayout(images, color) {
             traceorder: 'reversed'
         },
         hovermode: 'compare',
+        hoverdistance: 1100,
         yaxis2: {
             title: 'Buffs',
             domain: [0.11, 0.6],
@@ -377,10 +397,10 @@ function computeTargetHealthData(graph, targets, phase, data, yaxis) {
     for (i = 0; i < graph.targets.length; i++) {
         var health = graph.targets[i].health;
         var hpTexts = [];
-        for (j = 0; j < health.length; j++) {
-            hpTexts[j] = health[j] + "%";
-        }
         var target = targets[phase.targets[i]];
+        for (j = 0; j < health.length; j++) {
+            hpTexts[j] = health[j] + "% hp - " + target.name ;
+        }
         var res = {
             text: hpTexts,
             mode: 'lines',
@@ -388,7 +408,7 @@ function computeTargetHealthData(graph, targets, phase, data, yaxis) {
                 shape: 'spline',
                 dash: 'dashdot'
             },
-            hoverinfo: 'text+x+name',
+            hoverinfo: 'text',
             name: target.name + ' health',
         };
         if (yaxis) {
@@ -407,19 +427,28 @@ function computeBuffData(buffData, data) {
             var line = {
                 x: [],
                 y: [],
+                text: [],
                 yaxis: 'y2',
                 type: 'scatter',
                 visible: boonItem.visible ? null : 'legendonly',
                 line: {
                     color: boonItem.color,
-                    shape: 'hv'
+                    shape: 'linear'
                 },
+                hoverinfo: 'text',
                 fill: 'tozeroy',
-                name: boon.name
+                name: boon.name.substring(0,20)
             };
-            for (var p = 0; p < boonItem.states.length; p++) {
-                line.x[p] = boonItem.states[p][0];
-                line.y[p] = boonItem.states[p][1];
+            line.x.push(boonItem.states[0][0]);
+            line.y.push(boonItem.states[0][1]);
+            line.text.push(boon.name + ': ' + boonItem.states[0][1]);
+            for (var p = 1; p < boonItem.states.length; p++) {
+                line.x.push(boonItem.states[p][0]-0.001);
+                line.y.push(boonItem.states[p-1][1]);
+                line.text.push(boon.name + ': ' + boonItem.states[p-1][1]);
+                line.x.push(boonItem.states[p][0]);
+                line.y.push(boonItem.states[p][1]);
+                line.text.push(boon.name + ': ' + boonItem.states[p][1]);
             }
             data.push(line);
         }

@@ -8,9 +8,9 @@ namespace LuckParser.Models
 {
     public class JsonMinions
     {
-        public string Name;
-        public Dictionary<long, JsonDamageDist>[] TotalDamageDist;
-        public Dictionary<long, JsonDamageDist>[][] TargetDamageDist;
-        public Dictionary<long, List<JsonSkill>> Rotation;
+        public string name;
+        public Dictionary<string, JsonDamageDist>[] totalDamageDist;
+        public Dictionary<string, JsonDamageDist>[][] targetDamageDist;
+        public Dictionary<string, List<JsonSkill>> rotation;
     }
 }

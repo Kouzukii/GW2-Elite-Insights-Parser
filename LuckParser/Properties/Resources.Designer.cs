@@ -19,7 +19,7 @@ namespace LuckParser.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -247,7 +247,8 @@ namespace LuckParser.Properties {
         ///    Object.defineProperty(String.prototype, &quot;includes&quot;, {
         ///        value: function (search, start) {
         ///            if (typeof start !== &apos;number&apos;) {
-        ///                start = 0;        /// [rest of string was truncated]&quot;;.
+        ///                start = 0;
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string globalJS {
             get {
@@ -385,21 +386,22 @@ namespace LuckParser.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /*jshint esversion: 6 */
         ///
-        ///function computeTargetDPS(targetid, graph, lim, phasebreaks) {
-        ///    var totalDamage = 0;
-        ///    var maxDPS = 0;
-        ///    var totalDPS = [0];
-        ///    var dpsData = graph.targets[targetid].total;
-        ///    var start = 0;
         ///
+        ///function computeTargetDPS(target, dpsData,lim, phasebreaks, cacheID) {
+        ///    if (!target.dpsGraphCache) {
+        ///        target.dpsGraphCache = new Map();
+        ///    }
+        ///    if (target.dpsGraphCache.has(cacheID)) {
+        ///        return target.dpsGraphCache.get(cacheID);
+        ///    }
+        ///    var totalDamage = 0;
+        ///    var totalDPS = [0];
+        ///    var maxDPS = 0;
+        ///    var start = 0;
         ///    for (var j = 1; j &lt; dpsData.length; j++) {
         ///        var limID = 0;
         ///        if (lim &gt; 0) {
-        ///            limID = Math.max(j - lim, 0);
-        ///            start = limID;
-        ///        }
-        ///        totalDamage += dpsData[j] - dpsData[limID];
-        ///        if (phasebreaks &amp;&amp; phasebreaks[j - 1] [rest of string was truncated]&quot;;.
+        ///            limID = Math.max(j - l [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string targetStatsJS {
             get {
@@ -423,6 +425,26 @@ namespace LuckParser.Properties {
         internal static string template_html {
             get {
                 return ResourceManager.GetString("template_html", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap theme_cosmo {
+            get {
+                object obj = ResourceManager.GetObject("theme_cosmo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap theme_slate {
+            get {
+                object obj = ResourceManager.GetObject("theme_slate", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -486,12 +508,12 @@ namespace LuckParser.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;div class=&quot;d-flex justify-content-around align-items-center justify-content-center&quot;&gt;
+        ///   Looks up a localized string similar to &lt;div class=&quot;d-flex justify-content-around align-items-center justify-content-center mt-2&quot;&gt;
         ///    &lt;div class=&quot;d-flex flex-column flex-wrap&quot;&gt;
         ///        &lt;canvas width=&quot;${canvasX}px&quot; height=&quot;${canvasY}px&quot; id=&quot;replayCanvas&quot; class=&quot;replay&quot;&gt;&lt;/canvas&gt;
         ///        &lt;div class=&quot;d-flex justify-content-center slidecontainer&quot;&gt;
         ///            &lt;input style=&quot;min-width: 400px;&quot; oninput=&quot;updateTime(this.value)&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;${maxTime}&quot; value=&quot;0&quot; class=&quot;slider&quot; id=&quot;timeRange&quot;&gt;
-        ///            &lt;input style=&quot;width: 70px; text-alig [rest of string was truncated]&quot;;.
+        ///            &lt;input style=&quot;width: 70px; text [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tmplCombatReplay {
             get {
@@ -670,9 +692,9 @@ namespace LuckParser.Properties {
         ///                &lt;th&gt;Dmg Barrier&lt;/th&gt;
         ///                &lt;th&gt;Blocked&lt;/th&gt;
         ///                &lt;th&gt;Invulned&lt;/th&gt;
+        ///                &lt;th&gt;Interrupted&lt;/th&gt;
         ///                &lt;th&gt;Evaded&lt;/th&gt;
-        ///                &lt;th&gt;
-        ///                    &lt;span  [rest of string was truncated]&quot;;.
+        ///           [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tmplDefenseTable {
             get {
@@ -859,11 +881,11 @@ namespace LuckParser.Properties {
         ///    &lt;table class=&quot;table composition&quot;&gt;
         ///        &lt;tbody&gt;
         ///            &lt;tr v-for=&quot;group in groups&quot;&gt;
-        ///                &lt;td :class=&quot;{&apos;player-cell&apos; : !crmode, active: player.active}&quot; v-for=&quot;player in group&quot; @click=&quot;select(player,groups)&quot;&gt;
+        ///                &lt;td v-for=&quot;player in group&quot; class=&quot;player-cell&quot; :class=&quot;{active: player.active}&quot; @click=&quot;select(player,groups)&quot;&gt;
         ///                    &lt;div&gt;
         ///                        &lt;img :src=&quot;player.icon&quot; :alt=&quot;player.profession&quot; class=&quot;icon&quot; :data-original-title=&quot;player.prof&quot;&gt;
         ///                        &lt;img v-if=&quot;player.condi &gt; 0&quot; src=&quot;https://wiki.guildwars2.com/images/5/54/Condition_Damage.png&quot;
-        ///  [rest of string was truncated]&quot;;.
+        ///       [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tmplPlayers {
             get {
@@ -982,9 +1004,27 @@ namespace LuckParser.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;div&gt;
+        ///    &lt;img v-if=&quot;target.health &gt; 0&quot; src=&quot;https://wiki.guildwars2.com/images/b/be/Vitality.png&quot; alt=&quot;Health&quot; class=&quot;icon&quot;
+        ///        :data-original-title=&quot;&apos;Health - &apos; + target.health&quot;&gt;
+        ///    &lt;img v-if=&quot;target.tough &gt; 0&quot; src=&quot;https://wiki.guildwars2.com/images/1/12/Toughness.png&quot; alt=&quot;Toughness&quot; class=&quot;icon&quot;
+        ///        hbHeight :data-original-title=&quot;&apos;Toughness - &apos; + target.tough&quot;&gt;
+        ///    &lt;img v-if=&quot;target.hbWidth &gt; 0&quot; src=&quot;https://wiki.guildwars2.com/images/1/12/Toughness.png&quot; alt=&quot;Hitbox Width&quot; class=&quot;icon&quot;
+        ///  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tmplTargetData {
+            get {
+                return ResourceManager.GetString("tmplTargetData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;div class=&quot;d-flex flex-row justify-content-center flex-wrap&quot;&gt;
-        ///    &lt;img class=&quot;icon-lg mr-2 ml-2 target-cell&quot; v-for=&quot;target in targets&quot; v-show=&quot;show(target)&quot; :src=&quot;target.icon&quot; :alt=&quot;target.name&quot;
-        ///        :data-original-title=&quot;target.name&quot; :class=&quot;{active: target.active}&quot; @click=&quot;target.active = !target.active&quot;&gt;
+        ///    &lt;div v-for=&quot;target in targets&quot; v-show=&quot;show(target)&quot;&gt;
+        ///        &lt;img class=&quot;icon-lg mr-2 ml-2 target-cell&quot; :src=&quot;target.icon&quot; :alt=&quot;target.name&quot; :data-original-title=&quot;target.name&quot;
+        ///            :class=&quot;{active: target.active}&quot; @click=&quot;target.active = !target.active&quot;&gt;
+        ///        &lt;target-data-component :target=&quot;target&quot;&gt;&lt;/target-data-component&gt;
+        ///    &lt;/div&gt;
         ///&lt;/div&gt;.
         /// </summary>
         internal static string tmplTargets {
@@ -1002,8 +1042,8 @@ namespace LuckParser.Properties {
         ///            &lt;/a&gt;
         ///        &lt;/li&gt;
         ///    &lt;/ul&gt;
-        ///    &lt;h3 v-for=&quot;(target, targetid) in targets&quot; :key=&quot;targetid&quot; v-show=&quot;phase.focus === target&quot; class=&quot;text-center mt-2&quot;&gt;&lt;img :alt=&quot;target.name&quot; class=&quot;icon-lg mt-2&quot; :src=&quot;target.icon&quot;&gt;{{target.name}}&lt;/h3&gt;
-        ///    &lt;ul c [rest of string was truncated]&quot;;.
+        ///    &lt;div v-for=&quot;(target, targetid) in targets&quot; :key=&quot;targetid&quot; v-show=&quot;phase.focus === target&quot;&gt;
+        ///        &lt;h3 class=&quot;text-center mt-2&quot;&gt;&lt;img :alt=&quot;target.name&quot; class=&quot;icon-lg mt-2&quot; :src=&quot;target.icon&quot;&gt;{{target.name}}&lt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tmplTargetStats {
             get {
@@ -1028,22 +1068,15 @@ namespace LuckParser.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;div&gt;
-        ///    &lt;div class=&quot;mt-2&quot;&gt;
-        ///        &lt;ul&gt;
-        ///            &lt;li v-show=&quot;target.health &gt; 0&quot;&gt;
-        ///                Health: {{target.health}}
-        ///            &lt;/li&gt;
-        ///            &lt;li v-show=&quot;target.tough &gt; 0&quot;&gt;
-        ///                Toughness: {{target.tough}}
-        ///            &lt;/li&gt;
-        ///            &lt;li v-show=&quot;target.hbWidth &gt; 0&quot;&gt;
-        ///                Hitbox width: {{target.hbWidth}}
-        ///            &lt;/li&gt;
-        ///            &lt;li v-show=&quot;target.hbHeight &gt; 0&quot;&gt;
-        ///                Hitbox height: {{target.hbHeight}}
-        ///            &lt;/li&gt;
-        ///        &lt;/ul&gt;
-        ///     [rest of string was truncated]&quot;;.
+        ///    &lt;ul class=&quot;nav nav-pills d-flex flex-row justify-content-center mt-5 mb-2&quot;&gt;
+        ///        &lt;li class=&quot;nav-item&quot;&gt;
+        ///            &lt;a class=&quot;nav-link&quot; @click=&quot;dpsmode = 0&quot; :class=&quot;{active: dpsmode === 0}&quot;&gt;Full&lt;/a&gt;
+        ///        &lt;/li&gt;
+        ///        &lt;li v-if=&quot;phase.end - phase.start &gt; 10&quot; class=&quot;nav-item&quot;&gt;
+        ///            &lt;a class=&quot;nav-link&quot; @click=&quot;dpsmode = 1&quot; :class=&quot;{active: dpsmode === 1}&quot;&gt;10s&lt;/a&gt;
+        ///        &lt;/li&gt;
+        ///        &lt;li v-if=&quot;phase.end - phase.start &gt; 30&quot; class=&quot;nav-item&quot;&gt;
+        ///            &lt;a class=&quot;nav-link&quot; @click [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tmplTargetTabGraph {
             get {

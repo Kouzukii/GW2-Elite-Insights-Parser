@@ -13,17 +13,17 @@ namespace LuckParser.Models
         {
             MechanicList.AddRange(new List<Mechanic>
             {
-            new Mechanic(34912, "Fixate", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.KeepConstruct, "symbol:'star',color:'rgb(255,0,255)'", "Fixt","Fixated by Statue", "Fixated",0),
-            new Mechanic(34925, "Fixate", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.KeepConstruct, "symbol:'star',color:'rgb(255,0,255)'", "Fixt","Fixated by Statue", "Fixated",0),
-            new Mechanic(35077, "Hail of Fury", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.KeepConstruct, "symbol:'circle-open',color:'rgb(255,0,0)'", "Debris","Hail of Fury (Falling Debris)", "Debris",0),
-            new Mechanic(35096, "Compromised", Mechanic.MechType.EnemyBoon, ParseEnum.TargetIDS.KeepConstruct, "symbol:'hexagon',color:'rgb(0,0,255)'", "Rift#","Compromised (Pushed Orb through Rifts)", "Compromised",0),
-            new Mechanic(16227, "Insidious Projection", Mechanic.MechType.Spawn, ParseEnum.TargetIDS.KeepConstruct, "symbol:'bowtie',color:'rgb(255,0,0)'", "Merge","Insidious Projection spawn (2 Statue merge)", "Merged Statues",0),
-            new Mechanic(35137, "Phantasmal Blades", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.KeepConstruct, "symbol:'hexagram-open',color:'rgb(255,0,255)'", "PhBlds","Phantasmal Blades (rotating Attack)", "Phantasmal Blades",0),
-            new Mechanic(34971, "Phantasmal Blades", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.KeepConstruct, "symbol:'hexagram-open',color:'rgb(255,0,255)'", "PhBlds","Phantasmal Blades (rotating Attack)", "Phantasmal Blades",0),
-            new Mechanic(35064, "Phantasmal Blades", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.KeepConstruct, "symbol:'hexagram-open',color:'rgb(255,0,255)'", "PhBlds","Phantasmal Blades (rotating Attack)", "Phantasmal Blades",0),
-            new Mechanic(35086, "Tower Drop", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.KeepConstruct, "symbol:'circle',color:'rgb(255,140,0)'", "Jump","Tower Drop (KC Jump)", "Tower Drop",0),
-            new Mechanic(35103, "Xera's Fury", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.KeepConstruct, "symbol:'circle',color:'rgb(200,140,0)'", "Bmb","Xera's Fury (Large Bombs) application", "Bombs",0),
-            new Mechanic(16261, "Core Hit", Mechanic.MechType.HitOnEnemy, ParseEnum.TargetIDS.KeepConstruct, "symbol:'star-open',color:'rgb(255,140,0)'", "C.Hit","Core was Hit by Player", "Core Hit",1000)
+            new Mechanic(34912, "Fixate", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("star","rgb(255,0,255)"), "Fixt","Fixated by Statue", "Fixated",0),
+            new Mechanic(34925, "Fixate", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("star","rgb(255,0,255)"), "Fixt","Fixated by Statue", "Fixated",0),
+            new Mechanic(35077, "Hail of Fury", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(255,0,0)"), "Debris","Hail of Fury (Falling Debris)", "Debris",0),
+            new Mechanic(35096, "Compromised", Mechanic.MechType.EnemyBoon, new MechanicPlotlySetting("hexagon","rgb(0,0,255)"), "Rift#","Compromised (Pushed Orb through Rifts)", "Compromised",0),
+            new Mechanic(16227, "Insidious Projection", Mechanic.MechType.Spawn, new MechanicPlotlySetting("bowtie","rgb(255,0,0)"), "Merge","Insidious Projection spawn (2 Statue merge)", "Merged Statues",0),
+            new Mechanic(35137, "Phantasmal Blades", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("hexagram-open","rgb(255,0,255)"), "PhBlds","Phantasmal Blades (rotating Attack)", "Phantasmal Blades",0),
+            new Mechanic(34971, "Phantasmal Blades", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("hexagram-open","rgb(255,0,255)"), "PhBlds","Phantasmal Blades (rotating Attack)", "Phantasmal Blades",0),
+            new Mechanic(35064, "Phantasmal Blades", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("hexagram-open","rgb(255,0,255)"), "PhBlds","Phantasmal Blades (rotating Attack)", "Phantasmal Blades",0),
+            new Mechanic(35086, "Tower Drop", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(255,140,0)"), "Jump","Tower Drop (KC Jump)", "Tower Drop",0),
+            new Mechanic(35103, "Xera's Fury", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("circle","rgb(200,140,0)"), "Bmb","Xera's Fury (Large Bombs) application", "Bombs",0),
+            new Mechanic(16261, "Core Hit", Mechanic.MechType.HitOnEnemy, new MechanicPlotlySetting("star-open","rgb(255,140,0)"), "C.Hit","Core was Hit by Player", "Core Hit",1000)
             });
             Extension = "kc";
             IconUrl = "https://wiki.guildwars2.com/images/e/ea/Mini_Keep_Construct.png";
@@ -95,13 +95,13 @@ namespace LuckParser.Models
                 {
                     if (start == 0)
                     {
-                        start = c.Time - log.FightData.FightStart;
+                        start = log.FightData.ToFightSpace(c.Time);
                     }
                     orbCount++;
                 }
                 else if (start != 0)
                 {
-                    segments.Add(new BoonsGraphModel.Segment(start, Math.Min(c.Time - log.FightData.FightStart, fightDuration), orbCount));
+                    segments.Add(new BoonsGraphModel.Segment(start, Math.Min(log.FightData.ToFightSpace(c.Time), fightDuration), orbCount));
                     orbCount = 0;
                     start = 0;
                 }
@@ -290,11 +290,11 @@ namespace LuckParser.Models
             {
                 if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                 {
-                    xeraFuryStart = (int)(c.Time - log.FightData.FightStart);
+                    xeraFuryStart = (int)(log.FightData.ToFightSpace(c.Time));
                 }
                 else
                 {
-                    int xeraFuryEnd = (int)(c.Time - log.FightData.FightStart);
+                    int xeraFuryEnd = (int)(log.FightData.ToFightSpace(c.Time));
                     replay.Actors.Add(new CircleActor(true, 0, 550, new Tuple<int, int>(xeraFuryStart, xeraFuryEnd), "rgba(200, 150, 0, 0.2)", new AgentConnector(p)));
                     replay.Actors.Add(new CircleActor(true, xeraFuryEnd, 550, new Tuple<int, int>(xeraFuryStart, xeraFuryEnd), "rgba(200, 150, 0, 0.4)", new AgentConnector(p)));
                 }
@@ -308,12 +308,12 @@ namespace LuckParser.Models
             {
                 if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                 {
-                    fixationStatueStart = (int)(c.Time - log.FightData.FightStart);
+                    fixationStatueStart = (int)(log.FightData.ToFightSpace(c.Time));
                     statue = TrashMobs.FirstOrDefault(x => x.Agent == c.SrcAgent);
                 }
                 else
                 {
-                    int fixationStatueEnd = (int)(c.Time - log.FightData.FightStart);
+                    int fixationStatueEnd = (int)(log.FightData.ToFightSpace(c.Time));
                     Tuple<int, int> duration = new Tuple<int, int>(fixationStatueStart, fixationStatueEnd);
                     if (statue != null)
                     {

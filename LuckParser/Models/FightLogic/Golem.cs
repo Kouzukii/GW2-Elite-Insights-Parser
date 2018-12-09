@@ -36,12 +36,6 @@ namespace LuckParser.Models
             }
         }
 
-        public override List<PhaseData> GetPhases(ParsedLog log, bool requirePhases)
-        {
-            List<PhaseData> phases = GetInitialPhase(log);          
-            return phases;
-        }
-
         public override void SpecialParse(FightData fightData, AgentData agentData, List<CombatItem> combatData)
         {
             Target target = Targets.Find(x => x.ID == TriggerID);
@@ -54,6 +48,16 @@ namespace LuckParser.Models
                     c.DstInstid = target.InstID;
                 }
             }
+            CombatItem pov = combatData.FirstOrDefault(x => x.IsStateChange == ParseEnum.StateChange.PointOfView);
+            if (pov != null)
+            {
+                // to make sure that the logging starts when the PoV starts attacking (in case there is a slave with them)
+                CombatItem enterCombat = combatData.FirstOrDefault(x => x.SrcAgent == pov.SrcAgent && x.IsStateChange == ParseEnum.StateChange.EnterCombat);
+                if (enterCombat != null)
+                {
+                    fightData.FightStart = enterCombat.Time;
+                }
+            }
         }
 
         public override void SetSuccess(ParsedLog log)
@@ -63,17 +67,7 @@ namespace LuckParser.Models
             {
                 throw new InvalidOperationException("Main target of the fight not found");
             }
-            CombatItem pov = log.CombatData.AllCombatItems.FirstOrDefault(x => x.IsStateChange == ParseEnum.StateChange.PointOfView);
-            if (pov != null)
-            {
-                // to make sure that the logging starts when the PoV starts attacking (in case there is a slave with them)
-                CombatItem enterCombat = log.CombatData.AllCombatItems.FirstOrDefault(x => x.SrcAgent == pov.SrcAgent && x.IsStateChange == ParseEnum.StateChange.EnterCombat);
-                if (enterCombat != null)
-                {
-                    log.FightData.FightStart = enterCombat.Time;
-                }
-            }
-            CombatItem lastDamageTaken = log.CombatData.GetDamageTakenData(mainTarget.InstID).LastOrDefault(x => x.Value > 0 || x.BuffDmg > 0);
+            CombatItem lastDamageTaken = log.CombatData.GetDamageTakenData(mainTarget.InstID, mainTarget.FirstAware, mainTarget.LastAware).LastOrDefault(x => x.Value > 0 || x.BuffDmg > 0);
             if (lastDamageTaken != null)
             {
                 log.FightData.FightEnd = lastDamageTaken.Time;

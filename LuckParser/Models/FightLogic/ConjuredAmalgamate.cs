@@ -13,13 +13,13 @@ namespace LuckParser.Models
         {
             MechanicList.AddRange(new List<Mechanic>
             {
-            new Mechanic(52173, "Pulverize", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.ConjuredAmalgamate, "symbol:'square',color:'rgb(255,140,0)'", "A.Slam","Pulverize (Arm Slam)", "Arm Slam",0),
-            new Mechanic(52086, "Junk Absorption", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.ConjuredAmalgamate, "symbol:'circle-open',color:'rgb(150,0,150)'", "Balls","Junk Absorption (Purple Balls during collect)", "Purple Balls",0),
-            new Mechanic(52878, "Junk Fall", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.ConjuredAmalgamate, "symbol:'circle-open',color:'rgb(255,150,0)'", "Junk","Junk Fall (Falling Debris)", "Junk Fall",0),
-            new Mechanic(52120, "Junk Fall", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.ConjuredAmalgamate, "symbol:'circle-open',color:'rgb(255,150,0)'", "Junk","Junk Fall (Falling Debris)", "Junk Fall",0),
-            new Mechanic(52161, "Ruptured Ground", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.ConjuredAmalgamate, "symbol:'square-open',color:'rgb(0,255,255)'", "Grnd","Ruptured Ground (Relics after Junk Wall)", "Ruptured Ground",0,(condition => condition.DamageLog.Damage > 0)),
-            new Mechanic(52656, "Tremor", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.ConjuredAmalgamate, "symbol:'circle-open',color:'rgb(255,0,0)'", "Trmr","Tremor (Field adjacent to Arm Slam)", "Near Arm Slam",0,(condition => condition.DamageLog.Damage > 0)),
-            new Mechanic(52150, "Junk Torrent", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.ConjuredAmalgamate, "symbol:'square-open',color:'rgb(255,0,0)'", "Wall","Junk Torrent (Moving Wall)", "Junk Torrent (Wall)",0,(condition => condition.DamageLog.Damage > 0)),
+            new Mechanic(52173, "Pulverize", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("square","rgb(255,140,0)"), "A.Slam","Pulverize (Arm Slam)", "Arm Slam",0),
+            new Mechanic(52086, "Junk Absorption", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(150,0,150)"), "Balls","Junk Absorption (Purple Balls during collect)", "Purple Balls",0),
+            new Mechanic(52878, "Junk Fall", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(255,150,0)"), "Junk","Junk Fall (Falling Debris)", "Junk Fall",0),
+            new Mechanic(52120, "Junk Fall", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(255,150,0)"), "Junk","Junk Fall (Falling Debris)", "Junk Fall",0),
+            new Mechanic(52161, "Ruptured Ground", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("square-open","rgb(0,255,255)"), "Grnd","Ruptured Ground (Relics after Junk Wall)", "Ruptured Ground",0,(condition => condition.DamageLog.Damage > 0)),
+            new Mechanic(52656, "Tremor", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(255,0,0)"), "Trmr","Tremor (Field adjacent to Arm Slam)", "Near Arm Slam",0,(condition => condition.DamageLog.Damage > 0)),
+            new Mechanic(52150, "Junk Torrent", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("square-open","rgb(255,0,0)"), "Wall","Junk Torrent (Moving Wall)", "Junk Torrent (Wall)",0,(condition => condition.DamageLog.Damage > 0)),
             }); 
             Extension = "ca";
             IconUrl = "https://i.imgur.com/eLyIWd2.png";
@@ -101,11 +101,11 @@ namespace LuckParser.Models
                     {
                         if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                         {
-                            shieldStart = (int)(c.Time - log.FightData.FightStart);
+                            shieldStart = (int)(log.FightData.ToFightSpace(c.Time));
                         }
                         else
                         {
-                            int shieldEnd = (int)(c.Time - log.FightData.FightStart);
+                            int shieldEnd = (int)(log.FightData.ToFightSpace(c.Time));
                             Tuple<int, int> lifespan = new Tuple<int, int>(shieldStart, shieldEnd);
                             int radius = 100;
                             replay.Actors.Add(new CircleActor(true, 0, radius, lifespan, "rgba(0, 150, 255, 0.3)", new AgentConnector(mob)));
@@ -138,7 +138,7 @@ namespace LuckParser.Models
                 CombatItem invul = CAInvul[i];
                 if (invul.IsBuffRemove != ParseEnum.BuffRemove.None)
                 {
-                    end = Math.Min(invul.Time - log.FightData.FightStart, log.FightData.FightDuration);
+                    end = Math.Min(log.FightData.ToFightSpace(invul.Time), log.FightData.FightDuration);
                     phases.Add(new PhaseData(start, end));
                     if (i == CAInvul.Count - 1)
                     {
@@ -147,7 +147,7 @@ namespace LuckParser.Models
                 }
                 else
                 {
-                    start = Math.Min(invul.Time - log.FightData.FightStart, log.FightData.FightDuration);
+                    start = Math.Min(log.FightData.ToFightSpace(invul.Time), log.FightData.FightDuration);
                     phases.Add(new PhaseData(end, start));
                     if (i == CAInvul.Count - 1)
                     {
@@ -155,6 +155,7 @@ namespace LuckParser.Models
                     }
                 }
             }
+            phases.RemoveAll(x => x.GetDuration() < 1000);
             for (int i = 1; i < phases.Count; i++)
             {
                 string name;
@@ -173,7 +174,7 @@ namespace LuckParser.Models
             Target leftArm = Targets.Find(x => x.ID == (ushort)ParseEnum.TargetIDS.CALeftArm);
             if (leftArm != null)
             {
-                List<long> leftArmDown = log.GetBoonData(52430).Where(x => x.IsBuffRemove == ParseEnum.BuffRemove.All && x.SrcInstid == leftArm.InstID).Select(x => x.Time - log.FightData.FightStart).ToList();
+                List<long> leftArmDown = log.GetBoonData(52430).Where(x => x.IsBuffRemove == ParseEnum.BuffRemove.All && x.SrcInstid == leftArm.InstID).Select(x => log.FightData.ToFightSpace(x.Time)).ToList();
                 for (int i = 1; i < phases.Count; i += 2)
                 {
                     PhaseData phase = phases[i];
@@ -187,7 +188,7 @@ namespace LuckParser.Models
             Target rightArm = Targets.Find(x => x.ID == (ushort)ParseEnum.TargetIDS.CARightArm);
             if (rightArm != null)
             {
-                List<long> rightArmDown = log.GetBoonData(52430).Where(x => x.IsBuffRemove == ParseEnum.BuffRemove.All && x.SrcInstid == rightArm.InstID).Select(x => x.Time - log.FightData.FightStart).ToList();
+                List<long> rightArmDown = log.GetBoonData(52430).Where(x => x.IsBuffRemove == ParseEnum.BuffRemove.All && x.SrcInstid == rightArm.InstID).Select(x => log.FightData.ToFightSpace(x.Time)).ToList();
                 for (int i = 1; i < phases.Count; i += 2)
                 {
                     PhaseData phase = phases[i];
@@ -205,7 +206,6 @@ namespace LuckParser.Models
                     }
                 }
             }
-            phases.RemoveAll(x => x.GetDuration() < 1000);
             return phases;
         }
 
@@ -223,11 +223,11 @@ namespace LuckParser.Models
                     {
                         if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                         {
-                            shieldStart = (int)(c.Time - log.FightData.FightStart);
+                            shieldStart = (int)(log.FightData.ToFightSpace(c.Time));
                         }
                         else
                         {
-                            int shieldEnd = (int)(c.Time - log.FightData.FightStart);
+                            int shieldEnd = (int)(log.FightData.ToFightSpace(c.Time));
                             Tuple<int, int> lifespan = new Tuple<int, int>(shieldStart, shieldEnd);
                             int radius = 500;
                             replay.Actors.Add(new CircleActor(true, 0, radius, lifespan, "rgba(0, 150, 255, 0.3)", new AgentConnector(target)));

@@ -11,6 +11,69 @@ namespace LuckParser.Controllers
 {
     public static class GeneralHelper
     {
+        private static HashSet<string> _compressedFiles = new HashSet<string>()
+        {
+            ".zevtc",
+            ".evtc.zip",
+        };
+
+        private static HashSet<string> _tmpFiles = new HashSet<string>()
+        {
+            ".tmp.zip"
+        };
+
+        private static HashSet<string> _supportedFiles = new HashSet<string>(_compressedFiles)
+        {
+            ".evtc"
+        };
+
+        public static bool IsCompressedFormat(string fileName)
+        {
+            foreach (string format in _compressedFiles)
+            {
+                if (fileName.EndsWith(format, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool IsTemporaryFormat(string fileName)
+        {
+            foreach (string format in _tmpFiles)
+            {
+                if (fileName.EndsWith(format, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool IsSupportedFormat(string fileName)
+        {
+            foreach (string format in _supportedFiles)
+            {
+                if (fileName.EndsWith(format, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static string UppercaseFirst(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return string.Empty;
+            }
+            char[] a = s.ToCharArray();
+            a[0] = char.ToUpper(a[0]);
+            return new string(a);
+        }
+
         public static T MaxBy<T, R>(this IEnumerable<T> en, Func<T, R> evaluate) where R : IComparable<R>
         {
             return en.Select(t => new Tuple<T, R>(t, evaluate(t)))
@@ -277,6 +340,14 @@ namespace LuckParser.Controllers
                     return "https://i.imgur.com/o3vX9Zc.png";
                 case Hands:
                     return "https://i.imgur.com/8JRPEoo.png";
+                case TemporalAnomaly:
+                case TemporalAnomaly2:
+                    return "https://i.imgur.com/MIpP5pK.png";
+                case DOC:
+                case BLIGHT:
+                case PLINK:
+                case CHOP:
+                    return "https://wiki.guildwars2.com/images/4/47/Mini_Baron_von_Scrufflebutt.png";
             }
             return "https://i.imgur.com/HuJHqRZ.png";
         }

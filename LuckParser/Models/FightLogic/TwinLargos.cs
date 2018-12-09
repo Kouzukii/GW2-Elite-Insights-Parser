@@ -12,22 +12,22 @@ namespace LuckParser.Models
         {
             MechanicList.AddRange(new List<Mechanic>
             {
-            new Mechanic(51935, "Waterlogged", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Nikare, "symbol:'hexagon-open',color:'rgb(0,140,255)'", "Wtlg","Waterlogged (stacking water debuff)", "Waterlogged",0),
-            new Mechanic(52876, "Vapor Rush", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Nikare, "symbol:'triangle-left-open',color:'rgb(0,140,255)'", "Chrg","Vapor Rush (Triple Charge)", "Vapor Rush Charge",0),
-            new Mechanic(52812, "Tidal Pool", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Nikare, "symbol:'circle',color:'rgb(0,140,255)'", "Pool","Tidal Pool", "Tidal Pool",0),
-            new Mechanic(51977, "Aquatic Barrage Start", Mechanic.MechType.EnemyCastStart, ParseEnum.TargetIDS.Nikare, "symbol:'diamond-tall',color:'rgb(0,160,150)'", "CC","Breakbar", "Breakbar",0),
-            new Mechanic(51977, "Aquatic Barrage End", Mechanic.MechType.EnemyCastEnd, ParseEnum.TargetIDS.Nikare, "symbol:'diamond-tall',color:'rgb(0,160,0)'", "CCed","Breakbar broken", "CCed",0),
-            new Mechanic(53018, "Sea Swell", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Nikare, "symbol:'circle-open',color:'rgb(30,30,80)'", "Shkwv","Sea Swell (Shockwave)", "Shockwave",0),
-            new Mechanic(53130, "Geyser", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Nikare, "symbol:'hexagon',color:'rgb(0,255,255)'", "Gysr","Geyser (Launching Aoes)", "Launch Field",0),
-            new Mechanic(53097, "Water Bomb Debuff", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Nikare, "symbol:'diamond',color:'rgb(0,255,255)'", "Psn","Expanding Water Field", "Water Poison",0),
-            new Mechanic(52931, "Aquatic Detainment", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Nikare, "symbol:'circle-open',color:'rgb(0,0,255)'", "Float","Aquatic Detainment (Float Bubble)", "Float Bubble",6000),
-            new Mechanic(52130, "Aquatic Vortex", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Nikare, "symbol:'star-square-open-dot',color:'rgb(0,200,255)'", "Tndo","Aquatic Vortex (Water Tornados)", "Tornado",0),
-            new Mechanic(51965, "Vapor Jet", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Nikare, "symbol:'square',color:'rgb(255,150,0)'", "Steal","Vapor Jet (Boon Steal)", "Boon Steal",0),
-            new Mechanic(52626, "Enraged (Nikare)", Mechanic.MechType.EnemyBoon, ParseEnum.TargetIDS.Nikare, "symbol:'star-diamond',color:'rgb(255,0,0)'", "N.Enrg","Enraged (Kenut Dead)", "Nikare Enrage",0,(condition => condition.CombatItem.SrcInstid == Targets.Find(x => x.ID == (ushort)ParseEnum.TargetIDS.Nikare).InstID)),
-            new Mechanic(52626, "Enraged (Kenut)", Mechanic.MechType.EnemyBoon, ParseEnum.TargetIDS.Nikare, "symbol:'star-diamond',color:'rgb(255,0,0)'", "K.Enrg","Enraged (Nikare Dead)", "Kenut Enrage",0,(condition => condition.CombatItem.SrcInstid == Targets.Find(x => x.ID == (ushort)ParseEnum.TargetIDS.Kenut).InstID)),
-            new Mechanic(52211, "Aquatic Aura Kenut", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Nikare, "symbol:'square-open',color:'rgb(0,255,255)'", "K.Aura","Increasing Damage Debuff on Kenut's Last Platform", "Kenut Aura Debuff",0),
-            new Mechanic(52929, "Aquatic Aura Nikare", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Nikare, "symbol:'diamond-open',color:'rgb(0,255,255)'", "N.Aura","Increasing Damage Debuff on Nikare's Last Platform", "Nikare Aura Debuff",0),
-            new Mechanic(51999, "Cyclone Burst", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Nikare, "symbol:'y-up-open',color:'rgb(255,150,0)'", "Y-Fld","Cyclone Burst (triangular rotating fields)", "Cyclone Burst",0),
+            new Mechanic(51935, "Waterlogged", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("hexagon-open","rgb(0,140,255)"), "Wtlg","Waterlogged (stacking water debuff)", "Waterlogged",0),
+            new Mechanic(52876, "Vapor Rush", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("triangle-left-open","rgb(0,140,255)"), "Chrg","Vapor Rush (Triple Charge)", "Vapor Rush Charge",0),
+            new Mechanic(52812, "Tidal Pool", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(0,140,255)"), "Pool","Tidal Pool", "Tidal Pool",0),
+            new Mechanic(51977, "Aquatic Barrage Start", Mechanic.MechType.EnemyCastStart, new MechanicPlotlySetting("diamond-tall","rgb(0,160,150)"), "CC","Breakbar", "Breakbar",0),
+            new Mechanic(51977, "Aquatic Barrage End", Mechanic.MechType.EnemyCastEnd, new MechanicPlotlySetting("diamond-tall","rgb(0,160,0)"), "CCed","Breakbar broken", "CCed",0),
+            new Mechanic(53018, "Sea Swell", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(30,30,80)"), "Shkwv","Sea Swell (Shockwave)", "Shockwave",0),
+            new Mechanic(53130, "Geyser", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("hexagon","rgb(0,255,255)"), "Gysr","Geyser (Launching Aoes)", "Launch Field",0),
+            new Mechanic(53097, "Water Bomb Debuff", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("diamond","rgb(0,255,255)"), "Psn","Expanding Water Field", "Water Poison",0),
+            new Mechanic(52931, "Aquatic Detainment", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(0,0,255)"), "Float","Aquatic Detainment (Float Bubble)", "Float Bubble",6000),
+            new Mechanic(52130, "Aquatic Vortex", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("star-square-open-dot","rgb(0,200,255)"), "Tndo","Aquatic Vortex (Water Tornados)", "Tornado",0),
+            new Mechanic(51965, "Vapor Jet", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("square","rgb(255,150,0)"), "Steal","Vapor Jet (Boon Steal)", "Boon Steal",0),
+            new Mechanic(52626, "Enraged (Nikare)", Mechanic.MechType.EnemyBoon, new MechanicPlotlySetting("star-diamond","rgb(255,0,0)"), "N.Enrg","Enraged (Kenut Dead)", "Nikare Enrage",0,(condition => condition.CombatItem.SrcInstid == Targets.Find(x => x.ID == (ushort)ParseEnum.TargetIDS.Nikare).InstID)),
+            new Mechanic(52626, "Enraged (Kenut)", Mechanic.MechType.EnemyBoon, new MechanicPlotlySetting("star-diamond","rgb(255,0,0)"), "K.Enrg","Enraged (Nikare Dead)", "Kenut Enrage",0,(condition => condition.CombatItem.SrcInstid == Targets.Find(x => x.ID == (ushort)ParseEnum.TargetIDS.Kenut).InstID)),
+            new Mechanic(52211, "Aquatic Aura Kenut", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("square-open","rgb(0,255,255)"), "K.Aura","Increasing Damage Debuff on Kenut's Last Platform", "Kenut Aura Debuff",0),
+            new Mechanic(52929, "Aquatic Aura Nikare", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("diamond-open","rgb(0,255,255)"), "N.Aura","Increasing Damage Debuff on Nikare's Last Platform", "Nikare Aura Debuff",0),
+            new Mechanic(51999, "Cyclone Burst", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("y-up-open","rgb(255,150,0)"), "Y-Fld","Cyclone Burst (triangular rotating fields)", "Cyclone Burst",0),
             }); 
             Extension = "twinlargos";
             IconUrl = "https://i.imgur.com/6O5MT7v.png";
@@ -66,7 +66,7 @@ namespace LuckParser.Models
                 CombatItem state = states[i];
                 if (state.IsStateChange == ParseEnum.StateChange.EnterCombat)
                 {
-                    start = state.Time - log.FightData.FightStart;
+                    start = log.FightData.ToFightSpace(state.Time);
                     if (i == states.Count - 1)
                     {
                         targetPhases.Add(new PhaseData(start, fightDuration));
@@ -74,7 +74,7 @@ namespace LuckParser.Models
                 }
                 else
                 {
-                    end = Math.Min(state.Time - log.FightData.FightStart, fightDuration);
+                    end = Math.Min(log.FightData.ToFightSpace(state.Time), fightDuration);
                     targetPhases.Add(new PhaseData(start, end));
                     if (i == states.Count - 1 && targetPhases.Count < 3)
                     {
@@ -89,6 +89,78 @@ namespace LuckParser.Models
                 phase.Targets.Add(target);
             }
             return targetPhases;
+        }
+
+        private void FallBackPhases(Target target, List<PhaseData> phases, ParsedLog log, bool firstPhaseAt0)
+        {
+            HashSet<ushort> pIds = new HashSet<ushort>(log.PlayerList.Select(x => x.InstID));
+            // clean Nikare related bugs
+            switch (phases.Count)
+            {
+                case 2:
+                    {
+                        PhaseData p1 = phases[0];
+                        PhaseData p2 = phases[1];
+                        // P1 and P2 merged
+                        if (p1.Start == p2.Start)
+                        {
+                            CombatItem hit = log.CombatData.GetDamageTakenData(target.InstID, log.FightData.ToLogSpace(p1.End) + 2000, target.LastAware).FirstOrDefault(x => (pIds.Contains(x.SrcInstid) || pIds.Contains(x.SrcMasterInstid)) && (x.Value > 0 || x.BuffDmg > 0));
+                            if (hit != null)
+                            {
+                                p2.OverrideStart(log.FightData.ToFightSpace(hit.Time));
+                            }
+                            else
+                            {
+                                p2.OverrideStart(p1.End);
+                            }
+                        }
+                    }
+                    break;
+                case 3:
+                    {
+                        PhaseData p1 = phases[0];
+                        PhaseData p2 = phases[1];
+                        PhaseData p3 = phases[2];
+                        // P1 and P2 merged
+                        if (p1.Start == p2.Start)
+                        {
+                            CombatItem hit = log.CombatData.GetDamageTakenData(target.InstID, log.FightData.ToLogSpace(p1.End) + 2000, target.LastAware).FirstOrDefault(x => (pIds.Contains(x.SrcInstid) || pIds.Contains(x.SrcMasterInstid)) && (x.Value > 0 || x.BuffDmg > 0));
+                            if (hit != null)
+                            {
+                                p2.OverrideStart(log.FightData.ToFightSpace(hit.Time));
+                            }
+                            else
+                            {
+                                p2.OverrideStart(p1.End);
+                            }
+                        }
+                        // P1/P2 and P3 are merged
+                        if (p1.Start == p3.Start || p2.Start == p3.Start)
+                        {
+                            CombatItem hit = log.CombatData.GetDamageTakenData(target.InstID, log.FightData.ToLogSpace(p2.End) + 2000, target.LastAware).FirstOrDefault(x => (pIds.Contains(x.SrcInstid) || pIds.Contains(x.SrcMasterInstid)) && (x.Value > 0 || x.BuffDmg > 0));
+                            if (hit != null)
+                            {
+                                p3.OverrideStart(log.FightData.ToFightSpace(hit.Time));
+                            }
+                            else
+                            {
+                                p3.OverrideStart(p2.End);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if (!firstPhaseAt0 && phases.Count > 0 && phases.First().Start == 0)
+            {
+                PhaseData p1 = phases[0];
+                CombatItem hit = log.CombatData.GetDamageTakenData(target.InstID, log.FightData.ToLogSpace(0), target.LastAware).FirstOrDefault(x => (pIds.Contains(x.SrcInstid) || pIds.Contains(x.SrcMasterInstid)) && (x.Value > 0 || x.BuffDmg > 0));
+                if (hit != null)
+                {
+                    p1.OverrideStart(log.FightData.ToFightSpace(hit.Time));
+                }
+            } 
         }
 
         public override List<PhaseData> GetPhases(ParsedLog log, bool requirePhases)
@@ -110,77 +182,14 @@ namespace LuckParser.Models
                 return phases;
             }
             List<PhaseData> nikPhases = GetTargetPhases(log, nikare, new string[] { "Nikare P1", "Nikare P2", "Nikare P3" });
+            FallBackPhases(nikare, nikPhases, log, true);
+            phases.AddRange(nikPhases);
             if (kenut != null)
             {
-                phases.AddRange(GetTargetPhases(log, kenut, new string[] { "Kenut P1", "Kenut P2", "Kenut P3" }));
-                // clean Nikare related bugs
-                switch (nikPhases.Count)
-                {
-                    case 2:
-                        {
-                            PhaseData p1 = nikPhases[0];
-                            PhaseData p2 = nikPhases[1];
-                            // P1 and P2 merged
-                            if (p1.Start == p2.Start)
-                            {
-                                CombatItem auraHit = log.CombatData.GetDamageData(nikare.InstID).FirstOrDefault(x => x.SkillID == 52779 && x.Time > p1.End + log.FightData.FightStart);
-                                if (auraHit != null)
-                                {
-                                    p2.OverrideStart(auraHit.Time - log.FightData.FightStart);
-                                }
-                                else
-                                {
-                                    CombatItem combatItem = log.CombatData.GetStatesData(ParseEnum.StateChange.ExitCombat).Where(x => x.SrcInstid == kenut.InstID).FirstOrDefault();
-                                    if (combatItem != null)
-                                    {
-                                        p2.OverrideStart(combatItem.Time - log.FightData.FightStart);
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 3:
-                        {
-                            PhaseData p1 = nikPhases[0];
-                            PhaseData p2 = nikPhases[1];
-                            PhaseData p3 = nikPhases[2];
-                            // P1 and P2 merged
-                            if (p1.Start == p2.Start)
-                            {
-                                CombatItem auraHit = log.CombatData.GetDamageData(nikare.InstID).FirstOrDefault(x => x.SkillID == 52779 && x.Time > p1.End + log.FightData.FightStart);
-                                if (auraHit != null)
-                                {
-                                    p2.OverrideStart(auraHit.Time - log.FightData.FightStart);
-                                }
-                                else
-                                {
-                                    CombatItem combatItem = log.CombatData.GetStatesData(ParseEnum.StateChange.ExitCombat).Where(x => x.SrcInstid == kenut.InstID).FirstOrDefault();
-                                    if (combatItem != null)
-                                    {
-                                        p2.OverrideStart(combatItem.Time - log.FightData.FightStart);
-                                    }
-                                }
-                            }
-                            // P1/P2 and P3 are merged
-                            if (p1.Start == p3.Start || p2.Start == p3.Start)
-                            {
-                                CombatItem auraHit = log.CombatData.GetDamageData(nikare.InstID).FirstOrDefault(x => x.SkillID == 52779 && x.Time > p2.End + log.FightData.FightStart);
-                                if (auraHit != null)
-                                {
-                                    p3.OverrideStart(auraHit.Time - log.FightData.FightStart);
-                                }
-                                else
-                                {
-                                    p3.OverrideStart(p2.End);
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                List<PhaseData> kenPhases = GetTargetPhases(log, kenut, new string[] { "Kenut P1", "Kenut P2", "Kenut P3" });
+                FallBackPhases(kenut, kenPhases, log, false);
+                phases.AddRange(kenPhases);           
             }
-            phases.AddRange(nikPhases);
             phases.Sort((x, y) => x.Start < y.Start ? -1 : 1);
             return phases;
         }
@@ -271,11 +280,11 @@ namespace LuckParser.Models
                 int radius = 500;
                 if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                 {
-                    toDropStart = (int)(c.Time - log.FightData.FightStart);
+                    toDropStart = (int)(log.FightData.ToFightSpace(c.Time));
                 }
                 else
                 {
-                    int toDropEnd = (int)(c.Time - log.FightData.FightStart);
+                    int toDropEnd = (int)(log.FightData.ToFightSpace(c.Time));
                     replay.Actors.Add(new CircleActor(false, 0, debuffRadius, new Tuple<int, int>(toDropStart, toDropEnd), "rgba(255, 100, 0, 0.4)", new AgentConnector(p)));
                     replay.Actors.Add(new CircleActor(true, toDropStart + timer, debuffRadius, new Tuple<int, int>(toDropStart, toDropEnd), "rgba(255, 100, 0, 0.4)", new AgentConnector(p)));
                     Point3D poisonNextPos = replay.Positions.FirstOrDefault(x => x.Time >= toDropEnd);
@@ -295,11 +304,11 @@ namespace LuckParser.Models
                 int radius = 100;
                 if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
                 {
-                    bubbleStart = Math.Max((int)(c.Time - log.FightData.FightStart), 0);
+                    bubbleStart = Math.Max((int)(log.FightData.ToFightSpace(c.Time)), 0);
                 }
                 else
                 {
-                    int bubbleEnd = (int)(c.Time - log.FightData.FightStart);
+                    int bubbleEnd = (int)(log.FightData.ToFightSpace(c.Time));
                     replay.Actors.Add(new CircleActor(true, 0, radius, new Tuple<int, int>(bubbleStart, bubbleEnd), "rgba(0, 200, 255, 0.3)", new AgentConnector(p)));
                 }
             }

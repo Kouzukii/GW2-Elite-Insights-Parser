@@ -10,34 +10,42 @@ namespace LuckParser.Models
     {
         public JsonStats(int phaseCount)
         {
-            CritablePowerLoopCount = new int[phaseCount];
-            CriticalDmg = new int[phaseCount];
-            CriticalRate = new int[phaseCount];
-            FlankingRate = new int[phaseCount];
-            GlanceRate = new int[phaseCount];
-            Interrupts = new int[phaseCount];
-            Invulned = new int[phaseCount];
-            Missed = new int[phaseCount];
-            MovingDamage = new int[phaseCount];
-            MovingRate = new int[phaseCount];
-            PowerLoopCount = new int[phaseCount];
-            ScholarDmg = new int[phaseCount];
-            ScholarRate = new int[phaseCount]; ;
+            powerLoopCount = new int[phaseCount];
+            critablePowerLoopCount = new int[phaseCount];
+            criticalRate = new int[phaseCount];
+            criticalDmg = new int[phaseCount];
+            scholarRate = new int[phaseCount];
+            scholarDmg = new int[phaseCount];
+            eagleRate = new int[phaseCount];
+            eagleDmg = new int[phaseCount];
+            movingRate = new int[phaseCount];
+            movingDamage = new int[phaseCount];
+            flankingDmg = new int[phaseCount];
+            flankingRate = new int[phaseCount];
+            glanceRate = new int[phaseCount];
+            missed = new int[phaseCount];
+            interrupts = new int[phaseCount];
+            invulned = new int[phaseCount];
+            powerDamage = new int[phaseCount];
         }
 
         // Rates
-        public int[] PowerLoopCount;
-        public int[] CritablePowerLoopCount;
-        public int[] CriticalRate;
-        public int[] CriticalDmg;
-        public int[] ScholarRate;
-        public int[] ScholarDmg;
-        public int[] MovingRate;
-        public int[] MovingDamage;
-        public int[] FlankingRate;
-        public int[] GlanceRate;
-        public int[] Missed;
-        public int[] Interrupts;
-        public int[] Invulned;
+        public int[] powerLoopCount;
+        public int[] critablePowerLoopCount;
+        public int[] criticalRate;
+        public int[] criticalDmg;
+        public int[] scholarRate;
+        public int[] scholarDmg;
+        public int[] eagleRate;
+        public int[] eagleDmg;
+        public int[] movingRate;
+        public int[] movingDamage;
+        public int[] flankingDmg;
+        public int[] flankingRate;
+        public int[] glanceRate;
+        public int[] missed;
+        public int[] interrupts;
+        public int[] invulned;
+        public int[] powerDamage;
     }
 }

@@ -29,6 +29,16 @@ var compileCommons = function () {
     Vue.component('rotation-legend-component', {
         template: "#tmplRotationLegend"
     });
+    
+    Vue.component('target-data-component', {
+        props: ['targetid'],
+        template: "#tmplTargetData",
+        computed: {
+            target: function() {
+                return logData.targets[this.targetid];
+            }
+        }
+    });
 
     Vue.component('dmgtaken-component', {
         props: ['actor', 'tableid',
@@ -49,7 +59,9 @@ var compileCommons = function () {
             var div = document.querySelector(this.queryID);
             Plotly.react(div, this.data, this.layout);
             var _this = this;
-            div.on('plotly_animated', function () { Plotly.relayout(div, _this.layout); });
+            div.on('plotly_animated', function () {
+                Plotly.relayout(div, _this.layout);
+            });
         },
         computed: {
             queryID: function () {
@@ -61,7 +73,9 @@ var compileCommons = function () {
                 handler: function () {
                     var div = document.querySelector(this.queryID);
                     var duration = 1000;
-                    Plotly.animate(div, { data: this.data }, {
+                    Plotly.animate(div, {
+                        data: this.data
+                    }, {
                         transition: {
                             duration: duration,
                             easing: 'cubic-in-out'
@@ -76,7 +90,7 @@ var compileCommons = function () {
         }
     });
     Vue.component("buff-table-component", {
-        props: ["buffs", "playerdata", "generation", "condition", "sums", "id"],
+        props: ["buffs", "playerdata", "generation", "condition", "sums", "id", "playerindex"],
         template: "#tmplBuffTable",
         methods: {
             getAvgTooltip: function (avg) {

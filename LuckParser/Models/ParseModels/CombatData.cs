@@ -1,4 +1,5 @@
 ﻿using LuckParser.Models.DataModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -72,23 +73,42 @@ namespace LuckParser.Models.ParseModels
             return new List<CombatItem>();
         }
 
-        public int GetSkillCount(int srcInstid, long skillId, long start, long end)
+        public List<CombatItem> GetSkills(int srcInstid, long skillId, long start, long end)
         {
             if (CastDataById.TryGetValue(skillId, out List<CombatItem> data))
             {
-                return data.Count(x => x.SrcInstid == srcInstid && x.Time >= start && x.Time <= end && x.IsActivation.IsCasting());
+                return data.Where(x => x.SrcInstid == srcInstid && x.Time >= start && x.Time <= end && x.IsActivation.IsCasting()).ToList();
             }
-            return 0;
+            return new List<CombatItem>();
         }
 
-        public int GetBuffCount(int srcInstid, long skillId, long start, long end)
+        public List<CombatItem> GetBuffs(int srcInstid, long skillId, long start, long end)
         {
             if (BoonData.TryGetValue(skillId, out List<CombatItem> data))
             {
-                return data.Count(x => x.SrcInstid == srcInstid && x.Time >= start && x.Time <= end && x.IsBuffRemove == ParseEnum.BuffRemove.None);
+                return data.Where(x => x.SrcInstid == srcInstid && x.Time >= start && x.Time <= end && x.IsBuffRemove == ParseEnum.BuffRemove.None).ToList();
             }
-            return 0;
+            return new List<CombatItem>();
         }
+
+        public void Update(long end)
+        {
+            List<CombatItem> damageData = DamageData.SelectMany(x => x.Value).ToList();
+            damageData.Sort((x, y) => x.Time < y.Time ? -1 : 1);
+            damageData.Reverse();
+            foreach (CombatItem c in damageData)
+            {
+                if (c.Time <= end)
+                {
+                    break;
+                }
+                else if (c.Time <= end + 1000)
+                {
+                    c.Time = end;
+                }
+            }
+        }
+
         // getters
 
         public List<CombatItem> GetBoonData(long key)
@@ -100,30 +120,30 @@ namespace LuckParser.Models.ParseModels
             return new List<CombatItem>(); ;
         }
 
-        public List<CombatItem> GetBoonDataByDst(ushort key)
+        public List<CombatItem> GetBoonDataByDst(ushort key, long start, long end)
         {
             if (BoonDataByDst.TryGetValue(key, out List<CombatItem> res))
             {
-                return res;
+                return res.Where(x => x.Time >= start && x.Time <= end).ToList();
             }
             return new List<CombatItem>(); ;
         }
 
 
-        public List<CombatItem> GetDamageData(ushort key)
+        public List<CombatItem> GetDamageData(ushort key, long start, long end)
         {
             if (DamageData.TryGetValue(key, out List<CombatItem> res))
             {
-                return res;
+                return res.Where(x => x.Time >= start && x.Time <= end).ToList();
             }
             return new List<CombatItem>(); ;
         }
 
-        public List<CombatItem> GetCastData(ushort key)
+        public List<CombatItem> GetCastData(ushort key, long start, long end)
         {
             if (CastData.TryGetValue(key, out List<CombatItem> res))
             {
-                return res;
+                return res.Where(x => x.Time >= start && x.Time <= end).ToList();
             }
             return new List<CombatItem>(); ;
         }
@@ -138,11 +158,11 @@ namespace LuckParser.Models.ParseModels
             return new List<CombatItem>(); ;
         }
 
-        public List<CombatItem> GetDamageTakenData(ushort key)
+        public List<CombatItem> GetDamageTakenData(ushort key, long start, long end)
         {
             if (DamageTakenData.TryGetValue(key, out List<CombatItem> res))
             {
-                return res;
+                return res.Where(x => x.Time >= start && x.Time <= end).ToList();
             }
             return new List<CombatItem>();
         }
@@ -158,11 +178,11 @@ namespace LuckParser.Models.ParseModels
         }*/
 
 
-        public List<CombatItem> GetMovementData(ushort key)
+        public List<CombatItem> GetMovementData(ushort key, long start, long end)
         {
             if (MovementData.TryGetValue(key, out List<CombatItem> res))
             {
-                return res;
+                return res.Where(x => x.Time >= start && x.Time <= end).ToList();
             }
             return new List<CombatItem>();
         }
@@ -175,5 +195,51 @@ namespace LuckParser.Models.ParseModels
             }
             return new List<CombatItem>();
         }
+
+
+        public void GetAgentStatus(long start, long end, ushort instid, List<Tuple<long, long>> dead, List<Tuple<long, long>> down, List<Tuple<long, long>> dc)
+        {
+            List<CombatItem> status = GetStates(instid, ParseEnum.StateChange.ChangeDown, start, end);
+            status.AddRange(GetStates(instid, ParseEnum.StateChange.ChangeUp, start, end));
+            status.AddRange(GetStates(instid, ParseEnum.StateChange.ChangeDead, start, end));
+            status.AddRange(GetStates(instid, ParseEnum.StateChange.Spawn, start, end));
+            status.AddRange(GetStates(instid, ParseEnum.StateChange.Despawn, start, end));
+            status = status.OrderBy(x => x.Time).ToList();
+            for (var i = 0; i < status.Count - 1; i++)
+            {
+                CombatItem cur = status[i];
+                CombatItem next = status[i + 1];
+                if (cur.IsStateChange == ParseEnum.StateChange.ChangeDown)
+                {
+                    down.Add(new Tuple<long, long>(cur.Time - start, next.Time - start));
+                }
+                else if (cur.IsStateChange == ParseEnum.StateChange.ChangeDead)
+                {
+                    dead.Add(new Tuple<long, long>(cur.Time - start, next.Time - start));
+                }
+                else if (cur.IsStateChange == ParseEnum.StateChange.Despawn)
+                {
+                    dc.Add(new Tuple<long, long>(cur.Time - start, next.Time - start));
+                }
+            }
+            // check last value
+            if (status.Count > 0)
+            {
+                CombatItem cur = status.Last();
+                if (cur.IsStateChange == ParseEnum.StateChange.ChangeDown)
+                {
+                    down.Add(new Tuple<long, long>(cur.Time - start, end));
+                }
+                else if (cur.IsStateChange == ParseEnum.StateChange.ChangeDead)
+                {
+                    dead.Add(new Tuple<long, long>(cur.Time - start, end));
+                }
+                else if (cur.IsStateChange == ParseEnum.StateChange.Despawn)
+                {
+                    dc.Add(new Tuple<long, long>(cur.Time - start, end));
+                }
+            }
+        }
+
     }
 }

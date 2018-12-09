@@ -13,15 +13,15 @@ namespace LuckParser.Models
         {           
             MechanicList.AddRange(new List<Mechanic>
             {
-            new Mechanic(38880, "Corporeal Reassignment", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Artsariiv, "symbol:'diamond-tall',color:'rgb(255,0,0)'", "Skull","Exploding Skull mechanic application","Corporeal Reassignment",0),
-            new Mechanic(38977, "Vault", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Artsariiv, "symbol:'triangle-down-open',color:'rgb(255,200,0)'", "Vlt","Vault from Big Adds", "Vault (Add)",0),
-            new Mechanic(39925, "Slam", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Artsariiv, "symbol:'circle',color:'rgb(255,140,0)'", "Slam","Slam (Vault) from Boss", "Vault (Arts)",0),
-            new Mechanic(39469, "Teleport Lunge", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Artsariiv, "symbol:'star-triangle-down-open',color:'rgb(255,140,0)'", "Jmp","Triple Jump Mid->Edge", "Triple Jump",0),
-            new Mechanic(39035, "Astral Surge", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Artsariiv, "symbol:'circle-open',color:'rgb(255,200,0)'", "Flr","Different sized spiraling circles", "1000 Circles",0),
-            new Mechanic(39029, "Red Marble", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Artsariiv, "symbol:'circle',color:'rgb(255,0,0)'", "Marble","Red KD Marble after Jump", "Red Marble",0), 
-            new Mechanic(39863, "Red Marble", Mechanic.MechType.SkillOnPlayer, ParseEnum.TargetIDS.Artsariiv, "symbol:'circle',color:'rgb(255,0,0)'", "Marble","Red KD Marble after Jump", "Red Marble",0), 
-            new Mechanic(791, "Fear", Mechanic.MechType.PlayerBoon, ParseEnum.TargetIDS.Artsariiv, "symbol:'square-open',color:'rgb(255,0,0)'", "Eye","Hit by the Overhead Eye Fear", "Eye (Fear)" ,0,(condition => condition.CombatItem.Value == 3000)), //not triggered under stab, still get blinded/damaged, seperate tracking desired?
-            new Mechanic(17630, "Spark", Mechanic.MechType.Spawn, ParseEnum.TargetIDS.Artsariiv, "symbol: 'star', color: 'rgb(0,255,255)'","Sprk","Spawned a Spark (missed marble)", "Spark",0),
+            new Mechanic(38880, "Corporeal Reassignment", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("diamond-tall","rgb(255,0,0)"), "Skull","Exploding Skull mechanic application","Corporeal Reassignment",0),
+            new Mechanic(38977, "Vault", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("triangle-down-open","rgb(255,200,0)"), "Vlt","Vault from Big Adds", "Vault (Add)",0),
+            new Mechanic(39925, "Slam", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(255,140,0)"), "Slam","Slam (Vault) from Boss", "Vault (Arts)",0),
+            new Mechanic(39469, "Teleport Lunge", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("star-triangle-down-open","rgb(255,140,0)"), "Jmp","Triple Jump Mid->Edge", "Triple Jump",0),
+            new Mechanic(39035, "Astral Surge", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(255,200,0)"), "Flr","Different sized spiraling circles", "1000 Circles",0),
+            new Mechanic(39029, "Red Marble", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(255,0,0)"), "Marble","Red KD Marble after Jump", "Red Marble",0), 
+            new Mechanic(39863, "Red Marble", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(255,0,0)"), "Marble","Red KD Marble after Jump", "Red Marble",0), 
+            new Mechanic(791, "Fear", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("square-open","rgb(255,0,0)"), "Eye","Hit by the Overhead Eye Fear", "Eye (Fear)" ,0,(condition => condition.CombatItem.Value == 3000)), //not triggered under stab, still get blinded/damaged, seperate tracking desired?
+            new Mechanic(17630, "Spark", Mechanic.MechType.Spawn, new MechanicPlotlySetting("star","rgb(0,255,255)"),"Sprk","Spawned a Spark (missed marble)", "Spark",0),
             });
             Extension = "arts";
             IconUrl = "https://wiki.guildwars2.com/images/b/b4/Artsariiv.jpg";
@@ -81,7 +81,21 @@ namespace LuckParser.Models
 
         public override void SetSuccess(ParsedLog log)
         {
-            SetSuccessOnCombatExit(log, 3, 1000);
+            Target mainTarget = Targets.Find(x => x.ID == TriggerID);
+            if (mainTarget == null)
+            {
+                throw new InvalidOperationException("Main target of the fight not found");
+            }
+            HashSet<ushort> pIds = new HashSet<ushort>(log.PlayerList.Select(x => x.InstID));
+            int combatExits = log.CombatData.GetStatesData(ParseEnum.StateChange.ExitCombat).Count(x => x.SrcInstid == mainTarget.InstID);
+            CombatItem lastDamageTaken = log.CombatData.GetDamageTakenData(mainTarget.InstID, mainTarget.FirstAware, mainTarget.LastAware).LastOrDefault(x => (x.Value > 0 || x.BuffDmg > 0) && pIds.Contains(x.SrcInstid));
+            if (combatExits == 3 && lastDamageTaken != null)
+            {
+                CombatItem lastPlayerExit = log.CombatData.GetStatesData(ParseEnum.StateChange.ExitCombat).Where(x => pIds.Contains(x.SrcInstid)).LastOrDefault();
+                CombatItem lastTargetExit = log.CombatData.GetStatesData(ParseEnum.StateChange.ExitCombat).LastOrDefault(x => x.SrcInstid == mainTarget.InstID);
+                log.FightData.Success = lastPlayerExit != null && lastTargetExit != null && lastPlayerExit.Time - lastTargetExit.Time > 1000 ? true : false;
+                log.FightData.FightEnd = lastDamageTaken.Time;
+            }
         }
     }
 }
