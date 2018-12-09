@@ -37,9 +37,17 @@ namespace LuckParser
                             return 0;
                         }
                     } else if (args[i].StartsWith("--")) {
-                        string setting = args[i].Substring(2);
+                        int eq = args[i].IndexOf('=');
+                        string setting, val;
+                        if (eq > 0) {
+                            setting = args[i].Substring(2, eq - 2);
+                            val = args[i].Substring(eq + 1);
+                        } else {
+                            setting = args[i].Substring(2);
+                            val = "True";
+                        }
                         if (args.Length - i >= 1 && Properties.Settings.HasSetting(setting)) {
-                            Properties.Settings.Default.Set(setting, args[++i]);
+                            Properties.Settings.Default.Set(setting, val);
                         } else {
                             PrintHelp();
                             return 0;
