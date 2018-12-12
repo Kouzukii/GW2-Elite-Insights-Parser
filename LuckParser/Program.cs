@@ -64,7 +64,14 @@ namespace LuckParser
                 return 0;
             }
 
+#if NETCOREAPP
             PrintHelp();
+#else
+            
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new MainForm());
+#endif
             return 0;
         }
 

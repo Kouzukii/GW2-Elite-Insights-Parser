@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using Newtonsoft.Json;
 
 namespace LuckParser.Properties {
     internal sealed class Settings {
@@ -18,7 +17,30 @@ namespace LuckParser.Properties {
         }
 
         public static void LoadFrom(TextReader stream) {
-            Default = JsonSerializer.Create().Deserialize<Settings>(new JsonTextReader(stream));
+            string line;
+            Settings settings = new Settings();
+            while ((line = stream.ReadLine()) != null) {
+                if (line.StartsWith("#")) return; // commented out line
+                int equalsPos = line.IndexOf("=");
+                if (equalsPos <= 0)
+                {
+                    Console.WriteLine("Warning: invalid setting line \"" + line + "\"");
+                    return;
+                }
+                string name = line.Substring(0, equalsPos).Trim();
+                string value = line.Substring(equalsPos + 1).Trim();
+                if (value.StartsWith("\"") && value.EndsWith("\""))
+                {
+                    value = value.Trim('\"');
+                }
+                if (!HasSetting(name))
+                {
+                    Console.WriteLine("Warning: Ignoring unknown setting \"" + name + "\"");
+                    return;
+                }
+                settings.Set(name, value);
+            }
+            Default = settings;
         }
 
         public static Settings Default { get; private set; } = new Settings();
