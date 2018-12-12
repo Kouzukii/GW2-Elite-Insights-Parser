@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 
 namespace LuckParser.Controllers
 {
@@ -1232,7 +1231,7 @@ namespace LuckParser.Controllers
             html = html.Replace("${encounterEnd}", _log.LogData.LogEnd);
             html = html.Replace("${evtcVersion}", _log.LogData.BuildVersion);
             html = html.Replace("${fightID}", _log.FightData.ID.ToString());
-            html = html.Replace("${eiVersion}", Application.ProductVersion);
+            html = html.Replace("${eiVersion}", Program.Version);
             html = html.Replace("${recordedBy}", _log.LogData.PoV.Split(':')[0]);
 
             string uploadString = "";

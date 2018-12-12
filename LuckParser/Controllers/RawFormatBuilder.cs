@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Forms;
 using System.Xml;
 using LuckParser.Models;
 using LuckParser.Models.DataModels;
@@ -113,7 +112,7 @@ namespace LuckParser.Controllers
             }
             log.triggerID = _log.FightData.ID;
             log.fightName = _log.FightData.Name;
-            log.eliteInsightsVersion = Application.ProductVersion;
+            log.eliteInsightsVersion = Program.Version;
             log.arcVersion = _log.LogData.BuildVersion;
             log.recordedBy = _log.LogData.PoV.Split(':')[0].TrimEnd('\u0000');
             log.timeStart = _log.LogData.LogStart;
