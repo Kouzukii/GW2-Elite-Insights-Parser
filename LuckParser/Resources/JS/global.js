@@ -133,7 +133,7 @@ function computeRotationData(rotationData, images, data) {
                 width: '5',
                 line: {
                     color: [],
-                    width: '1'
+                    width: '2'
                 }
             },
             showlegend: false
@@ -280,7 +280,7 @@ function computePhaseMarkups(shapes, annotations, phase, linecolor) {
 }
 
 
-function computePlayerDPS(player, dpsData,lim, phasebreaks, activetargets, cacheID) {
+function computePlayerDPS(player, damageData, lim, phasebreaks, activetargets, cacheID, lastTime) {
     if (!player.dpsGraphCache) {
         player.dpsGraphCache = new Map();
     }
@@ -292,35 +292,64 @@ function computePlayerDPS(player, dpsData,lim, phasebreaks, activetargets, cache
     var totalDPS = [0];
     var cleaveDPS = [0];
     var targetDPS = [0];
+    var totalTotalDamage = [0];
+    var totalCleaveDamage = [0];
+    var totalTargetDamage = [0];
     var maxDPS = {
         total: 0,
         cleave: 0,
         target: 0
     };
-    var start = 0;
-    for (var j = 1; j < dpsData.total.length; j++) {
-        var limID = 0;
+    var end = damageData.total.length;
+    if (lastTime > 0) {
+        end--;
+    }
+    var j, limID = 0, targetid, k;
+    for (j = 1; j < end; j++) {
         if (lim > 0) {
             limID = Math.max(j - lim, 0);
             start = limID;
+        } else if (phasebreaks && phasebreaks[j-1]) {
+            limID = j;
         }
-        totalDamage += dpsData.total[j] - dpsData.total[limID];
-        for (var k = 0; k < activetargets.length; k++) {
-            var targetid = activetargets[k];
-            targetDamage += dpsData.targets[targetid][j] - dpsData.targets[targetid][limID];
+        var div = Math.max(j - limID, 1);
+        totalDamage = damageData.total[j] - damageData.total[limID];
+        for (k = 0; k < activetargets.length; k++) {
+            targetid = activetargets[k];
+            targetDamage = damageData.targets[targetid][j] - damageData.targets[targetid][limID];
         }
-        if (phasebreaks && phasebreaks[j - 1]) {
-            start = j - 1;
-            totalDamage = 0;
-            targetDamage = 0;
-        }
-        totalDPS[j] = Math.round(totalDamage / (j - start));
-        targetDPS[j] = Math.round(targetDamage / (j - start));
-        cleaveDPS[j] = Math.round((totalDamage - targetDamage) / (j - start));
+        totalDPS[j] = Math.round(totalDamage / div);
+        targetDPS[j] = Math.round(targetDamage / div);
+        cleaveDPS[j] = Math.round((totalDamage - targetDamage) / div);
+        totalTotalDamage[j] = totalDamage;
+        totalTargetDamage[j] = targetDamage;
+        totalCleaveDamage[j] = (totalDamage - targetDamage);
         maxDPS.total = Math.max(maxDPS.total, totalDPS[j]);
         maxDPS.target = Math.max(maxDPS.target, targetDPS[j]);
         maxDPS.cleave = Math.max(maxDPS.cleave, cleaveDPS[j]);
-    }   
+    }
+    // last point management
+    if (lastTime > 0) {
+        if (lim > 0) {
+            limID = Math.round(Math.max(lastTime - lim, 0));
+        } else if (phasebreaks && phasebreaks[j-1]) {
+            limID = j;
+        }
+        totalDamage = damageData.total[j] - damageData.total[limID];
+        for (k = 0; k < activetargets.length; k++) {
+            targetid = activetargets[k];
+            targetDamage = damageData.targets[targetid][j] - damageData.targets[targetid][limID];
+        }
+        totalDPS[j] = Math.round(totalDamage / (lastTime - limID));
+        targetDPS[j] = Math.round(targetDamage / (lastTime - limID));
+        cleaveDPS[j] = Math.round((totalDamage - targetDamage) / (lastTime - limID));
+        totalTotalDamage[j] = totalDamage;
+        totalTargetDamage[j] = targetDamage;
+        totalCleaveDamage[j] = (totalDamage - targetDamage);
+        maxDPS.total = Math.max(maxDPS.total, totalDPS[j]);
+        maxDPS.target = Math.max(maxDPS.target, targetDPS[j]);
+        maxDPS.cleave = Math.max(maxDPS.cleave, cleaveDPS[j]);
+    }
     if (maxDPS.total < 1e-6) {
         maxDPS.total = 10;
     }
@@ -335,6 +364,11 @@ function computePlayerDPS(player, dpsData,lim, phasebreaks, activetargets, cache
             total: totalDPS,
             target: targetDPS,
             cleave: cleaveDPS
+        },
+        total: {
+            total: totalTotalDamage,
+            target: totalTargetDamage,
+            cleave: totalCleaveDamage
         },
         maxDPS: maxDPS
     };
@@ -393,7 +427,7 @@ function getActorGraphLayout(images, color) {
     };
 }
 
-function computeTargetHealthData(graph, targets, phase, data, yaxis) {
+function computeTargetHealthData(graph, targets, phase, data, yaxis, times) {
     for (i = 0; i < graph.targets.length; i++) {
         var health = graph.targets[i].health;
         var hpTexts = [];
@@ -402,6 +436,7 @@ function computeTargetHealthData(graph, targets, phase, data, yaxis) {
             hpTexts[j] = health[j] + "% hp - " + target.name ;
         }
         var res = {
+            x: times,
             text: hpTexts,
             mode: 'lines',
             line: {

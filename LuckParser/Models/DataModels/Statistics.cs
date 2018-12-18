@@ -112,9 +112,9 @@ namespace LuckParser.Models.DataModels
         {
             //public long allHeal;
             public int Resurrects;
-            public float ResurrectTime;
+            public double ResurrectTime;
             public int CondiCleanse;
-            public float CondiCleanseTime;
+            public double CondiCleanseTime;
         }
 
         public readonly Dictionary<Player, FinalSupport[]> Support;
@@ -124,6 +124,8 @@ namespace LuckParser.Models.DataModels
             public double Uptime;
             public double Generation;
             public double Overstack;
+            public double Wasted;
+            public double UnknownExtension;
             public double Presence;
         }
 
@@ -140,10 +142,14 @@ namespace LuckParser.Models.DataModels
                 Presence = 0;
                 Generated = new Dictionary<Player, double>();
                 Overstacked = new Dictionary<Player, double>();
+                Wasted = new Dictionary<Player, double>();
+                UnknownExtension = new Dictionary<Player, double>();
                 foreach (Player p in plist)
                 {
                     Generated.Add(p, 0);
                     Overstacked.Add(p, 0);
+                    Wasted.Add(p, 0);
+                    UnknownExtension.Add(p, 0);
                 }
             }
 
@@ -151,11 +157,13 @@ namespace LuckParser.Models.DataModels
             public double Presence;
             public readonly Dictionary<Player, double> Generated;
             public readonly Dictionary<Player, double> Overstacked;
+            public readonly Dictionary<Player, double> Wasted;
+            public readonly Dictionary<Player, double> UnknownExtension;
         }
 
         public readonly Dictionary<Target,Dictionary<long, FinalTargetBuffs>[]> TargetBuffs;
 
-        public Dictionary<Target, double[]> TargetHealth { get; set; }
+        public Dictionary<Target, double[]>[] TargetsHealth { get; set; }
 
         // present buff
         public readonly List<Boon> PresentBoons = new List<Boon>();//Used only for Boon tables

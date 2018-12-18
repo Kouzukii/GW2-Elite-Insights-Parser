@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static LuckParser.Models.JsonBuffs;
 
-namespace LuckParser.Models
+namespace LuckParser.Models.JsonModels
 {
     public class JsonTargetBuffs
     {
@@ -15,6 +14,8 @@ namespace LuckParser.Models
             presence = new double[phaseCount];
             generated = new Dictionary<string, double>[phaseCount];
             overstacked = new Dictionary<string, double>[phaseCount];
+            unknownExtension = new Dictionary<string, double>[phaseCount];
+            wasted = new Dictionary<string, double>[phaseCount];
             states = new List<int[]>();
         }
 
@@ -22,6 +23,8 @@ namespace LuckParser.Models
         public double[] presence;
         public Dictionary<string, double>[] generated;
         public Dictionary<string, double>[] overstacked;
+        public Dictionary<string, double>[] wasted;
+        public Dictionary<string, double>[] unknownExtension;
         public List<int[]> states;
     }
 

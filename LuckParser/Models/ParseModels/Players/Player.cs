@@ -233,19 +233,23 @@ namespace LuckParser.Models.ParseModels
             {
                 swapped = 4;
             }
-            // if the player swapped once, check on which set they started
-            else if (swaps.Count == 1)
+            // if the player swapped, check on which set they started
+            else
             {
                 swapped = swaps.First().ExpectedDuration == 4 ? 5 : 4;
             }
             foreach (CastLog cl in casting)
             {
+                if (cl.ActualDuration == 0 && cl.SkillId != SkillItem.WeaponSwapId)
+                {
+                    continue;
+                }
                 GW2APISkill apiskill = skillList.Get(cl.SkillId)?.ApiSkill;
                 if (apiskill != null && cl.Time > swappedTime)
                 {
-                    if (apiskill.type == "Weapon" && apiskill.professions.Count() > 0 && (apiskill.categories == null || (apiskill.categories.Count() == 1 && apiskill.categories[0] == "Phantasm")))
+                    if (apiskill.type == "Weapon" && apiskill.professions.Count() > 0 && (apiskill.categories == null || (apiskill.categories.Count() == 1 && (apiskill.categories[0] == "Phantasm" || apiskill.categories[0] == "DualWield"))))
                     {
-                        if (apiskill.dual_wield != null && apiskill.dual_wield != "None")
+                        if (apiskill.dual_wield != null && apiskill.dual_wield != "None" && apiskill.dual_wield != "Nothing")
                         {
                             if (swapped == 4)
                             {
@@ -380,7 +384,7 @@ namespace LuckParser.Models.ParseModels
             public string Img { get; set; }
             public string Type { get; set; }
             public int ID { get; set; }
-            public int[] Positions { get; set; }
+            public double[] Positions { get; set; }
             public long[] Dead { get; set; }
             public long[] Down { get; set; }
         }
@@ -393,14 +397,14 @@ namespace LuckParser.Models.ParseModels
                 Img = CombatReplay.Icon,
                 Type = "Player",
                 ID = InstID,
-                Positions = new int[2 * CombatReplay.Positions.Count],
+                Positions = new double[2 * CombatReplay.Positions.Count],
                 Dead = new long[2 * CombatReplay.Deads.Count],
                 Down = new long[2 * CombatReplay.Downs.Count]
             };
             int i = 0;
             foreach (Point3D pos in CombatReplay.Positions)
             {
-                Tuple<int, int> coord = map.GetMapCoord(pos.X, pos.Y);
+                Tuple<double, double> coord = map.GetMapCoord(pos.X, pos.Y);
                 aux.Positions[i++] = coord.Item1;
                 aux.Positions[i++] = coord.Item2;
             }

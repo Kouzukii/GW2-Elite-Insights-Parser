@@ -7,6 +7,8 @@ using LuckParser.Controllers;
 using LuckParser.Models.DataModels;
 using System.Text;
 using System.Threading.Tasks;
+using LuckParser.Exceptions;
+using LuckParser.Builders;
 
 namespace LuckParser
 {
@@ -80,8 +82,8 @@ namespace LuckParser
                 }
                 else
                 {
-                    row.Run();
                     _anyRunning = true;
+                    row.Run();
                 }
             }
             else
@@ -99,6 +101,9 @@ namespace LuckParser
             {
                 GridRow row = _logQueue.Dequeue();
                 row.Run();
+            } else
+            {
+                _anyRunning = false;
             }
         }
         
@@ -368,8 +373,6 @@ namespace LuckParser
         /// <param name="e"></param>
         private void BgWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            _anyRunning = false;
-
             GridRow row;
             if (e.Cancelled || e.Error != null)
             {
@@ -408,11 +411,7 @@ namespace LuckParser
             
             btnParse.Enabled = true;
             dgvFiles.Invalidate();
-
-            if (_logQueue.Count > 0)
-            {
-                RunNextWorker();
-            }
+            RunNextWorker();
         }
         
         /// <summary>

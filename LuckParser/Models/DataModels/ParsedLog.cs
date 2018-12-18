@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using LuckParser.Models.Logic;
 using LuckParser.Models.ParseModels;
 
 namespace LuckParser.Models.DataModels
@@ -13,6 +14,7 @@ namespace LuckParser.Models.DataModels
         public readonly CombatData CombatData;
         public readonly MechanicData MechanicData;
         public readonly List<Player> PlayerList;
+        public readonly HashSet<ushort> PlayerIDs;
         public readonly Dictionary<string, List<Player>> PlayerListBySpec;
         public readonly Target LegacyTarget;
 
@@ -30,6 +32,7 @@ namespace LuckParser.Models.DataModels
             LegacyTarget = target;
             MechanicData = new MechanicData(fightData);
             PlayerListBySpec = playerList.GroupBy(x => x.Prof).ToDictionary(x => x.Key, x => x.ToList());
+            PlayerIDs = new HashSet<ushort>(playerList.Select(x => x.InstID));
 
             FightData.SetSuccess(this);
             FightData.SetCM(this);

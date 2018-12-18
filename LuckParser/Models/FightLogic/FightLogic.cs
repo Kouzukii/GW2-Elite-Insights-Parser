@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-namespace LuckParser.Models
+namespace LuckParser.Models.Logic
 {
     public class FightLogic
     {
@@ -251,7 +251,7 @@ namespace LuckParser.Models
             MechanicData mechData = log.MechanicData;
             CombatData combatData = log.CombatData;
             Mechanic.CheckSpecialCondition condition;
-            HashSet<ushort> playersIds = new HashSet<ushort>(log.PlayerList.Select(x => x.InstID));
+            HashSet<ushort> playersIds = log.PlayerIDs;
             Dictionary<ushort, AbstractMasterPlayer> regroupedMobs = new Dictionary<ushort, AbstractMasterPlayer>();
             foreach (Mechanic mech in MechanicList)
             {

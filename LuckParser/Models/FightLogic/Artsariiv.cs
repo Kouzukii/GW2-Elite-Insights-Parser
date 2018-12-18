@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static LuckParser.Models.DataModels.ParseEnum.TrashIDS;
 
-namespace LuckParser.Models
+namespace LuckParser.Models.Logic
 {
     public class Artsariiv : FractalLogic
     {
@@ -86,7 +86,7 @@ namespace LuckParser.Models
             {
                 throw new InvalidOperationException("Main target of the fight not found");
             }
-            HashSet<ushort> pIds = new HashSet<ushort>(log.PlayerList.Select(x => x.InstID));
+            HashSet<ushort> pIds = log.PlayerIDs;
             int combatExits = log.CombatData.GetStatesData(ParseEnum.StateChange.ExitCombat).Count(x => x.SrcInstid == mainTarget.InstID);
             CombatItem lastDamageTaken = log.CombatData.GetDamageTakenData(mainTarget.InstID, mainTarget.FirstAware, mainTarget.LastAware).LastOrDefault(x => (x.Value > 0 || x.BuffDmg > 0) && pIds.Contains(x.SrcInstid));
             if (combatExits == 3 && lastDamageTaken != null)

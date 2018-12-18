@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LuckParser.Models
+namespace LuckParser.Models.JsonModels
 {
     public class JsonTarget
     {
@@ -20,7 +20,7 @@ namespace LuckParser.Models
         public double[] avgConditions;
         public List<int[]> avgConditionsStates;
         public List<int[]> avgBoonsStates;
-        public List<int> dps1s;
+        public List<int>[] damage1S;
         public uint hitboxHeight;
         public uint hitboxWidth;
         public Dictionary<string, List<JsonSkill>> rotation;
