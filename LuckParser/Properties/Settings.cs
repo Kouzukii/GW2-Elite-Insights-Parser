@@ -1,10 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Reflection;
 
 namespace LuckParser.Properties {
     internal sealed class Settings {
+        static Settings() {
+            Default = new Settings();
+#if !NETCOREAPP
+            Configuration config =
+                ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
+            if (config.HasFile) {
+                foreach (KeyValueConfigurationElement kv in config.AppSettings.Settings) {
+                    Default.Set(kv.Key, kv.Value);
+                }
+            }
+#endif
+        }
 
         public static IEnumerable<string> EnumSettings() {
             foreach (var info in typeof(Settings).GetProperties(BindingFlags.Instance | BindingFlags.Public)) {
@@ -43,7 +56,20 @@ namespace LuckParser.Properties {
             Default = settings;
         }
 
-        public static Settings Default { get; private set; } = new Settings();
+        public static Settings Default { get; private set; }
+
+        public void Save() {
+#if !NETCOREAPP
+            Configuration config =
+                ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
+            AppSettingsSection settings = config.AppSettings;
+            PropertyInfo property = settings.GetType().GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic, null, typeof(ConfigurationProperty), new []{typeof(string)}, new ParameterModifier[0]);
+            foreach (string setting in EnumSettings()) {
+                property.SetValue(settings, Get(setting), new object[]{setting});
+            }
+            config.Save();
+#endif
+        }
 
         public void Set(string setting, string value) {
             PropertyInfo info = typeof(Settings).GetProperty(setting, BindingFlags.Instance | BindingFlags.Public);

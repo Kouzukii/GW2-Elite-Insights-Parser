@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Mime;
-using System.Runtime.InteropServices;
 using System.Threading;
+#if !NETCOREAPP
+using System.Windows.Forms;
+#endif
 
 namespace LuckParser
 {
     static class Program {
-        public static string Version = "1.8";
+        public const string Version = "2.1";
 
         /// <summary>
         /// The main entry point for the application.

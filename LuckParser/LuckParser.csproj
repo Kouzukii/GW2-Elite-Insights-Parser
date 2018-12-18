@@ -65,6 +65,7 @@
       <HintPath>..\packages\NUglify.1.5.12\lib\net40\NUglify.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -98,7 +99,6 @@
     <Compile Include="Controllers\ParseHelper.cs" />
     <Compile Include="Controllers\StatisticsCalculator.cs" />
     <Compile Include="Controllers\UploadController.cs" />
-    <Compile Include="CustomSettingsManager.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GridRow.cs" />
     <Compile Include="MainForm.cs">
@@ -243,12 +243,8 @@
     <Compile Include="Models\ParseModels\SkillItem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Settings.cs" />
+    <Compile Include="Properties\Resources.cs" />
+    <Compile Include="Properties\Settings.cs" />
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -258,26 +254,12 @@
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="App.manifest" />
     <None Include="packages.config" />
     <None Include="Properties\DataSources\GridRow.datasource" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -297,58 +279,58 @@
     <None Include="sample.conf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\theme-cosmo.png" />
-    <None Include="Resources\theme-slate.png" />
-    <None Include="Resources\combatreplay.js" />
-    <None Include="Resources\combatReplayTemplates\tmplCombatReplay.html" />
-    <Content Include="Resources\ei.css" />
-    <Content Include="Resources\ei.js" />
-    <None Include="Resources\htmlTemplates\tmplGeneralLayout.html" />
-    <None Include="Resources\htmlTemplates\tmplBuffTable.html" />
-    <None Include="Resources\htmlTemplates\tmplDamageDistTable.html" />
-    <None Include="Resources\htmlTemplates\tmplEncounter.html" />
-    <None Include="Resources\htmlTemplates\tmplPhase.html" />
-    <None Include="Resources\htmlTemplates\tmplGameplayTable.html" />
-    <None Include="Resources\htmlTemplates\tmplMechanicsTable.html" />
-    <None Include="Resources\htmlTemplates\tmplDefenseTable.html" />
-    <None Include="Resources\htmlTemplates\tmplSupportTable.html" />
-    <None Include="Resources\htmlTemplates\tmplBuffStats.html" />
-    <None Include="Resources\htmlTemplates\tmplPersonalBuffTable.html" />
-    <None Include="Resources\htmlTemplates\tmplBuffStatsTarget.html" />
-    <None Include="Resources\htmlTemplates\tmplDamageDistTarget.html" />
-    <None Include="Resources\htmlTemplates\tmplTargetTab.html" />
-    <None Include="Resources\htmlTemplates\tmplTargetStats.html" />
-    <None Include="Resources\htmlTemplates\tmplDeathRecap.html" />
-    <None Include="Resources\htmlTemplates\tmplSimpleRotation.html" />
-    <None Include="Resources\htmlTemplates\tmplFood.html" />
-    <None Include="Resources\htmlTemplates\tmplDamageDistPlayer.html" />
-    <None Include="Resources\htmlTemplates\tmplPlayerTab.html" />
-    <None Include="Resources\htmlTemplates\tmplPlayerStats.html" />
-    <None Include="Resources\htmlTemplates\tmplGraphStats.html" />
-    <None Include="Resources\htmlTemplates\tmplDPSGraph.html" />
-    <Content Include="Resources\combatReplayTemplates\tmplCombatReplayGroup.html" />
-    <None Include="Resources\htmlTemplates\tmplTargets.html" />
-    <None Include="Resources\htmlTemplates\tmplDamageTable.html" />
-    <Content Include="Resources\combatReplayTemplates\tmplCombatReplayPlayer.html" />
-    <None Include="Resources\htmlTemplates\tmplPlayers.html" />
-    <None Include="Resources\htmlTemplates\tmplDamageModifierTable.html" />
-    <None Include="Resources\htmlTemplates\tmplPlayerTabGraph.html" />
-    <None Include="Resources\htmlTemplates\tmplRotationLegend.html" />
-    <None Include="Resources\htmlTemplates\tmplTargetTabGraph.html" />
-    <Content Include="Resources\htmlTemplates\tmplDamageTaken.html" />
-    <Content Include="Resources\htmlTemplates\tmplTargetData.html" />
-    <Content Include="Resources\JS\generalStats.js" />
-    <Content Include="Resources\JS\buffStats.js" />
-    <Content Include="Resources\JS\graphs.js" />
-    <Content Include="Resources\JS\targetStats.js" />
-    <Content Include="Resources\JS\mechanics.js" />
-    <Content Include="Resources\JS\playerStats.js" />
-    <Content Include="Resources\JS\header.js" />
-    <Content Include="Resources\JS\layout.js" />
-    <Content Include="Resources\JS\commons.js" />
-    <Content Include="Resources\JS\global.js" />
+    <EmbeddedResource Include="Resources\theme-cosmo.png" />
+    <EmbeddedResource Include="Resources\theme-slate.png" />
+    <EmbeddedResource Include="Resources\combatreplay.js" />
+    <EmbeddedResource Include="Resources\combatReplayTemplates\tmplCombatReplay.html" />
+    <EmbeddedResource Include="Resources\ei.css" />
+    <EmbeddedResource Include="Resources\ei.js" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplGeneralLayout.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplBuffTable.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageDistTable.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplEncounter.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplPhase.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplGameplayTable.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplMechanicsTable.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplDefenseTable.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplSupportTable.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplBuffStats.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplPersonalBuffTable.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplBuffStatsTarget.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageDistTarget.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplTargetTab.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplTargetStats.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplDeathRecap.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplSimpleRotation.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplFood.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageDistPlayer.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplPlayerTab.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplPlayerStats.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplGraphStats.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplDPSGraph.html" />
+    <EmbeddedResource Include="Resources\combatReplayTemplates\tmplCombatReplayGroup.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplTargets.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageTable.html" />
+    <EmbeddedResource Include="Resources\combatReplayTemplates\tmplCombatReplayPlayer.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplPlayers.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageModifierTable.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplPlayerTabGraph.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplRotationLegend.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplTargetTabGraph.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageTaken.html" />
+    <EmbeddedResource Include="Resources\htmlTemplates\tmplTargetData.html" />
+    <EmbeddedResource Include="Resources\JS\generalStats.js" />
+    <EmbeddedResource Include="Resources\JS\buffStats.js" />
+    <EmbeddedResource Include="Resources\JS\graphs.js" />
+    <EmbeddedResource Include="Resources\JS\targetStats.js" />
+    <EmbeddedResource Include="Resources\JS\mechanics.js" />
+    <EmbeddedResource Include="Resources\JS\playerStats.js" />
+    <EmbeddedResource Include="Resources\JS\header.js" />
+    <EmbeddedResource Include="Resources\JS\layout.js" />
+    <EmbeddedResource Include="Resources\JS\commons.js" />
+    <EmbeddedResource Include="Resources\JS\global.js" />
     <Content Include="Resources\TODO.txt" />
-    <None Include="Resources\template.html" />
+    <EmbeddedResource Include="Resources\template.html" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">

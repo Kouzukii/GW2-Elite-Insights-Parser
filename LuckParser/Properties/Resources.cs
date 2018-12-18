@@ -1,4 +1,7 @@
 ﻿using System;
+#if !NETCOREAPP
+using System.Drawing;
+#endif
 using System.IO;
 
 namespace LuckParser.Properties {
@@ -307,5 +310,27 @@ namespace LuckParser.Properties {
                 return GetString("LuckParser.Resources.htmlTemplates.tmplTargetTabGraph.html");
             }
         }
+
+#if !NETCOREAPP
+        internal static Image theme_cosmo {
+            get {
+                Stream resourceStream = typeof(Resources).Assembly.GetManifestResourceStream("LuckParser.Resources.theme-cosmo.png");
+                if (resourceStream == null) {
+                    throw new Exception("Resource not found.");
+                }
+                return Image.FromStream(resourceStream);
+            }
+        }
+
+        internal static Image theme_slate {
+            get {
+                Stream resourceStream = typeof(Resources).Assembly.GetManifestResourceStream("LuckParser.Resources.theme-slate.png");
+                if (resourceStream == null) {
+                    throw new Exception("Resource not found.");
+                }
+                return Image.FromStream(resourceStream);
+            }
+        }
+#endif
     }
 }
