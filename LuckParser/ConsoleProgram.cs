@@ -74,10 +74,10 @@ namespace LuckParser
                 {
                     //Process evtc here
                     ParsedLog log = control.ParseLog(row, fInfo.FullName);
-                    Console.Write("Log Parsed\n");
+                    Console.Error.WriteLine("Log Parsed");
                     if (Properties.Settings.Default.UploadToDPSReports)
                     {
-                        Console.Write("Uploading to DPSReports using EI\n");
+                        Console.Error.WriteLine("Uploading to DPSReports using EI");
                         if (up_controller == null)
                         {
                             up_controller = new UploadController();
@@ -98,7 +98,7 @@ namespace LuckParser
                     }
                     if (Properties.Settings.Default.UploadToDPSReportsRH)
                     {
-                        Console.Write("Uploading to DPSReports using RH\n");
+                        Console.Error.WriteLine("Uploading to DPSReports using RH");
                         if (up_controller == null)
                         {
                             up_controller = new UploadController();
@@ -119,7 +119,7 @@ namespace LuckParser
                     }
                     if (Properties.Settings.Default.UploadToRaidar)
                     {
-                        Console.Write("Uploading to Raidar\n");
+                        Console.Error.WriteLine("Uploading to Raidar");
                         if (up_controller == null)
                         {
                             up_controller = new UploadController();
@@ -161,7 +161,7 @@ namespace LuckParser
                     string encounterLengthTerm = Properties.Settings.Default.AddDuration ? "_" + (log.FightData.FightDuration / 1000).ToString() + "s" : "";
                     string PoVClassTerm = Properties.Settings.Default.AddPoVProf ? "_" + log.PlayerList.Find(x => x.AgentItem.Name.Split(':')[0] == log.LogData.PoV.Split(':')[0]).Prof.ToLower() : "";
 
-                    Console.Write("Statistics Computed\n");
+                    Console.Error.WriteLine("Statistics Computed");
 
                     string fName = fInfo.Name.Split('.')[0];
                     fName = $"{fName}{PoVClassTerm}_{log.FightData.Logic.Extension}{encounterLengthTerm}_{result}";
@@ -228,27 +228,28 @@ namespace LuckParser
                         }
                     }
 
-                    Console.Write("Generation Done\n");
+                    Console.Error.WriteLine("Generation Done");
+                    Console.WriteLine(fName);
                 }
                 else
                 {
-                    Console.Error.Write("Not EVTC");
+                    Console.Error.WriteLine("Not EVTC");
                     throw new CancellationException(row, new InvalidDataException("Not EVTC"));
                 }
             }
             catch (SkipException s)
             {
-                Console.Error.Write(s.Message);
+                Console.Error.WriteLine(s.Message);
                 throw new CancellationException(row, s);
             }
             catch (TooShortException t)
             {
-                Console.Error.Write(t.Message);
+                Console.Error.WriteLine(t.Message);
                 throw new CancellationException(row, t);
             }
             catch (Exception ex) when (!System.Diagnostics.Debugger.IsAttached)
             {
-                Console.Error.Write(ex.Message);
+                Console.Error.WriteLine(ex.Message);
                 throw new CancellationException(row, ex);
             } 
             finally

@@ -59,7 +59,7 @@ namespace LuckParser.Controllers
             //catch (Exception ex)
             //{
             //    return ex.Message;
-            //    // Console.WriteLine(ex.Message);
+            //    // Console.Error.WriteLine(ex.Message);
             //}
             return "";
         }
@@ -105,7 +105,7 @@ namespace LuckParser.Controllers
             catch (Exception ex)
             {
                 return ex.Message;
-                // Console.WriteLine(ex.Message);
+                // Console.Error.WriteLine(ex.Message);
             }
             return "";
         }

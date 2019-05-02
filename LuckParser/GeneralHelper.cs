@@ -39,7 +39,7 @@ namespace LuckParser
             bg.ReportProgress(percent, row);
             if (row.Metadata.FromConsole)
             {
-                Console.WriteLine($"{row.Location}: {status}");
+                Console.Error.WriteLine($"{row.Location}: {status}");
             }
         }
 

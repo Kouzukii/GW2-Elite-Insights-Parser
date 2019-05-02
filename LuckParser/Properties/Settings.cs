@@ -37,7 +37,7 @@ namespace LuckParser.Properties {
                 int equalsPos = line.IndexOf("=");
                 if (equalsPos <= 0)
                 {
-                    Console.WriteLine("Warning: invalid setting line \"" + line + "\"");
+                    Console.Error.WriteLine("Warning: invalid setting line \"" + line + "\"");
                     return;
                 }
                 string name = line.Substring(0, equalsPos).Trim();
@@ -48,7 +48,7 @@ namespace LuckParser.Properties {
                 }
                 if (!HasSetting(name))
                 {
-                    Console.WriteLine("Warning: Ignoring unknown setting \"" + name + "\"");
+                    Console.Error.WriteLine("Warning: Ignoring unknown setting \"" + name + "\"");
                     return;
                 }
                 settings.Set(name, value);

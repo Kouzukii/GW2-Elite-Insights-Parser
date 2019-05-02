@@ -99,7 +99,7 @@ namespace LuckParser.Controllers
             fcreate.Close();
 
 
-            Console.WriteLine("Getting APi");
+            Console.Error.WriteLine("Getting APi");
             //Get list from API
             GetAPIClient();
 
@@ -142,7 +142,7 @@ namespace LuckParser.Controllers
                 {
                     if (new FileInfo(path).Length != 0)
                     {
-                        Console.WriteLine("Reading Skilllist");
+                        Console.Error.WriteLine("Reading Skilllist");
                         using (StreamReader reader = new StreamReader(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location)
                         + "/Content/SkillList.json"))
                         {
@@ -215,7 +215,7 @@ namespace LuckParser.Controllers
             fcreate.Close();
 
 
-            Console.WriteLine("Getting APi");
+            Console.Error.WriteLine("Getting APi");
             //Get list from API
             GetAPIClient();
 
@@ -240,7 +240,7 @@ namespace LuckParser.Controllers
                     }
                     else
                     {
-                        Console.WriteLine("Fail to get response");//fail to retrieve
+                        Console.Error.WriteLine("Fail to get response");//fail to retrieve
                         failedList.Add(id);
                     }
 
@@ -275,7 +275,7 @@ namespace LuckParser.Controllers
                 {
                     if (new FileInfo(path).Length != 0)
                     {
-                        Console.WriteLine("Reading SpecList");
+                        Console.Error.WriteLine("Reading SpecList");
                         using (StreamReader reader = new StreamReader(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location)
                         + "/Content/SpecList.json"))
                         {
