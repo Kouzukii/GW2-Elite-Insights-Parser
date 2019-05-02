@@ -1,4 +1,4 @@
-﻿using LuckParser.Models.DataModels;
+﻿using LuckParser.Parser;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,7 +10,7 @@ namespace LuckParser.Models.ParseModels
         private readonly List<HashSet<Mechanic>> _presentOnPlayerMechanics = new List<HashSet<Mechanic>>();
         private readonly List<HashSet<Mechanic>> _presentOnEnemyMechanics = new List<HashSet<Mechanic>>();
         private readonly List<HashSet<Mechanic>> _presentMechanics = new List<HashSet<Mechanic>>();
-        private readonly List<List<AbstractMasterPlayer>> _enemyList = new List<List<AbstractMasterPlayer>>();
+        private readonly List<List<DummyActor>> _enemyList = new List<List<DummyActor>>();
 
         public MechanicData(FightData fightData)
         {
@@ -21,9 +21,9 @@ namespace LuckParser.Models.ParseModels
             }
         }
 
-        public void ComputePresentMechanics(ParsedLog log)
+        public void ProcessMechanics(ParsedLog log)
         {
-            if (_presentOnPlayerMechanics.Count > 0)
+            if (_presentMechanics.Count > 0)
             {
                 return;
             }
@@ -62,18 +62,18 @@ namespace LuckParser.Models.ParseModels
                         if (pair.Key.IsEnemyMechanic)
                         {
                             toAddEnemy.Add(pair.Key);
-                        } else if (pair.Key.MechanicType != Mechanic.MechType.PlayerStatus)
+                        } else if (pair.Key.ShowOnTable)
                         {
                             toAddPlayer.Add(pair.Key);
                         }
                     }
                 }
                 // ready enemy list
-                List<AbstractMasterPlayer> toAdd = new List<AbstractMasterPlayer>();
+                List<DummyActor> toAdd = new List<DummyActor>();
                 _enemyList.Add(toAdd);
                 foreach(Mechanic m in Keys.Where(x=> x.IsEnemyMechanic))
                 {
-                    foreach (AbstractMasterPlayer p in this[m].Where(x => phase.InInterval(x.Time)).Select(x => x.Player).Distinct())
+                    foreach (DummyActor p in this[m].Where(x => phase.InInterval(x.Time)).Select(x => x.Actor).Distinct())
                     {
                         if (toAdd.FirstOrDefault(x => x.InstID == p.InstID) == null)
                         {
@@ -102,7 +102,7 @@ namespace LuckParser.Models.ParseModels
             return _presentMechanics[phaseIndex];
         }
 
-        public List<AbstractMasterPlayer> GetEnemyList(int phaseIndex)
+        public List<DummyActor> GetEnemyList(int phaseIndex)
         {
             return _enemyList[phaseIndex];
         }

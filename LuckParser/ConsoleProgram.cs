@@ -1,7 +1,8 @@
 ﻿using LuckParser.Builders;
 using LuckParser.Controllers;
 using LuckParser.Exceptions;
-using LuckParser.Models.DataModels;
+using LuckParser.Models;
+using LuckParser.Parser;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,7 +42,7 @@ namespace LuckParser
             System.Globalization.CultureInfo before = Thread.CurrentThread.CurrentCulture;
             Thread.CurrentThread.CurrentCulture =
                     new System.Globalization.CultureInfo("en-US");
-            GridRow row = new GridRow(logFile as string, "")
+            GridRow row = new GridRow(logFile as string, "Ready to parse")
             {
                 BgWorker = new System.ComponentModel.BackgroundWorker()
                 {
@@ -62,16 +63,19 @@ namespace LuckParser
             string[] uploadresult = new string[3] { "", "", "" };
             try
             {
-                SettingsContainer settings = new SettingsContainer(Properties.Settings.Default);
-                Parser control = new Parser(settings);
+                ParsingController control = new ParsingController();
+
+                if (!GeneralHelper.HasFormat())
+                {
+                    throw new CancellationException(row, new Exception("No output format has been selected"));
+                }
 
                 if (GeneralHelper.IsSupportedFormat(fInfo.Name))
                 {
                     //Process evtc here
                     ParsedLog log = control.ParseLog(row, fInfo.FullName);
                     Console.Write("Log Parsed\n");
-                    bool uploadAuthorized = !Properties.Settings.Default.SkipFailedTries || (Properties.Settings.Default.SkipFailedTries && log.FightData.Success);
-                    if (Properties.Settings.Default.UploadToDPSReports && uploadAuthorized)
+                    if (Properties.Settings.Default.UploadToDPSReports)
                     {
                         Console.Write("Uploading to DPSReports using EI\n");
                         if (up_controller == null)
@@ -92,7 +96,7 @@ namespace LuckParser
                             uploadresult[0] = "Failed to Define Upload Task";
                         }
                     }
-                    if (Properties.Settings.Default.UploadToDPSReportsRH && uploadAuthorized)
+                    if (Properties.Settings.Default.UploadToDPSReportsRH)
                     {
                         Console.Write("Uploading to DPSReports using RH\n");
                         if (up_controller == null)
@@ -113,7 +117,7 @@ namespace LuckParser
                             uploadresult[1] = "Failed to Define Upload Task";
                         }
                     }
-                    if (Properties.Settings.Default.UploadToRaidar && uploadAuthorized)
+                    if (Properties.Settings.Default.UploadToRaidar)
                     {
                         Console.Write("Uploading to Raidar\n");
                         if (up_controller == null)
@@ -132,13 +136,6 @@ namespace LuckParser
                         else
                         {
                             uploadresult[2] = "Failed to Define Upload Task";
-                        }
-                    }
-                    if (Properties.Settings.Default.SkipFailedTries)
-                    {
-                        if (!log.FightData.Success)
-                        {
-                            throw new SkipException();
                         }
                     }
                     //Creating File
@@ -164,21 +161,6 @@ namespace LuckParser
                     string encounterLengthTerm = Properties.Settings.Default.AddDuration ? "_" + (log.FightData.FightDuration / 1000).ToString() + "s" : "";
                     string PoVClassTerm = Properties.Settings.Default.AddPoVProf ? "_" + log.PlayerList.Find(x => x.AgentItem.Name.Split(':')[0] == log.LogData.PoV.Split(':')[0]).Prof.ToLower() : "";
 
-                    StatisticsCalculator statisticsCalculator = new StatisticsCalculator(settings);
-                    StatisticsCalculator.Switches switches = new StatisticsCalculator.Switches();
-                    if (Properties.Settings.Default.SaveOutHTML)
-                    {
-                        HTMLBuilder.UpdateStatisticSwitches(switches);
-                    }
-                    if (Properties.Settings.Default.SaveOutCSV)
-                    {
-                        CSVBuilder.UpdateStatisticSwitches(switches);
-                    }
-                    if (Properties.Settings.Default.SaveOutJSON || Properties.Settings.Default.SaveOutXML)
-                    {
-                        RawFormatBuilder.UpdateStatisticSwitches(switches);
-                    }
-                    Statistics statistics = statisticsCalculator.CalculateStatistics(log, switches);
                     Console.Write("Statistics Computed\n");
 
                     string fName = fInfo.Name.Split('.')[0];
@@ -193,7 +175,7 @@ namespace LuckParser
                         {
                             using (StreamWriter sw = new StreamWriter(fs))
                             {
-                                var builder = new HTMLBuilder(log, settings, statistics, uploadresult);
+                                var builder = new HTMLBuilder(log, uploadresult);
                                 builder.CreateHTML(sw, saveDirectory.FullName);
                             }
                         }
@@ -208,7 +190,7 @@ namespace LuckParser
                         {
                             using (StreamWriter sw = new StreamWriter(fs, Encoding.GetEncoding(1252)))
                             {
-                                var builder = new CSVBuilder(sw, ",",log, settings, statistics,uploadresult);
+                                var builder = new CSVBuilder(sw, ",", log, uploadresult);
                                 builder.CreateCSV();
                             }
                         }
@@ -222,9 +204,9 @@ namespace LuckParser
                         );
                         using (FileStream fs = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
                         {
-                            using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                            using (StreamWriter sw = new StreamWriter(fs, GeneralHelper.NoBOMEncodingUTF8))
                             {
-                                var builder = new RawFormatBuilder(sw, log, settings, statistics, uploadresult);
+                                var builder = new RawFormatBuilder(sw, log, uploadresult);
                                 builder.CreateJSON();
                             }
                         }
@@ -238,9 +220,9 @@ namespace LuckParser
                         );
                         using (FileStream fs = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
                         {
-                            using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                            using (StreamWriter sw = new StreamWriter(fs, GeneralHelper.NoBOMEncodingUTF8))
                             {
-                                var builder = new RawFormatBuilder(sw, log, settings, statistics, uploadresult);
+                                var builder = new RawFormatBuilder(sw, log, uploadresult);
                                 builder.CreateXML();
                             }
                         }
@@ -257,6 +239,12 @@ namespace LuckParser
             catch (SkipException s)
             {
                 Console.Error.Write(s.Message);
+                throw new CancellationException(row, s);
+            }
+            catch (TooShortException t)
+            {
+                Console.Error.Write(t.Message);
+                throw new CancellationException(row, t);
             }
             catch (Exception ex) when (!System.Diagnostics.Debugger.IsAttached)
             {

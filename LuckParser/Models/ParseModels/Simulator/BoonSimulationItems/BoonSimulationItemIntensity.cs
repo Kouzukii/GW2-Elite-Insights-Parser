@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using LuckParser.Parser;
+using System.Collections.Generic;
 using System.Linq;
 using static LuckParser.Models.ParseModels.BoonSimulator;
 
@@ -7,15 +8,20 @@ namespace LuckParser.Models.ParseModels
     public class BoonSimulationItemIntensity : BoonSimulationItem
     {
         private List<BoonSimulationItemDuration> _stacks = new List<BoonSimulationItemDuration>();
+        private List<AgentItem> _sources;
 
-        public BoonSimulationItemIntensity(List<BoonStackItem> stacks) : base()
+        public BoonSimulationItemIntensity(List<BoonStackItem> stacks) : base(stacks[0].Start, 0)
         {
-            Start = stacks[0].Start;
             foreach (BoonStackItem stack in stacks)
             {
                 _stacks.Add(new BoonSimulationItemDuration(stack));
             }
             Duration = _stacks.Max(x => x.Duration);
+            _sources = new List<AgentItem>();
+            foreach (BoonSimulationItemDuration item in _stacks)
+            {
+                _sources.AddRange(item.GetSources());
+            }
         }
 
         public override void SetEnd(long end)
@@ -27,36 +33,22 @@ namespace LuckParser.Models.ParseModels
             Duration = _stacks.Max(x => x.Duration);
         }
 
-        public override int GetStack(long end)
+        public override int GetStack()
         {
-            return _stacks.Count(x => x.End >= end);
+            return _stacks.Count;
         }
 
-        public override List<BoonsGraphModel.Segment> ToSegment()
-        {
-            if (Duration == _stacks.Min(x => x.Duration))
-            {
-                return new List<BoonsGraphModel.Segment>
-                {
-                    new BoonsGraphModel.Segment(Start,End,_stacks.Count)
-                };
-            }
-            long start = Start;
-            List<BoonsGraphModel.Segment> res = new List<BoonsGraphModel.Segment>();
-            foreach ( long end in _stacks.Select(x => x.Duration + Start).Distinct())
-            {
-                res.Add(new BoonsGraphModel.Segment(start,end,GetStack(end)));
-                start = end;
-            }
-            return res;
-        }
-
-        public override void SetBoonDistributionItem(Dictionary<ushort, BoonDistributionItem> distrib, long start, long end)
+        public override void SetBoonDistributionItem(BoonDistribution distribs, long start, long end, long boonid, ParsedLog log)
         {
             foreach (BoonSimulationItemDuration item in _stacks)
             {
-                item.SetBoonDistributionItem(distrib, start, end);
+                item.SetBoonDistributionItem(distribs, start, end, boonid, log);
             }
+        }
+
+        public override List<AgentItem> GetSources()
+        {
+            return _sources;
         }
     }
 }

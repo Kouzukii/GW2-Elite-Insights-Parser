@@ -1,4 +1,4 @@
-﻿using LuckParser.Models.DataModels;
+﻿using LuckParser.Parser;
 using LuckParser.Models.ParseModels;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ namespace LuckParser.Models.Logic
 {
     public class Golem : FightLogic
     {
-        public Golem(ushort id) : base(id)
+        public Golem(ushort id, AgentData agentData) : base(id, agentData)
         {
             Mode = ParseMode.Golem;  
             switch (id)
@@ -44,8 +44,7 @@ namespace LuckParser.Models.Logic
                 // redirect all attacks to the main golem
                 if (c.DstAgent == 0 && c.DstInstid == 0 && c.IsStateChange == ParseEnum.StateChange.Normal && c.IFF == ParseEnum.IFF.Foe && c.IsActivation == ParseEnum.Activation.None && c.IsBuffRemove == ParseEnum.BuffRemove.None)
                 {
-                    c.DstAgent = target.Agent;
-                    c.DstInstid = target.InstID;
+                    c.OverrideDstValues(target.Agent, target.InstID);
                 }
             }
             CombatItem pov = combatData.FirstOrDefault(x => x.IsStateChange == ParseEnum.StateChange.PointOfView);
@@ -74,8 +73,16 @@ namespace LuckParser.Models.Logic
             }
             if (mainTarget.HealthOverTime.Count > 0)
             {
-                log.FightData.Success = mainTarget.HealthOverTime.Last().Y < 200;
+                log.FightData.Success = mainTarget.HealthOverTime.Last().hp < 200;
             }
+        }
+
+        protected override HashSet<ushort> GetUniqueTargetIDs()
+        {
+            return new HashSet<ushort>
+            {
+                TriggerID
+            };
         }
     }
 }

@@ -6,43 +6,10 @@ var compileBuffStats = function () {
         template: `${tmplPersonalBuffTable}`,
         data: function () {
             return {
-                specs: [
-                    "Warrior", "Berserker", "Spellbreaker", "Revenant", "Herald", "Renegade", "Guardian", "Dragonhunter", "Firebrand",
-                    "Ranger", "Druid", "Soulbeast", "Engineer", "Scrapper", "Holosmith", "Thief", "Daredevil", "Deadeye",
-                    "Mesmer", "Chronomancer", "Mirage", "Necromancer", "Reaper", "Scourge", "Elementalist", "Tempest", "Weaver"
-                ],
                 bases: [],
-                specToBase: {
-                    Warrior: 'Warrior',
-                    Berserker: 'Warrior',
-                    Spellbreaker: 'Warrior',
-                    Revenant: "Revenant",
-                    Herald: "Revenant",
-                    Renegade: "Revenant",
-                    Guardian: "Guardian",
-                    Dragonhunter: "Guardian",
-                    Firebrand: "Guardian",
-                    Ranger: "Ranger",
-                    Druid: "Ranger",
-                    Soulbeast: "Ranger",
-                    Engineer: "Engineer",
-                    Scrapper: "Engineer",
-                    Holosmith: "Engineer",
-                    Thief: "Thief",
-                    Daredevil: "Thief",
-                    Deadeye: "Thief",
-                    Mesmer: "Mesmer",
-                    Chronomancer: "Mesmer",
-                    Mirage: "Mesmer",
-                    Necromancer: "Necromancer",
-                    Reaper: "Necromancer",
-                    Scourge: "Necromancer",
-                    Elementalist: "Elementalist",
-                    Tempest: "Elementalist",
-                    Weaver: "Elementalist"
-                },
                 mode: "Warrior",
-                cache: new Map()
+                cache: new Map(),
+                specToBase: specToBase
             };
         },
         computed: {
@@ -52,8 +19,8 @@ var compileBuffStats = function () {
             orderedSpecs: function () {
                 var res = [];
                 var aux = new Set();
-                for (var i = 0; i < this.specs.length; i++) {
-                    var spec = this.specs[i];
+                for (var i = 0; i < specs.length; i++) {
+                    var spec = specs[i];
                     var pBySpec = [];
                     for (var j = 0; j < logData.players.length; j++) {
                         if (logData.players[j].profession === spec && logData.phases[0].persBuffStats[j].data.length > 0) {
@@ -61,7 +28,7 @@ var compileBuffStats = function () {
                         }
                     }
                     if (pBySpec.length) {
-                        aux.add(this.specToBase[spec]);
+                        aux.add(specToBase[spec]);
                         res.push({
                             ids: pBySpec,
                             name: spec
@@ -120,6 +87,9 @@ var compileBuffStats = function () {
             };
         },
         computed: {
+            singleGroup: function() {
+               return logData.singleGroup;
+            },
             phase: function() {
                 return logData.phases[this.phaseindex];
             },
@@ -159,6 +129,8 @@ var compileBuffStats = function () {
                         totalavg = [];
                     var grcount = [],
                         totalcount = 0;
+                    var grBoonAvg = [],
+                        totalBoonAvg = 0;
                     var i, k;
                     for (i = 0; i < logData.players.length; i++) {
                         var player = logData.players[i];
@@ -188,8 +160,11 @@ var compileBuffStats = function () {
                         if (!gravg[player.group]) {
                             gravg[player.group] = [];
                             grcount[player.group] = 0;
+                            grBoonAvg[player.group] = 0;
                         }
                         totalcount++;
+                        totalBoonAvg += stats[i].avg;
+                        grBoonAvg[player.group] += stats[i].avg;
                         grcount[player.group]++;
                         for (var j = 0; j < stats[i].data.length; j++) {
                             totalavg[j] = (totalavg[j] || 0) + (stats[i].data[j][0] || 0);
@@ -204,6 +179,7 @@ var compileBuffStats = function () {
                             avg.push({
                                 name: "Group " + i,
                                 data: gravg[i],
+                                avg: Math.round(100 * grBoonAvg[i] / grcount[i]) / 100
                             });
                         }
                     }
@@ -212,7 +188,8 @@ var compileBuffStats = function () {
                     }
                     avg.push({
                         name: "Total",
-                        data: totalavg
+                        data: totalavg,
+                        avg: Math.round(100 * totalBoonAvg / totalcount) / 100
                     });
                     return [uptimes, gens, gengr, genoff, gensq, avg];
                 };

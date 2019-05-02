@@ -4,21 +4,26 @@ namespace LuckParser.Models.HtmlModels
 {   
     public class LogDataDto
     { 
-        public List<TargetDto> targets = new List<TargetDto>();
-        public readonly List<PlayerDto> players = new List<PlayerDto>();
-        public readonly List<EnemyDto> enemies = new List<EnemyDto>();
-        public readonly List<PhaseDto> phases = new List<PhaseDto>();
-        public List<long> boons;
-        public List<long> offBuffs;
-        public List<long> defBuffs;
-        public Dictionary<string, List<long>> persBuffs;
+        public List<TargetDto> Targets = new List<TargetDto>();
+        public readonly List<PlayerDto> Players = new List<PlayerDto>();
+        public readonly List<EnemyDto> Enemies = new List<EnemyDto>();
+        public readonly List<PhaseDto> Phases = new List<PhaseDto>();
+        public readonly List<long> Boons = new List<long>();
+        public readonly List<long> OffBuffs = new List<long>();
+        public readonly List<long> DefBuffs = new List<long>();
+        public readonly List<long> DmgModifiersItem = new List<long>();
+        public readonly List<long> DmgModifiersCommon = new List<long>();
+        public readonly Dictionary<string, List<long>> DmgModifiersPers = new Dictionary<string, List<long>>();
+        public readonly Dictionary<string, List<long>> PersBuffs = new Dictionary<string, List<long>>();
         
-        public List<long> conditions;
-        public string encounterDuration;
-        public int success;
-        public string fightName;
-        public string fightIcon;
-        public int combatReplay;
-        public int lightTheme;
+        public readonly List<long> Conditions = new List<long>();
+        public string EncounterDuration;
+        public bool Success;
+        public bool Wvw;
+        public string FightName;
+        public string FightIcon;
+        public bool LightTheme;
+        public bool NoMechanics;
+        public bool SingleGroup;
     }
 }

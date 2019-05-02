@@ -1,4 +1,4 @@
-﻿using LuckParser.Models.DataModels;
+﻿using LuckParser.Parser;
 using LuckParser.Models.ParseModels;
 using System;
 using System.Collections.Generic;
@@ -10,10 +10,9 @@ namespace LuckParser.Models.Logic
 {
     public abstract class RaidLogic : FightLogic
     {
-        protected RaidLogic(ushort triggerID) : base(triggerID)
+        protected RaidLogic(ushort triggerID, AgentData agentData) : base(triggerID, agentData)
         {
             Mode = ParseMode.Raid;
-            CanCombatReplay = true;
         }
 
         public override void SetSuccess(ParsedLog log)
@@ -21,14 +20,23 @@ namespace LuckParser.Models.Logic
             HashSet<int> raidRewardsIds = new HashSet<int>
                 {
                     55821,
-                    60685
+                    60685,
+                    914
                 };
-            CombatItem reward = log.CombatData.GetStatesData(ParseEnum.StateChange.Reward).FirstOrDefault(x => raidRewardsIds.Contains(x.Value));
+            CombatItem reward = log.CombatData.GetStates(ParseEnum.StateChange.Reward).FirstOrDefault(x => raidRewardsIds.Contains(x.Value));
             if (reward != null)
             {
                 log.FightData.Success = true;
                 log.FightData.FightEnd = reward.Time;
             }
+        }
+
+        protected override HashSet<ushort> GetUniqueTargetIDs()
+        {
+            return new HashSet<ushort>
+            {
+                TriggerID
+            };
         }
     }
 }

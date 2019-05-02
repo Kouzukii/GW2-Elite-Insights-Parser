@@ -1,4 +1,5 @@
 <div v-if="buffs.length > 0">
+    <img v-if="generation" class="mb-1 icon" src="https://wiki.guildwars2.com/images/5/54/Commander_tag_%28blue%29.png" :data-original-title="tooltipExpl"/>
     <table class="table table-sm table-striped table-hover" cellspacing="0" width="100%" :id="id">
         <thead>
             <tr>
@@ -33,7 +34,7 @@
                 <td></td>
                 <td v-if="sum.icon" :data-original-title="sum.name"><img :src="sum.icon" :alt="sum.name" class="icon"></td>
                 <td v-else></td>
-                <td :class="{'text-left' : !!sum.icon}" :data-original-title="getAvgTooltip(sum.avg)">{{sum.name}}</td>
+                <td class="text-left" :data-original-title="getAvgTooltip(sum.avg)">{{sum.name}}</td>
                 <td v-for=" (buff, index) in buffs" :data-original-title="getCellTooltip(buff, sum.data[index], !!sum.icon)">
                     {{ getCellValue(buff, sum.data[index]) }}
                 </td>

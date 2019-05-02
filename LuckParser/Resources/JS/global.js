@@ -1,4 +1,5 @@
 /*jshint esversion: 6 */
+"use strict";
 $.extend($.fn.dataTable.defaults, {
     searching: false,
     ordering: true,
@@ -90,7 +91,46 @@ var urls = {
     Longbow: "https://wiki.guildwars2.com/images/f/f0/Crimson_Antique_Greatbow.png",
     Shortbow: "https://wiki.guildwars2.com/images/1/17/Crimson_Antique_Short_Bow.png",
     Rifle: "https://wiki.guildwars2.com/images/1/19/Crimson_Antique_Musket.png",
-    Staff: "https://wiki.guildwars2.com/images/5/5f/Crimson_Antique_Spire.png"
+    Staff: "https://wiki.guildwars2.com/images/5/5f/Crimson_Antique_Spire.png",
+    Trident: "https://wiki.guildwars2.com/images/9/98/Crimson_Antique_Trident.png",
+    Speargun: "https://wiki.guildwars2.com/images/3/3b/Crimson_Antique_Harpoon_Gun.png",
+    Spear: "https://wiki.guildwars2.com/images/c/cb/Crimson_Antique_Impaler.png"
+};
+
+const specs = [
+    "Warrior", "Berserker", "Spellbreaker", "Revenant", "Herald", "Renegade", "Guardian", "Dragonhunter", "Firebrand",
+    "Ranger", "Druid", "Soulbeast", "Engineer", "Scrapper", "Holosmith", "Thief", "Daredevil", "Deadeye",
+    "Mesmer", "Chronomancer", "Mirage", "Necromancer", "Reaper", "Scourge", "Elementalist", "Tempest", "Weaver"
+];
+
+const specToBase = {
+    Warrior: 'Warrior',
+    Berserker: 'Warrior',
+    Spellbreaker: 'Warrior',
+    Revenant: "Revenant",
+    Herald: "Revenant",
+    Renegade: "Revenant",
+    Guardian: "Guardian",
+    Dragonhunter: "Guardian",
+    Firebrand: "Guardian",
+    Ranger: "Ranger",
+    Druid: "Ranger",
+    Soulbeast: "Ranger",
+    Engineer: "Engineer",
+    Scrapper: "Engineer",
+    Holosmith: "Engineer",
+    Thief: "Thief",
+    Daredevil: "Thief",
+    Deadeye: "Thief",
+    Mesmer: "Mesmer",
+    Chronomancer: "Mesmer",
+    Mirage: "Mesmer",
+    Necromancer: "Necromancer",
+    Reaper: "Necromancer",
+    Scourge: "Necromancer",
+    Elementalist: "Elementalist",
+    Tempest: "Elementalist",
+    Weaver: "Elementalist"
 };
 
 function findSkill(isBuff, id) {
@@ -182,7 +222,7 @@ function computeRotationData(rotationData, images, data) {
             rotaTrace.x.push(duration / 1000.0);
             rotaTrace.base.push(x);
             rotaTrace.y.push(1.2);
-            rotaTrace.text.push(name + ': ' + duration + 'ms');
+            rotaTrace.text.push(name + ' at ' + x + 's for ' + duration + 'ms');
             rotaTrace.width.push(aa ? 0.5 : 1.0);
             rotaTrace.marker.color.push(fillColor);
             rotaTrace.marker.line.color.push(quick ? 'rgb(220,40,220)' : 'rgb(20,20,20)');
@@ -218,7 +258,7 @@ function computePhaseMarkupSettings(currentArea, areas, annotations) {
 
 function computePhaseMarkups(shapes, annotations, phase, linecolor) {
     if (phase.markupAreas) {
-        for (i = 0; i < phase.markupAreas.length; i++) {
+        for (var i = 0; i < phase.markupAreas.length; i++) {
             var area = phase.markupAreas[i];
             var setting = computePhaseMarkupSettings(area, phase.markupAreas, annotations);
             annotations.push({
@@ -258,7 +298,7 @@ function computePhaseMarkups(shapes, annotations, phase, linecolor) {
         }
     }
     if (phase.markupLines) {
-        for (i = 0; i < phase.markupLines.length; i++) {
+        for (var i = 0; i < phase.markupLines.length; i++) {
             var x = phase.markupLines[i];
             shapes.push({
                 type: 'line',
@@ -281,9 +321,6 @@ function computePhaseMarkups(shapes, annotations, phase, linecolor) {
 
 
 function computePlayerDPS(player, damageData, lim, phasebreaks, activetargets, cacheID, lastTime) {
-    if (!player.dpsGraphCache) {
-        player.dpsGraphCache = new Map();
-    }
     if (player.dpsGraphCache.has(cacheID)) {
         return player.dpsGraphCache.get(cacheID);
     }
@@ -308,15 +345,15 @@ function computePlayerDPS(player, damageData, lim, phasebreaks, activetargets, c
     for (j = 1; j < end; j++) {
         if (lim > 0) {
             limID = Math.max(j - lim, 0);
-            start = limID;
         } else if (phasebreaks && phasebreaks[j-1]) {
             limID = j;
         }
         var div = Math.max(j - limID, 1);
         totalDamage = damageData.total[j] - damageData.total[limID];
+        targetDamage = 0;
         for (k = 0; k < activetargets.length; k++) {
             targetid = activetargets[k];
-            targetDamage = damageData.targets[targetid][j] - damageData.targets[targetid][limID];
+            targetDamage += damageData.targets[targetid][j] - damageData.targets[targetid][limID];
         }
         totalDPS[j] = Math.round(totalDamage / div);
         targetDPS[j] = Math.round(targetDamage / div);
@@ -336,9 +373,10 @@ function computePlayerDPS(player, damageData, lim, phasebreaks, activetargets, c
             limID = j;
         }
         totalDamage = damageData.total[j] - damageData.total[limID];
+        targetDamage = 0;
         for (k = 0; k < activetargets.length; k++) {
             targetid = activetargets[k];
-            targetDamage = damageData.targets[targetid][j] - damageData.targets[targetid][limID];
+            targetDamage += damageData.targets[targetid][j] - damageData.targets[targetid][limID];
         }
         totalDPS[j] = Math.round(totalDamage / (lastTime - limID));
         targetDPS[j] = Math.round(targetDamage / (lastTime - limID));
@@ -428,11 +466,11 @@ function getActorGraphLayout(images, color) {
 }
 
 function computeTargetHealthData(graph, targets, phase, data, yaxis, times) {
-    for (i = 0; i < graph.targets.length; i++) {
+    for (var i = 0; i < graph.targets.length; i++) {
         var health = graph.targets[i].health;
         var hpTexts = [];
         var target = targets[phase.targets[i]];
-        for (j = 0; j < health.length; j++) {
+        for (var j = 0; j < health.length; j++) {
             hpTexts[j] = health[j] + "% hp - " + target.name ;
         }
         var res = {
@@ -443,7 +481,7 @@ function computeTargetHealthData(graph, targets, phase, data, yaxis, times) {
                 shape: 'spline',
                 dash: 'dashdot'
             },
-            hoverinfo: 'text',
+            hoverinfo: 'text+x',
             name: target.name + ' health',
         };
         if (yaxis) {
@@ -470,7 +508,7 @@ function computeBuffData(buffData, data) {
                     color: boonItem.color,
                     shape: 'linear'
                 },
-                hoverinfo: 'text',
+                hoverinfo: 'text+x',
                 fill: 'tozeroy',
                 name: boon.name.substring(0,20)
             };
@@ -551,10 +589,10 @@ var DataTypes = {
     offensiveBuffTable: 6,
     defensiveBuffTable: 7,
     personalBuffTable: 8,
-    dmgModifiersTable: 9,
-    playerTab: 10,
-    targetTab: 11,
-    dpsGraph: 12
+    playerTab: 9,
+    targetTab: 10,
+    dpsGraph: 11,
+    dmgModifiersTable: 12,
 };
 
 /*function getActorGraphLayout(images, boonYs, stackingBoons) {

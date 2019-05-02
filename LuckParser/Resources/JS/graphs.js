@@ -6,7 +6,8 @@ var compileGraphs = function () {
         template: `${tmplGraphStats}`,
         data: function () {
             return {
-                mode: 1
+                wvw: !!logData.wvw,
+                mode: logData.wvw ? 0 : 1
             };
         },
         computed: {
@@ -87,7 +88,7 @@ var compileGraphs = function () {
                         width: i === this.playerindex ? 5 : 2
                     },
                     text: pText,
-                    hoverinfo: 'y+text',
+                    hoverinfo: 'y+text+x',
                     name: player.name + ' DPS',
                 });
             }
@@ -97,7 +98,7 @@ var compileGraphs = function () {
                 line: {
                     shape: 'spline'
                 },
-                hoverinfo: 'name+y',
+                hoverinfo: 'name+y+x',
                 visible: 'legendonly',
                 name: 'All Player Dps'
             });
@@ -119,7 +120,7 @@ var compileGraphs = function () {
                     },
                     text: [],
                     name: mechData.name,
-                    hoverinfo: 'text'
+                    hoverinfo: 'text+x'
                 };
                 var time, pts, k;
                 if (mechData.enemyMech) {
@@ -127,7 +128,7 @@ var compileGraphs = function () {
                         pts = mech.points[this.phaseindex][j];
                         var tarId = this.phase.targets[j];
                         if (tarId >= 0) {
-                            target = logData.targets[tarId];
+                            var target = logData.targets[tarId];
                             for (k = 0; k < pts.length; k++) {
                                 time = pts[k];
                                 chart.x.push(time);
@@ -135,9 +136,9 @@ var compileGraphs = function () {
                             }
                         } else {
                             for (k = 0; k < pts.length; k++) {
-                                time = pts[k];
+                                time = pts[k][0];
                                 chart.x.push(time);
-                                chart.text.push(time + 's');
+                                chart.text.push(time + 's: ' + pts[k][1]);
                             }
                         }
                     }
@@ -295,7 +296,7 @@ var compileGraphs = function () {
                 for (i = 0; i < graphData.mechanics.length; i++) {
                     var mech = graphData.mechanics[i];
                     var mechData = mechanicMap[i];
-                    chart = [];
+                    var chart = [];
                     res[offset++] = chart;
                     var time, pts, k, ftime, y, yp1;
                     if (mechData.enemyMech) {
@@ -303,7 +304,6 @@ var compileGraphs = function () {
                             pts = mech.points[this.phaseindex][j];
                             var tarId = this.phase.targets[j];
                             if (tarId >= 0) {
-                                target = logData.targets[tarId];
                                 for (k = 0; k < pts.length; k++) {
                                     time = pts[k];
                                     ftime = Math.floor(time);

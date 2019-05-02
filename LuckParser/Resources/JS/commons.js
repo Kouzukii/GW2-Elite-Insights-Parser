@@ -54,7 +54,7 @@ var compileCommons = function () {
 
     Vue.component("graph-component", {
         props: ['id', 'layout', 'data'],
-        template: '<div :id="id"></div>',
+        template: '<div :id="id" class="d-flex flex-row justify-content-center"></div>',
         mounted: function () {
             var div = document.querySelector(this.queryID);
             Plotly.react(div, this.data, this.layout);
@@ -105,11 +105,19 @@ var compileCommons = function () {
             },
             getCellTooltip: function (buff, val, uptime) {
                 if (val instanceof Array) {
-                    if (!uptime && this.generation && (val[1] > 0 || val[2] > 0 || val[3] > 0)) {
+                    if (!uptime && this.generation && (val[1] > 0 || val[2] > 0 || val[3] > 0 || val[4] > 0)) {
                         var res = (val[1] || 0) + (buff.stacking ? "" : "%") + " with overstack";
+                        if (val[4] > 0) {
+                            res += "<br>";
+                            res += val[4] + (buff.stacking ? "" : "%") + " by extension";
+                        }
                         if (val[2] > 0) {
                             res += "<br>";
                             res += val[2] + (buff.stacking ? "" : "%") + " wasted";
+                        }
+                        if (val[5] > 0) {
+                            res += "<br>";
+                            res += val[5] + (buff.stacking ? "" : "%") + " extended";
                         }
                         if (val[3] > 0) {
                             res += "<br>";
@@ -129,12 +137,25 @@ var compileCommons = function () {
                 var force = false;
                 if (val instanceof Array) {
                     value = val[0];
-                    force = this.generation && (val[1] > 0 || val[2] > 0 ||val[3] > 0);
+                    force = this.generation && (val[1] > 0 || val[2] > 0 ||val[3] > 0 || val[4] > 0);
                 }
                 if (value > 0 || force) {
                     return buff.stacking ? value : value + "%";
                 }
                 return "-";
+            }
+        },
+        computed: {
+            tooltipExpl: function () {
+                return `<ul>
+                        <li>The value shown in the row is "generation + extensions you are the source"</li>
+                        <li>With overstack is "generation + extensions you are the source + stacks that couldn't make into the queue/stacks"</li>
+                        <li>By extension is "extensions you are the source"</li>
+                        <li>Waste is "stacks that were overriden/cleansed". If you have high waste values that could mean there is an issue with your composition as someone may be overriding your stacks non-stop.</li>
+                        <li>Extended by unknown source is the extension value for which we were unable to find an src, not included in generation.</li>
+                        <li>Extended is "extended by unknown source + extended by known source other than yourself". Not included in generation. This value is just here to indicate if you are a good seed.</li>
+                        </ul>                        
+                        `
             }
         },
         mounted() {
@@ -146,7 +167,7 @@ var compileCommons = function () {
     });
 
     Vue.component("damagedist-table-component", {
-        props: ["dmgdist", "tableid", "actor", "isminion", "istarget"],
+        props: ["dmgdist", "tableid", "actor", "isminion", "istarget", "phaseindex"],
         template: `${tmplDamageDistTable}`,
         data: function () {
             return {
@@ -195,6 +216,11 @@ var compileCommons = function () {
         methods: {
             getSkill: function (isBoon, id) {
                 return findSkill(isBoon, id);
+            }
+        },
+        computed: {
+            phaseDuration: function () {
+                var phase = logData.phases[this.phaseindex]; return Math.max(phase.end - phase.start,0.001);
             }
         }
     });

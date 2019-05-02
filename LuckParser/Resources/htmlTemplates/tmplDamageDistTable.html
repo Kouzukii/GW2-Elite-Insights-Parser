@@ -35,21 +35,21 @@
                     row[1]).name}}
                 </td>
                 <td>{{ round3(100*row[2]/dmgdist.contributedDamage) }}%</td>
-                <td>{{ row[2] }}</td>
+                <td :data-original-title="(row[2]/phaseDuration).toFixed(1) +' dps'">{{ row[2] }}</td>
                 <td>{{ Math.max(row[3],0) }}</td>
                 <td>{{ round(row[2]/row[6]) }}</td>
                 <td>{{ row[4] }}</td>
                 <td>{{ !getSkill(row[0], row[1]).condi && row[5] ? row[5] : ''}}</td>
                 <td>{{ row[6] }}</td>
-                <td>{{(!getSkill(row[0], row[1]).condi && row[6] && row[5]) ? round3(row[6]/row[5]) : ''}}</td>
+                <td>{{(!getSkill(row[0], row[1]).condi && row[6] && row[5]) ? round2(row[6]/row[5]) : ''}}</td>
                 <td :data-original-title="(!getSkill(row[0], row[1]).condi && row[6]) ? row[7] +' out of ' + row[6] + ' hits': false">
-                    {{(!getSkill(row[0], row[1]).condi && row[6]) ? round3(row[7]*100/row[6]) + '%' : ''}}
+                    {{(!getSkill(row[0], row[1]).condi && row[6]) ? round2(row[7]*100/row[6]) + '%' : ''}}
                 </td>
                 <td :data-original-title="(!getSkill(row[0], row[1]).condi && row[6]) ? row[8] +' out of ' + row[6] + ' hits': false">
-                    {{(!getSkill(row[0], row[1]).condi && row[6]) ? round3(row[8]*100/row[6]) + '%' : ''}}
+                    {{(!getSkill(row[0], row[1]).condi && row[6]) ? round2(row[8]*100/row[6]) + '%' : ''}}
                 </td>
                 <td :data-original-title="(!getSkill(row[0], row[1]).condi && row[6]) ? row[9] +' out of ' + row[6] + ' hits': false">
-                    {{(!getSkill(row[0], row[1]).condi && row[6]) ? round3(row[9]*100/row[6]) + '%' : ''}}
+                    {{(!getSkill(row[0], row[1]).condi && row[6]) ? round2(row[9]*100/row[6]) + '%' : ''}}
                 </td>
                 <td>{{ row[10] ? row[10] + 's' : ''}}</td>
                 <td>{{ row[11] ? row[11] + 's' : ''}}</td>
@@ -59,7 +59,7 @@
             <tr>
                 <td class="text-left">Total</td>
                 <td></td>
-                <td>{{dmgdist.contributedDamage}}</td>
+                <td :data-original-title="Math.round((dmgdist.contributedDamage ? dmgdist.contributedDamage : 0)/phaseDuration) +' dps'">{{dmgdist.contributedDamage ? dmgdist.contributedDamage : 0}}</td>
                 <td></td>
                 <td></td>
                 <td></td>

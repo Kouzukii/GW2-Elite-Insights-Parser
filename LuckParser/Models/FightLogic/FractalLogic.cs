@@ -1,4 +1,4 @@
-﻿using LuckParser.Models.DataModels;
+﻿using LuckParser.Parser;
 using LuckParser.Models.ParseModels;
 using System;
 using System.Collections.Generic;
@@ -9,24 +9,20 @@ namespace LuckParser.Models.Logic
 {
     public abstract class FractalLogic : FightLogic
     {
-        protected FractalLogic(ushort triggerID) : base (triggerID)
+        protected FractalLogic(ushort triggerID, AgentData agentData) : base (triggerID, agentData)
         { 
             Mode = ParseMode.Fractal;
-            CanCombatReplay = true;
             MechanicList.AddRange(new List<Mechanic>
             {
-            new Mechanic(37695, "Flux Bomb", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("circle","rgb(150,0,255)",10), "FBmb","Flux Bomb application", "Flux Bomb",0),
-            new Mechanic(36393, "Flux Bomb", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(150,0,255)",10), "FB.dmg","Flux Bomb hit", "Flux Bomb dmg",0),
-            new Mechanic(19684, "Fractal Vindicator", Mechanic.MechType.Spawn, new MechanicPlotlySetting("star-diamond-open","rgb(0,0,0)",10), "FV.spwn","Fractal Vindicator spawned", "Vindicator spawn",0),
+            new PlayerBoonApplyMechanic(37695, "Flux Bomb", new MechanicPlotlySetting("circle","rgb(150,0,255)",10), "Flux","Flux Bomb application", "Flux Bomb",0),
+            new SkillOnPlayerMechanic(36393, "Flux Bomb", new MechanicPlotlySetting("circle-open","rgb(150,0,255)",10), "Flux dmg","Flux Bomb hit", "Flux Bomb dmg",0),
+            new SpawnMechanic(19684, "Fractal Vindicator", new MechanicPlotlySetting("star-diamond-open","rgb(0,0,0)",10), "Vindicator","Fractal Vindicator spawned", "Vindicator spawn",0),
             });
         }
 
         public override List<PhaseData> GetPhases(ParsedLog log, bool requirePhases)
         {
             // generic method for fractals
-            long start = 0;
-            long end = 0;
-            long fightDuration = log.FightData.FightDuration;
             List<PhaseData> phases = GetInitialPhase(log);
             Target mainTarget = Targets.Find(x => x.ID == TriggerID);
             if (mainTarget == null)
@@ -38,36 +34,22 @@ namespace LuckParser.Models.Logic
             {
                 return phases;
             }
-            List<CombatItem> invulsTarget = GetFilteredList(log,762,mainTarget);        
-            for (int i = 0; i < invulsTarget.Count; i++)
-            {
-                CombatItem c = invulsTarget[i];
-                if (c.IsBuffRemove == ParseEnum.BuffRemove.None)
-                {
-                    end = log.FightData.ToFightSpace(c.Time);
-                    phases.Add(new PhaseData(start, end));
-                    if (i == invulsTarget.Count - 1)
-                    {
-                        mainTarget.AddCustomCastLog(new CastLog(end, -5, (int)(fightDuration - end), ParseEnum.Activation.None, (int)(fightDuration - end), ParseEnum.Activation.None), log);
-                    }
-                }
-                else
-                {
-                    start = log.FightData.ToFightSpace(c.Time);
-                    mainTarget.AddCustomCastLog(new CastLog(end, -5, (int)(start - end), ParseEnum.Activation.None, (int)(start - end), ParseEnum.Activation.None), log);
-                }
-            }
-            if (fightDuration - start > 5000 && start >= phases.Last().End)
-            {
-                phases.Add(new PhaseData(start, fightDuration));
-            }
-            phases.RemoveAll(x => x.GetDuration() < 1000);
+            phases.AddRange(GetPhasesByInvul(log, 762, mainTarget, false, true));
+            phases.RemoveAll(x => x.DurationInMS < 1000);
             for (int i = 1; i < phases.Count; i++)
             {
                 phases[i].Name = "Phase " + i;
                 phases[i].Targets.Add(mainTarget);
             }
             return phases;
+        }
+
+        protected override HashSet<ushort> GetUniqueTargetIDs()
+        {
+            return new HashSet<ushort>
+            {
+                TriggerID
+            };
         }
 
         public override void SetSuccess(ParsedLog log)
@@ -78,18 +60,23 @@ namespace LuckParser.Models.Logic
             {
                 throw new InvalidOperationException("Main target of the fight not found");
             }
-            CombatItem reward = log.CombatData.GetStatesData(ParseEnum.StateChange.Reward).LastOrDefault();
-            CombatItem lastDamageTaken = log.CombatData.GetDamageTakenData(mainTarget.InstID, mainTarget.FirstAware, mainTarget.LastAware).LastOrDefault(x => x.Value > 0);
+            HashSet<ushort> pIds = log.PlayerIDs;
+            CombatItem reward = log.CombatData.GetStates(ParseEnum.StateChange.Reward).LastOrDefault();
+            CombatItem lastDamageTaken = log.CombatData.GetDamageTakenData(mainTarget.InstID, mainTarget.FirstAware, mainTarget.LastAware).LastOrDefault(x => (x.Value > 0 || x.BuffDmg > 0) && pIds.Contains(x.SrcInstid));
             if (lastDamageTaken != null)
             {
                 if (reward != null && lastDamageTaken.Time - reward.Time < 100)
                 {
                     log.FightData.Success = true;
-                    log.FightData.FightEnd = reward.Time;
+                    log.FightData.FightEnd = Math.Min(lastDamageTaken.Time, reward.Time);
                 }
                 else
                 {
-                    SetSuccessByDeath(log);
+                    SetSuccessByDeath(log, true, TriggerID);
+                    if (log.FightData.Success)
+                    {
+                        log.FightData.FightEnd = Math.Min(log.FightData.FightEnd, lastDamageTaken.Time);
+                    }
                 }
             }
         }

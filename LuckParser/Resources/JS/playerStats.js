@@ -10,7 +10,8 @@ var compilePlayerTab = function () {
         data: function () {
             return {
                 distmode: -1,
-                targetmode: 1,
+                wvw: !!logData.wvw,
+                targetmode: logData.wvw ? 0 : 1,
                 cacheTarget: new Map()
             };
         },
@@ -133,33 +134,35 @@ var compilePlayerTab = function () {
                     color: this.player.colTotal,
                 },
                 yaxis: dpsY,
-                hoverinfo: 'name+y',
+                hoverinfo: 'name+y+x',
                 name: 'Total DPS'
             });
-            this.data.push({
-                x: this.phase.times,
-                y: [],
-                mode: 'lines',
-                line: {
-                    shape: 'spline',
-                    color: this.player.colTarget,
-                },
-                yaxis: dpsY,
-                hoverinfo: 'name+y',
-                name: 'Target DPS'
-            });
-            this.data.push({
-                x: this.phase.times,
-                y: [],
-                mode: 'lines',
-                line: {
-                    shape: 'spline',
-                    color: this.player.colCleave,
-                },
-                yaxis: dpsY,
-                hoverinfo: 'name+y',
-                name: 'Cleave DPS'
-            });
+            if (!logData.wvw) {
+                this.data.push({
+                    x: this.phase.times,
+                    y: [],
+                    mode: 'lines',
+                    line: {
+                        shape: 'spline',
+                        color: this.player.colTarget,
+                    },
+                    yaxis: dpsY,
+                    hoverinfo: 'name+y+x',
+                    name: 'Target DPS'
+                });
+                this.data.push({
+                    x: this.phase.times,
+                    y: [],
+                    mode: 'lines',
+                    line: {
+                        shape: 'spline',
+                        color: this.player.colCleave,
+                    },
+                    yaxis: dpsY,
+                    hoverinfo: 'name+y+x',
+                    name: 'Cleave DPS'
+                });
+            }
             this.layout = getActorGraphLayout(images, this.light ? '#495057' : '#cccccc');
             computePhaseMarkups(this.layout.shapes, this.layout.annotations, this.phase, this.light ? '#495057' : '#cccccc');
         },
@@ -197,8 +200,10 @@ var compilePlayerTab = function () {
                 var res = this.data;
                 var data = this.computeDPSRelatedData();
                 this.data[this.playerOffset].y = data[0];
-                this.data[this.playerOffset + 1].y = data[1];
-                this.data[this.playerOffset + 2].y = data[2];
+                if (!logData.wvw) {
+                    this.data[this.playerOffset + 1].y = data[1];
+                    this.data[this.playerOffset + 2].y = data[2];
+                }
                 var offset = 3;
                 for (var i = this.playerOffset - this.graph.targets.length; i < this.playerOffset; i++) {
                     this.data[i].y = data[offset++];
@@ -241,10 +246,10 @@ var compilePlayerTab = function () {
                 res[offset++] = dpsData.playerDPS.total;
                 res[offset++] = dpsData.playerDPS.target;
                 res[offset++] = dpsData.playerDPS.cleave;
-                for (i = 0; i < this.graph.targets.length; i++) {
+                for (var i = 0; i < this.graph.targets.length; i++) {
                     var health = this.graph.targets[i].health;
                     var hpPoints = [];
-                    for (j = 0; j < health.length; j++) {
+                    for (var j = 0; j < health.length; j++) {
                         hpPoints[j] = health[j] * dpsData.maxDPS / 100.0;
                     }
                     res[offset++] = hpPoints;
@@ -355,7 +360,7 @@ var compilePlayerTab = function () {
                         x: [],
                         type: 'bar',
                         text: [],
-                        hoverinfo: 'text',
+                        hoverinfo: 'y+text',
                         marker: {
                             color: []
                         }

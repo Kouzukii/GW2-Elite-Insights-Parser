@@ -1,4 +1,4 @@
-﻿using LuckParser.Models.DataModels;
+﻿using LuckParser.Parser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,43 +7,32 @@ namespace LuckParser.Models.ParseModels
 {
     public class BoonSimulatorIntensity : BoonSimulator
     {
-        private List<ushort> _lastSrcRemoves = new List<ushort>();
+        private List<(AgentItem agent, bool extension)> _lastSrcRemoves = new List<(AgentItem agent, bool extension)>();
         // Constructor
         public BoonSimulatorIntensity(int capacity, ParsedLog log, StackingLogic logic) : base(capacity, log, logic)
         {
         }
 
-        public override void Extend(long extension, long oldValue, ushort src, long start)
+        public override void Extend(long extension, long oldValue, AgentItem src, long start)
         {
             if ((BoonStack.Count > 0 && oldValue > 0) || BoonStack.Count == Capacity)
             {
-                BoonStackItem minItem = BoonStack.MinBy(x => Math.Abs(x.BoonDuration - oldValue));
+                BoonStackItem minItem = BoonStack.MinBy(x => Math.Abs(x.TotalBoonDuration() - oldValue));
                 if (minItem != null)
                 {
                     minItem.Extend(extension, src);
-                    if (src == 0)
-                    {
-                        UnknownExtensionSimulationResult.Add(new BoonSimulationItemExtension(extension, minItem.Start, minItem.OriginalSrc));
-                    }
                 }
             }
             else
             {
-                ushort srcToUse = 0;
-                if (_lastSrcRemoves.Count > 0 && src == 0)
+                if (_lastSrcRemoves.Count > 0)
                 {
-                    srcToUse = _lastSrcRemoves.First();
-                    Add(oldValue + extension, srcToUse, start);
+                    Add(oldValue + extension, src, _lastSrcRemoves.First().agent, start, false, _lastSrcRemoves.First().extension);
                     _lastSrcRemoves.RemoveAt(0);
                 }
                 else
                 {
-                    srcToUse = src;
-                    Add(oldValue + extension, srcToUse, start);
-                }
-                if (src == 0)
-                {
-                    UnknownExtensionSimulationResult.Add(new BoonSimulationItemExtension(extension, start, srcToUse));
+                    Add(oldValue + extension, src, start);
                 }
             }
         }
@@ -55,7 +44,7 @@ namespace LuckParser.Models.ParseModels
             if (BoonStack.Count > 0 && timePassed > 0)
             {
                 _lastSrcRemoves.Clear();
-                var toAdd = new BoonSimulationItemIntensity(BoonStack);
+                   var toAdd = new BoonSimulationItemIntensity(BoonStack);
                 if (GenerationSimulation.Count > 0)
                 {
                     BoonSimulationItem last = GenerationSimulation.Last();
@@ -65,17 +54,20 @@ namespace LuckParser.Models.ParseModels
                     }
                 }
                 GenerationSimulation.Add(toAdd);
+                long diff = Math.Min(BoonStack.Min(x => x.BoonDuration), timePassed);
+                long leftOver = timePassed - diff;
                 // Subtract from each
                 for (int i = BoonStack.Count - 1; i >= 0; i--)
                 {
-                    var item = new BoonStackItem(BoonStack[i], timePassed, timePassed);
+                    var item = new BoonStackItem(BoonStack[i], diff, diff);
                     BoonStack[i] = item;
-                    if (item.BoonDuration <= 0)
+                    if (item.BoonDuration == 0)
                     {
-                        _lastSrcRemoves.Add(item.OriginalSrc);
+                        _lastSrcRemoves.Add((item.SeedSrc, item.IsExtension));
                     }
                 }
-                BoonStack.RemoveAll(x => x.BoonDuration <= 0);
+                BoonStack.RemoveAll(x => x.BoonDuration == 0);
+                Update(leftOver);
             }
         }
     }

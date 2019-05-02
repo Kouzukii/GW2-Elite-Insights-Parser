@@ -1,33 +1,33 @@
-﻿using LuckParser.Models.DataModels;
+﻿using LuckParser.Parser;
 using LuckParser.Models.ParseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static LuckParser.Models.DataModels.ParseEnum.TrashIDS;
+using static LuckParser.Parser.ParseEnum.TrashIDS;
 
 namespace LuckParser.Models.Logic
 {
     public class SoullessHorror : RaidLogic
     {
-        public SoullessHorror(ushort triggerID) : base(triggerID)
+        public SoullessHorror(ushort triggerID, AgentData agentData) : base(triggerID, agentData)
         {
             MechanicList.AddRange(new List<Mechanic>
             {
 
-            new Mechanic(47327, "Vortex Slash", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(255,140,0)"), "D.In","Vortex Slash (Inner Donut hit)", "Inner Donut",0),
-            new Mechanic(48432, "Vortex Slash", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(255,140,0)"), "D.Out","Vortex Slash (Outer Donut hit)", "Outer Donut", 0),
-            new Mechanic(47430, "Soul Rift", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle-open","rgb(255,0,0)"), "Golem","Soul Rift (stood in Golem Aoe)", "Golem Aoe",0),
-            new Mechanic(48363, "Quad Slash", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("star-diamond-open","rgb(255,140,0)"), "Slcs1","Quad Slash (4 Slices, First hit)", "4 Slices 1",0),
-            new Mechanic(47915, "Quad Slash", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("star-square-open","rgb(255,140,0)"), "Slcs2","Quad Slash (4 Slices, Second hit)", "4 Slices 2",0),
-            new Mechanic(47363, "Spinning Slash", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("star-triangle-up-open","rgb(128,0,0)"), "Scth","Spinning Slash (hit by Scythe)", "Scythe",0),
-            new Mechanic(48500, "Death Bloom", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("octagon","rgb(255,140,0)"), "8Slcs","Death Bloom (8 Slices)", "8 Slices",0),
-            new Mechanic(47434, "Fixated", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("star","rgb(255,0,255)"), "Fix","Fixated (Special Action Key)", "Fixated",0),
-            new Mechanic(47414, "Necrosis", Mechanic.MechType.PlayerBoon, new MechanicPlotlySetting("star-open","rgb(255,0,255)"), "Necr","Necrosis (Tanking Debuff)", "Necrosis Debuff",0),
-            new Mechanic(48327, "Corrupt the Living", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("circle","rgb(255,0,0)"), "Spin","Corrupt the Living (Torment+Poisen Spin)", "Torment+Poisen Spin",0),
-            new Mechanic(47756, "Wurm Spit", Mechanic.MechType.SkillOnPlayer, new MechanicPlotlySetting("diamond-open","rgb(0,128,128)"), "Spit","Wurm Spit", "Wurm Spit",0),
-            new Mechanic(48662, "Howling Death", Mechanic.MechType.EnemyCastStart, new MechanicPlotlySetting("diamond-tall","rgb(0,160,150)"), "CC","Howling Death (Breakbar)", "Breakbar",0),
-            new Mechanic(48662, "Howling Death", Mechanic.MechType.EnemyCastEnd, new MechanicPlotlySetting("diamond-tall","rgb(0,160,0)"), "CCed","Howling Death (Breakbar) broken", "CCed",0,(condition => condition.CombatItem.Value <=6800)),
-            new Mechanic(48662, "Howling Death", Mechanic.MechType.EnemyCastEnd, new MechanicPlotlySetting("diamond-tall","rgb(255,0,0)"), "CC.Fail","Howling Death (Breakbar failed) ", "CC Fail",0,(condition => condition.CombatItem.Value >6800)),
+            new SkillOnPlayerMechanic(47327, "Vortex Slash", new MechanicPlotlySetting("circle","rgb(255,140,0)"), "Donut In","Vortex Slash (Inner Donut hit)", "Inner Donut",0),
+            new SkillOnPlayerMechanic(48432, "Vortex Slash", new MechanicPlotlySetting("circle-open","rgb(255,140,0)"), "Donut Out","Vortex Slash (Outer Donut hit)", "Outer Donut", 0),
+            new SkillOnPlayerMechanic(47430, "Soul Rift", new MechanicPlotlySetting("circle-open","rgb(255,0,0)"), "Golem","Soul Rift (stood in Golem Aoe)", "Golem Aoe",0),
+            new SkillOnPlayerMechanic(48363, "Quad Slash", new MechanicPlotlySetting("star-diamond-open","rgb(255,140,0)"), "Slice1","Quad Slash (4 Slices, First hit)", "4 Slices 1",0),
+            new SkillOnPlayerMechanic(47915, "Quad Slash", new MechanicPlotlySetting("star-square-open","rgb(255,140,0)"), "Slice2","Quad Slash (4 Slices, Second hit)", "4 Slices 2",0),
+            new SkillOnPlayerMechanic(47363, "Spinning Slash", new MechanicPlotlySetting("star-triangle-up-open","rgb(128,0,0)"), "Scythe","Spinning Slash (hit by Scythe)", "Scythe",0),
+            new SkillOnPlayerMechanic(48500, "Death Bloom", new MechanicPlotlySetting("octagon","rgb(255,140,0)"), "8Slice","Death Bloom (8 Slices)", "8 Slices",0),
+            new PlayerBoonApplyMechanic(47434, "Fixated", new MechanicPlotlySetting("star","rgb(255,0,255)"), "Fixate","Fixated (Special Action Key)", "Fixated",0),
+            new PlayerBoonApplyMechanic(47414, "Necrosis", new MechanicPlotlySetting("star-open","rgb(255,0,255)"), "Necrosis","Necrosis (Tanking Debuff)", "Necrosis Debuff",0),
+            new SkillOnPlayerMechanic(48327, "Corrupt the Living", new MechanicPlotlySetting("circle","rgb(255,0,0)"), "Spin","Corrupt the Living (Torment+Poisen Spin)", "Torment+Poisen Spin",0),
+            new SkillOnPlayerMechanic(47756, "Wurm Spit", new MechanicPlotlySetting("diamond-open","rgb(0,128,128)"), "Spit","Wurm Spit", "Wurm Spit",0),
+            new EnemyCastStartMechanic(48662, "Howling Death", new MechanicPlotlySetting("diamond-tall","rgb(0,160,150)"), "CC","Howling Death (Breakbar)", "Breakbar",0),
+            new EnemyCastEndMechanic(48662, "Howling Death", new MechanicPlotlySetting("diamond-tall","rgb(0,160,0)"), "CCed","Howling Death (Breakbar) broken", "CCed",0,new List<MechanicChecker>{ new CombatItemValueChecker(6800, MechanicChecker.ValueCompare.LEQ) }, Mechanic.TriggerRule.AND),
+            new EnemyCastEndMechanic(48662, "Howling Death", new MechanicPlotlySetting("diamond-tall","rgb(255,0,0)"), "CC Fail","Howling Death (Breakbar failed) ", "CC Fail",0,new List<MechanicChecker>{ new CombatItemValueChecker(6800, MechanicChecker.ValueCompare.G) }, Mechanic.TriggerRule.AND),
 
             });
             Extension = "sh";
@@ -37,10 +37,10 @@ namespace LuckParser.Models.Logic
         protected override CombatReplayMap GetCombatMapInternal()
         {
             return new CombatReplayMap("https://i.imgur.com/A45pVJy.png",
-                            Tuple.Create(3657, 3657),
-                            Tuple.Create(-12223, -771, -8932, 2420),
-                            Tuple.Create(-21504, -12288, 24576, 12288),
-                            Tuple.Create(19072, 15484, 20992, 16508));
+                            (3657, 3657),
+                            (-12223, -771, -8932, 2420),
+                            (-21504, -12288, 24576, 12288),
+                            (19072, 15484, 20992, 16508));
         }
 
         protected override List<ParseEnum.TrashIDS> GetTrashMobsIDS()
@@ -55,23 +55,21 @@ namespace LuckParser.Models.Logic
         }
 
 
-        public override void ComputeAdditionalThrashMobData(Mob mob, ParsedLog log)
+        public override void ComputeMobCombatReplayActors(Mob mob, ParsedLog log, CombatReplay replay)
         {
-            CombatReplay replay = mob.CombatReplay;
-            int start = (int)replay.TimeOffsets.Item1;
-            int end = (int)replay.TimeOffsets.Item2;
-            Tuple<int, int> lifespan = new Tuple<int, int>(start, end);
+            int start = (int)replay.TimeOffsets.start;
+            int end = (int)replay.TimeOffsets.end;
             switch (mob.ID)
             {
                 case (ushort)Scythe:
-                    replay.Actors.Add(new CircleActor(true, 0, 80, lifespan, "rgba(255, 0, 0, 0.5)", new AgentConnector(mob)));
+                    replay.Actors.Add(new CircleActor(true, 0, 80, (start, end), "rgba(255, 0, 0, 0.5)", new AgentConnector(mob)));
                     break;
                 case (ushort)TormentedDead:
                     if (replay.Positions.Count == 0)
                     {
                         break;
                     }
-                    replay.Actors.Add(new CircleActor(true, 0, 400, new Tuple<int, int>(end, end + 60000), "rgba(255, 0, 0, 0.5)", new PositionConnector(replay.Positions.Last())));
+                    replay.Actors.Add(new CircleActor(true, 0, 400, (end, end + 60000), "rgba(255, 0, 0, 0.5)", new PositionConnector(replay.Positions.Last())));
                     break;
                 case (ushort)SurgingSoul:
                     List<Point3D> positions = replay.Positions;
@@ -81,12 +79,12 @@ namespace LuckParser.Models.Logic
                     }
                     if (positions[1].X < -12000 || positions[1].X > -9250)
                     {
-                        replay.Actors.Add(new RectangleActor(true, 0, 240, 660, lifespan, "rgba(255,100,0,0.5)", new AgentConnector(mob)));
+                        replay.Actors.Add(new RectangleActor(true, 0, 240, 660, (start, end), "rgba(255,100,0,0.5)", new AgentConnector(mob)));
                         break;
                     }
                     else if (positions[1].Y < -525 || positions[1].Y > 2275)
                     {
-                        replay.Actors.Add(new RectangleActor(true, 0, 645, 238, lifespan, "rgba(255,100,0,0.5)", new AgentConnector(mob)));
+                        replay.Actors.Add(new RectangleActor(true, 0, 645, 238, (start, end), "rgba(255,100,0,0.5)", new AgentConnector(mob)));
                         break;
                     }
                     break;
@@ -97,9 +95,48 @@ namespace LuckParser.Models.Logic
             }
         }
 
-        public override void ComputeAdditionalTargetData(Target target, ParsedLog log)
+        public override List<PhaseData> GetPhases(ParsedLog log, bool requirePhases)
         {
-            CombatReplay replay = target.CombatReplay;
+            long fightDuration = log.FightData.FightDuration;
+            List<PhaseData> phases = GetInitialPhase(log);
+            Target mainTarget = Targets.Find(x => x.ID == (ushort)ParseEnum.TargetIDS.SoullessHorror);
+            if (mainTarget == null)
+            {
+                throw new InvalidOperationException("Main target of the fight not found");
+            }
+            phases[0].Targets.Add(mainTarget);
+            if (!requirePhases)
+            {
+                return phases;
+            }
+            List<CastLog> howling = mainTarget.GetCastLogs(log, 0, log.FightData.FightDuration).Where(x => x.SkillId == 48662).ToList();
+            long start = 0;
+            int i = 1;
+            foreach (CastLog c in howling)
+            {
+                PhaseData phase = new PhaseData(start, Math.Min(c.Time, fightDuration))
+                {
+                    Name = "Pre-Breakbar " + i++
+                };
+                phase.Targets.Add(mainTarget);
+                start = c.Time + c.ActualDuration;
+                phases.Add(phase);
+            }
+            if (fightDuration - start > 3000)
+            {
+                PhaseData lastPhase = new PhaseData(start, fightDuration)
+                {
+                    Name = "Final"
+                };
+                lastPhase.Targets.Add(mainTarget);
+                phases.Add(lastPhase);
+            }
+            phases.RemoveAll(x => x.DurationInMS <= 1000);
+            return phases;
+        }
+
+        public override void ComputeTargetCombatReplayActors(Target target, ParsedLog log, CombatReplay replay)
+        {
             List<CastLog> cls = target.GetCastLogs(log, 0, log.FightData.FightDuration);
             switch (target.ID)
             {
@@ -109,8 +146,8 @@ namespace LuckParser.Models.Logic
                     {
                         int start = (int)c.Time;
                         int end = start + c.ActualDuration;
-                        replay.Actors.Add(new CircleActor(true, (int)c.Time + c.ExpectedDuration, 180, new Tuple<int, int>(start, end), "rgba(0, 180, 255, 0.3)", new AgentConnector(target)));
-                        replay.Actors.Add(new CircleActor(true, 0, 180, new Tuple<int, int>(start, end), "rgba(0, 180, 255, 0.3)", new AgentConnector(target)));
+                        replay.Actors.Add(new CircleActor(true, (int)c.Time + c.ExpectedDuration, 180, (start, end), "rgba(0, 180, 255, 0.3)", new AgentConnector(target)));
+                        replay.Actors.Add(new CircleActor(true, 0, 180, (start, end), "rgba(0, 180, 255, 0.3)", new AgentConnector(target)));
                     }
                     List<CastLog> vortex = cls.Where(x => x.SkillId == 47327).ToList();
                     foreach (CastLog c in vortex)
@@ -121,9 +158,9 @@ namespace LuckParser.Models.Logic
                         Point3D prev = replay.Positions.LastOrDefault(x => x.Time <= start);
                         if (next != null || prev != null)
                         {
-                            replay.Actors.Add(new CircleActor(false, 0, 380, new Tuple<int, int>(start, end), "rgba(255, 150, 0, 0.5)", new InterpolatedPositionConnector(prev, next, start)));
-                            replay.Actors.Add(new CircleActor(true, end, 380, new Tuple<int, int>(start, end), "rgba(255, 150, 0, 0.5)", new InterpolatedPositionConnector(prev, next, start)));
-                            replay.Actors.Add(new DoughnutActor(true, 0, 380, 760, new Tuple<int, int>(end, end + 1000), "rgba(255, 150, 0, 0.5)", new InterpolatedPositionConnector(prev, next, start)));
+                            replay.Actors.Add(new CircleActor(false, 0, 380, (start, end), "rgba(255, 150, 0, 0.5)", new InterpolatedPositionConnector(prev, next, start)));
+                            replay.Actors.Add(new CircleActor(true, end, 380, (start, end), "rgba(255, 150, 0, 0.5)", new InterpolatedPositionConnector(prev, next, start)));
+                            replay.Actors.Add(new DoughnutActor(true, 0, 380, 760, (end, end + 1000), "rgba(255, 150, 0, 0.5)", new InterpolatedPositionConnector(prev, next, start)));
                         }
                     }
                     List<CastLog> deathBloom = cls.Where(x => x.SkillId == 48500).ToList();
@@ -138,7 +175,7 @@ namespace LuckParser.Models.Logic
                         }
                         for (int i = 0; i < 8; i++)
                         {
-                            replay.Actors.Add(new PieActor(true, 0, 3500, Point3D.GetRotationFromFacing(facing) + (i * 360 / 8), 360 / 12, new Tuple<int, int>(start, end), "rgba(255,200,0,0.5)", new AgentConnector(target)));
+                            replay.Actors.Add(new PieActor(true, 0, 3500, Point3D.GetRotationFromFacing(facing) + (i * 360 / 8), 360 / 12,(start, end), "rgba(255,200,0,0.5)", new AgentConnector(target)));
                         }
 
                     }
@@ -155,7 +192,7 @@ namespace LuckParser.Models.Logic
                         }
                         for (int i = 0; i < 4; i++)
                         {
-                            replay.Actors.Add(new PieActor(true, 0, 3500, Point3D.GetRotationFromFacing(facing) + (i * 360 / 4), 360 / 12, new Tuple<int, int>(start, end), "rgba(255,200,0,0.5)", new AgentConnector(target)));
+                            replay.Actors.Add(new PieActor(true, 0, 3500, Point3D.GetRotationFromFacing(facing) + (i * 360 / 4), 360 / 12,(start, end), "rgba(255,200,0,0.5)", new AgentConnector(target)));
                         }
 
                     }
@@ -170,7 +207,7 @@ namespace LuckParser.Models.Logic
                         }
                         for (int i = 0; i < 4; i++)
                         {
-                            replay.Actors.Add(new PieActor(true, 0, 3500, Point3D.GetRotationFromFacing(facing) + 45 + (i * 360 / 4), 360 / 12, new Tuple<int, int>(start, end), "rgba(255,200,0,0.5)", new AgentConnector(target)));
+                            replay.Actors.Add(new PieActor(true, 0, 3500, Point3D.GetRotationFromFacing(facing) + 45 + (i * 360 / 4), 360 / 12, (start, end), "rgba(255,200,0,0.5)", new AgentConnector(target)));
                         }
 
                     }

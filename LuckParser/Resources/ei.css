@@ -20,9 +20,35 @@
     fill-opacity: 0.9 !important;
 }
 
+.ei-header {
+    min-width: 1000px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.ei-header-big {
+    min-width: 1900px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.ei-container {
+    max-width: 60%;
+    min-width: 1000px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.ei-container-big {
+    min-width: 1900px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
 .boon-container {
     position: relative;
     text-align: center;
+    height: 20px;
 }
 
 .boon-number {
@@ -31,54 +57,33 @@
     font-size: 0.65em;
     left: 15%;
     top: 45%;
-    text-shadow: -2px -2px 3px #000000,
-    -2px 2px 3px #000000,
-    2px -2px 3px #000000,
-    0px 2px 3px #000000,
-    0px -2px 3px #000000,
-    2px 0px 3px #000000,
-    -2px 0px 3px #000000,
-    2px 2px 3px #000000;
+    text-shadow: -2px -2px 3px #000000, -2px 2px 3px #000000, 2px -2px 3px #000000, 0px 2px 3px #000000, 0px -2px 3px #000000, 2px 0px 3px #000000, -2px 0px 3px #000000, 2px 2px 3px #000000;
     font-weight: bold;
     color: #fff;
-    width:100%;
+    width: 100%;
 }
 
-.modal-open {
-    overflow: auto !important;
+.player-data {
+    border-top: 1px solid black;
 }
 
-.modal {
-    overflow: hidden !important;
-    pointer-events: none;
-    min-width: 350px;
-    left: auto;
-    right: auto;
-    margin: auto;
-    margin-top: 200px;
-    margin-left: -200px;
+.target-data {
+    border-bottom: 1px solid black;
 }
 
-.theme-slate .modal-content {
-    background-color: rgba(50, 56, 62, 0.9);
-}
-
-.theme-yeti .modal-content {
-    background-color: rgba(255, 255, 255, 0.9);
-}
-
-.cr-player-data {
-    border-top:1px solid black;
-}
-
-.cr-player-status {
+.player-status {
     background-color: green;
     color: #DDDDDD;
     width: 100px;
 }
 
-h6.cr-player-shorten {
-    max-width: 75px;
+.target-status {
+    color: #DDDDDD;
+    width: 250px;
+}
+
+h6.actor-shorten {
+    width: 100%;
     margin-top: 7px;
     margin-bottom: 7px;
     overflow: hidden;
@@ -87,37 +92,58 @@ h6.cr-player-shorten {
     vertical-align: middle;
 }
 
-.cr-player-status.dead {
+.player-status.dead {
     background-color: black;
 }
 
-.cr-player-status.down {
+.player-status.down {
     background-color: red;
 }
 
-.theme-slate .cr-player-data.active {
+.player-status.dc {
+    background-color: grey;
+}
+
+.squad-details {
+    min-width: 550px;
+    min-height: 850px;
+}
+
+.group-details {
+    max-height: 800px;
+}
+
+.range-btn {
+    width: 60px;
+}
+
+.range-btns {
+    width: 200px;
+}
+
+.ply-btn {
+    width: 120px;
+}
+
+.cr-hp-display {
+    font-size: 0.65rem;
+    position: relative;
+    top: -12px;
+    width: 40px;
+    left: 210px;
+}
+
+.theme-slate .player-data.active {
     background-color: rgba(80, 86, 92, 0.9);
 }
 
-.theme-yeti .cr-player-data.active {
+.theme-yeti .player-data.active {
     background-color: rgba(220, 220, 220, 0.9);
 }
 
-.modal-header {
-    border-bottom: 1px solid #888888;
-}
 
 body {
-    font-family: -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        "Helvetica Neue",
-        Arial,
-        sans-serif,
-        "Apple Color Emoji",
-        "Segoe UI Emoji",
-        "Segoe UI Symbol";
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 .replay {
@@ -139,7 +165,7 @@ body {
     padding: 0.25rem 0.4rem;
 }
 
-.target-cell, .player-cell, li a {
+.target-cell, .player-cell, a {
     cursor: pointer !important;
 }
 
@@ -188,12 +214,12 @@ table {
     font-size: inherit;
 }
 
-.table>tfoot>tr:first-child>td,
-.table>tfoot>tr:last-child>td {
+.table > tfoot > tr:first-child > td,
+.table > tfoot > tr:last-child > td {
     border-top-width: 3px;
 }
 
-.table>tfoot>tr>td {
+.table > tfoot > tr > td {
     color: #888;
 }
 
@@ -266,7 +292,7 @@ th:hover img.icon-hover,
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=3, OffY=3, Color='#000')";
 }
 
-table.dataTable.table-sm>thead>tr>th {
+table.dataTable.table-sm > thead > tr > th {
     padding-right: 10px;
 }
 
@@ -314,22 +340,28 @@ th {
     background-repeat: no-repeat;
     border-bottom-color: transparent;
 }
+
 .theme-slate .nav-tabs .nav-link,
 .theme-slate .nav-tabs .nav-link:hover {
     color: #aaa;
 }
-.theme-slate .nav-tabs .nav-link:hover {
-    color: #fff;
-}
 
-.theme-yeti .nav-pills .nav-link {
-    border-radius: 0.25rem;
-}
+    .theme-slate .nav-tabs .nav-link:hover {
+        color: #fff;
+    }
+
 .theme-yeti .nav-pills .nav-link:not(.active) {
     background-color: #eee;
+    border: 1px solid #e1e1e1;
 }
+
 .theme-yeti .nav-pills .nav-link:hover, .theme-yeti .nav-pills .nav-link:focus {
     background-color: #008cba;
+    border-color: #0079a1;
+}
+
+.nav-tabs {
+    margin-top: 0.5rem;
 }
 
 .rot-icon {
@@ -338,7 +370,15 @@ th {
 }
 
 .rot-cancelled {
-    border: 3px solid #ff0000;
+    border: 2px solid #ff0000;
+}
+
+.rot-animfull {
+    border: 2px solid #00ff00;
+}
+
+.rot-unknown {
+    border: 2px solid #ffff00;
 }
 
 .rot-small .rot-icon {
@@ -348,6 +388,14 @@ th {
 
 .rot-small .rot-cancelled {
     border: 1px solid #ff0000;
+}
+
+.rot-small .rot-animfull {
+    border: 1px solid #00ff00;
+}
+
+.rot-small .rot-unknown {
+    border: 1px solid #ffff00;
 }
 
 .rot-swap:after {
@@ -410,30 +458,47 @@ th {
     transition: opacity .2s;
 }
 
-.slider:hover {
-    opacity: 1;
-}
+    .slider:hover {
+        opacity: 1;
+    }
 
-.slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 25px;
-    height: 25px;
-    background: #4CAF50;
-    cursor: pointer;
-}
+    .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        background: #4CAF50;
+        cursor: pointer;
+    }
 
-.slider::-moz-range-thumb {
-    width: 25px;
-    height: 25px;
-    background: #4CAF50;
-    cursor: pointer;
-}
+    .slider::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        background: #4CAF50;
+        cursor: pointer;
+    }
 
 
 .theme-yeti table tbody tr.active {
     background-color: rgba(100, 200, 0, 0.5);
 }
+
 .theme-slate table tbody tr.active {
     background-color: rgba(50, 120, 0, 0.5);
+}
+
+.nav-item .nav-link {
+    margin-left: -1px;
+    border-radius: 0;
+}
+
+.nav-item:first-child .nav-link {
+    margin-left: 0;
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.nav-item:last-child .nav-link {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
 }

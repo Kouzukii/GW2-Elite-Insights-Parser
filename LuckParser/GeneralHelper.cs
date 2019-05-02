@@ -1,5 +1,6 @@
 ﻿using LuckParser.Exceptions;
-using LuckParser.Models.DataModels;
+using LuckParser.Parser;
+using LuckParser.Models.ParseModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,12 +8,23 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static LuckParser.Models.DataModels.ParseEnum.TrashIDS;
+using static LuckParser.Parser.ParseEnum.TrashIDS;
+using LuckParser.Controllers;
 
 namespace LuckParser
 {
     public static class GeneralHelper
     {
+        public static int PollingRate = 150;
+
+        public static int BoonDigit = 2;
+        public static int TimeDigit = 3;
+
+        public static AgentItem UnknownAgent = new AgentItem(0, "UNKNOWN");
+        // use this for "null" in AbstractActor dictionaries
+        public static Mob NullActor = new Mob(UnknownAgent);
+
+        public static UTF8Encoding NoBOMEncodingUTF8 = new UTF8Encoding(false);
 
         /// <summary>
         /// Reports a status update for a log, updating the background worker and the related row with the new status
@@ -31,6 +43,11 @@ namespace LuckParser
             }
         }
 
+        public static bool HasFormat()
+        {
+            return Properties.Settings.Default.SaveOutCSV || Properties.Settings.Default.SaveOutHTML || Properties.Settings.Default.SaveOutXML || Properties.Settings.Default.SaveOutJSON;
+        }
+
         /// <summary>
         /// Throws a <see cref="CancellationException"/> if the background worker has been cancelled
         /// </summary>
@@ -46,13 +63,6 @@ namespace LuckParser
 
             }
         }
-
-#if !DEBUG
-        public static readonly NUglify.JavaScript.CodeSettings JSMinifySettings = new NUglify.JavaScript.CodeSettings()
-        {
-            LocalRenaming = NUglify.JavaScript.LocalRenaming.KeepAll
-        };
-#endif
 
         private readonly static HashSet<string> _compressedFiles = new HashSet<string>()
         {
@@ -106,6 +116,137 @@ namespace LuckParser
             return false;
         }
 
+        public static string GetAgentProfString(string build, GW2APIController apiController, uint prof, uint elite)
+        {
+            if (elite == 0xFFFFFFFF)
+            {
+                if ((prof & 0xffff0000) == 0xffff0000)
+                {
+                    return "GDG";
+                }
+                else
+                {
+                    return "NPC";
+                }
+            }
+            else if (elite == 0)
+            {
+                switch (prof)
+                {
+                    case 1:
+                        return "Guardian";
+                    case 2:
+                        return "Warrior";
+                    case 3:
+                        return "Engineer";
+                    case 4:
+                        return "Ranger";
+                    case 5:
+                        return "Thief";
+                    case 6:
+                        return "Elementalist";
+                    case 7:
+                        return "Mesmer";
+                    case 8:
+                        return "Necromancer";
+                    case 9:
+                        return "Revenant";
+                }
+            }
+            else if (Convert.ToInt32(build.Substring(4, 8)) < 20170914)
+            {
+                if (elite == 1)
+                {
+                    switch (prof + 9)
+                    {
+                        case 10:
+                            return "Dragonhunter";
+                        case 11:
+                            return "Berserker";
+                        case 12:
+                            return "Scrapper";
+                        case 13:
+                            return "Druid";
+                        case 14:
+                            return "Daredevil";
+                        case 15:
+                            return "Tempest";
+                        case 16:
+                            return "Chronomancer";
+                        case 17:
+                            return "Reaper";
+                        case 18:
+                            return "Herald";
+                    }
+
+                }
+            }
+            else if (Convert.ToInt32(build.Substring(4, 8)) >= 20170914)
+            {
+                if (elite == 1)
+                {
+                    switch (prof + 9)
+                    {
+                        case 10:
+                            return "Dragonhunter";
+                        case 11:
+                            return "Berserker";
+                        case 12:
+                            return "Scrapper";
+                        case 13:
+                            return "Druid";
+                        case 14:
+                            return "Daredevil";
+                        case 15:
+                            return "Tempest";
+                        case 16:
+                            return "Chronomancer";
+                        case 17:
+                            return "Reaper";
+                        case 18:
+                            return "Herald";
+
+
+                    }
+
+                }
+                else if (elite > 1)
+                {
+                    switch (elite)
+                    {
+                        case 55:
+                            return "Soulbeast";
+                        case 56:
+                            return "Weaver";
+                        case 57:
+                            return "Holosmith";
+                        case 58:
+                            return "Deadeye";
+                        case 59:
+                            return "Mirage";
+                        case 60:
+                            return "Scourge";
+                        case 61:
+                            return "Spellbreaker";
+                        case 62:
+                            return "Firebrand";
+                        case 63:
+                            return "Renegade";
+                    }
+                    GW2APISpec spec = apiController.GetSpec((int)elite);
+                    if (spec.Elite)
+                    {
+                        return spec.Name;
+                    }
+                    else
+                    {
+                        return spec.Profession;
+                    }
+                }
+            }
+            return null;
+        }
+
         public static string UppercaseFirst(string s)
         {
             if (string.IsNullOrEmpty(s))
@@ -119,14 +260,14 @@ namespace LuckParser
 
         public static T MaxBy<T, R>(this IEnumerable<T> en, Func<T, R> evaluate) where R : IComparable<R>
         {
-            return en.Select(t => new Tuple<T, R>(t, evaluate(t)))
-                .Aggregate((max, next) => next.Item2.CompareTo(max.Item2) > 0 ? next : max).Item1;
+            return en.Select(t => (value: t, eval: evaluate(t)))
+                .Aggregate((max, next) => next.eval.CompareTo(max.eval) > 0 ? next : max).value;
         }
 
         public static T MinBy<T, R>(this IEnumerable<T> en, Func<T, R> evaluate) where R : IComparable<R>
         {
-            return en.Select(t => new Tuple<T, R>(t, evaluate(t)))
-                .Aggregate((max, next) => next.Item2.CompareTo(max.Item2) < 0 ? next : max).Item1;
+            return en.Select(t => (value: t, eval: evaluate(t)))
+                .Aggregate((max, next) => next.eval.CompareTo(max.eval) < 0 ? next : max).value;
         }
 
 
@@ -208,6 +349,8 @@ namespace LuckParser
         {
             switch (ParseEnum.GetTargetIDS(id))
             {
+                case ParseEnum.TargetIDS.WorldVersusWorld:
+                    return "https://wiki.guildwars2.com/images/3/35/WvW_Rank_up.png";
                 case ParseEnum.TargetIDS.ValeGuardian:
                     return "https://i.imgur.com/MIpP5pK.png";
                 case ParseEnum.TargetIDS.Gorseval:
@@ -216,6 +359,12 @@ namespace LuckParser
                     return "https://i.imgur.com/UqbFp9S.png";
                 case ParseEnum.TargetIDS.Slothasor:
                     return "https://i.imgur.com/h1xH3ER.png";
+                case ParseEnum.TargetIDS.Berg:
+                    return "https://i.imgur.com/tLMXqL7.png";
+                case ParseEnum.TargetIDS.Narella:
+                    return "https://i.imgur.com/FwMCoR0.png";
+                case ParseEnum.TargetIDS.Zane:
+                    return "https://i.imgur.com/tkPWMST.png";
                 case ParseEnum.TargetIDS.Matthias:
                     return "https://i.imgur.com/3uMMmTS.png";
                 case ParseEnum.TargetIDS.KeepConstruct:
@@ -231,7 +380,15 @@ namespace LuckParser
                 case ParseEnum.TargetIDS.Deimos:
                     return "https://i.imgur.com/mWfxBaO.png";
                 case ParseEnum.TargetIDS.SoullessHorror:
+                case ParseEnum.TargetIDS.Desmina:
                     return "https://i.imgur.com/jAiRplg.png";
+                case ParseEnum.TargetIDS.BrokenKing:
+                    return "https://i.imgur.com/FNgUmvL.png";
+                case ParseEnum.TargetIDS.SoulEater:
+                    return "https://i.imgur.com/Sd6Az8M.png";
+                case ParseEnum.TargetIDS.EyeOfFate:
+                case ParseEnum.TargetIDS.EyeOfJudgement:
+                    return "https://i.imgur.com/kAgdoa5.png";
                 case ParseEnum.TargetIDS.Dhuum:
                     return "https://i.imgur.com/RKaDon5.png";
                 case ParseEnum.TargetIDS.ConjuredAmalgamate:
@@ -246,6 +403,8 @@ namespace LuckParser
                     return "https://i.imgur.com/TLykcrJ.png";
                 case ParseEnum.TargetIDS.Qadim:
                     return "https://i.imgur.com/IfoHTHT.png";
+                case ParseEnum.TargetIDS.Freezie:
+                    return "https://wiki.guildwars2.com/images/d/d9/Mini_Freezie.png";
                 case ParseEnum.TargetIDS.MAMA:
                     return "https://i.imgur.com/1h7HOII.png";
                 case ParseEnum.TargetIDS.Siax:
@@ -274,6 +433,7 @@ namespace LuckParser
                 case Spirit:
                 case Spirit2:
                 case ChargedSoul:
+                case HollowedBomber:
                     return "https://i.imgur.com/sHmksvO.png";
                 case Saul:
                     return "https://i.imgur.com/ck2IsoS.png";
@@ -283,6 +443,7 @@ namespace LuckParser
                     return "https://i.imgur.com/J6oMITN.png";
                 case Pride:
                     return "https://i.imgur.com/ePTXx23.png";
+                case OilSlick:
                 case Oil:
                     return "https://i.imgur.com/R26VgEr.png";
                 case Tear:
@@ -322,6 +483,9 @@ namespace LuckParser
                     return "https://i.imgur.com/9XtNPdw.png";
                 case IcePatch:
                     return "https://i.imgur.com/yxKJ5Yc.png";
+                case BanditSaboteur:
+                    return "https://i.imgur.com/jUKMEbD.png";
+                case NarellaTornado:
                 case Tornado:
                     return "https://i.imgur.com/e10lZMa.png";
                 case Jade:
@@ -344,7 +508,7 @@ namespace LuckParser
                     return "https://i.imgur.com/vHka0QN.png";
                 case ConjuredShield:
                     return "https://i.imgur.com/wUiI19S.png";
-                case GreaterMagmaElemental1:
+                case GreaterMagmaElemental1:                  
                 case GreaterMagmaElemental2:
                     return "https://i.imgur.com/sr146T6.png";
                 case LavaElemental1:
@@ -366,8 +530,13 @@ namespace LuckParser
                     return "https://i.imgur.com/xa7Fefn.png";
                 case Scythe:
                     return "https://i.imgur.com/INCGLIK.png";
+                case BanditBombardier:
                 case SurgingSoul:
+                //case MazeMinotaur:
+                case Enervator:
                     return "https://i.imgur.com/k79t7ZA.png";
+                case OrbSpider:
+                    return "https://i.imgur.com/FB5VM9X.png";
                 case Seekers:
                     return "https://i.imgur.com/FrPoluz.png";
                 case BlueGuardian:
@@ -377,6 +546,10 @@ namespace LuckParser
                 case RedGuardian:
                     return "https://i.imgur.com/73Uj4lG.png";
                 case UnderworldReaper:
+                    return "https://i.imgur.com/Tq6SYVe.png";
+                case CagedWarg:
+                case GreenSpirit1:
+                case GreenSpirit2:
                 case BanditSapper:
                     return "https://i.imgur.com/0koP4xB.png";
                 case FleshWurm:
@@ -391,6 +564,10 @@ namespace LuckParser
                 case PLINK:
                 case CHOP:
                     return "https://wiki.guildwars2.com/images/4/47/Mini_Baron_von_Scrufflebutt.png";
+                case FreeziesFrozenHeart:
+                    return "https://wiki.guildwars2.com/images/9/9e/Mini_Freezie%27s_Heart.png";
+                case RiverOfSouls:
+                    return "https://i.imgur.com/4pXEnaX.png";
             }
             return "https://i.imgur.com/HuJHqRZ.png";
         }

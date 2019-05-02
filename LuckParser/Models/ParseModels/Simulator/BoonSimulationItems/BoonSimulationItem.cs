@@ -5,21 +5,9 @@ namespace LuckParser.Models.ParseModels
 {
     public abstract class BoonSimulationItem : AbstractBoonSimulationItem
     {
-        public long Start { get; protected set; }
         public long Duration { get; protected set; }
-        public long End
-        {
-            get
-            {
-                return Start + Duration;
-            }
-        }
-
-        protected BoonSimulationItem()
-        {
-            Start = 0;
-            Duration = 0;
-        }
+        public long Start { get; protected set; }
+        public long End => Start + Duration;
 
         protected BoonSimulationItem(long start, long duration)
         {
@@ -39,10 +27,15 @@ namespace LuckParser.Models.ParseModels
             return 0;
         }
 
-        public abstract List<BoonsGraphModel.Segment> ToSegment();
+        public BoonsGraphModel.SegmentWithSources ToSegment()
+        {
+            return new BoonsGraphModel.SegmentWithSources(Start, End, GetStack(), GetSources().ToArray());
+        }
 
         public abstract void SetEnd(long end);
 
-        public abstract int GetStack(long end);
+        public abstract List<AgentItem> GetSources();
+
+        public abstract int GetStack();
     }
 }

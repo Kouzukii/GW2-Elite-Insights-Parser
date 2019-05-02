@@ -25,7 +25,7 @@ window.onload = function () {
         phase.times = times;
         simpleLogData.phases.push({
             active: i === 0,
-            focus: null
+            focus: -1
         });
     }
     for (i = 0; i < logData.targets.length; i++) {
@@ -33,12 +33,14 @@ window.onload = function () {
             active: true
         });
         logData.targets[i].id = i;
+        logData.targets[i].dpsGraphCache = new Map();
     }
     for (i = 0; i < logData.players.length; i++) {
         simpleLogData.players.push({
             active: false
         });
         var playerData = logData.players[i];
+        playerData.dpsGraphCache = new Map();
         playerData.icon = urls[playerData.profession];
         playerData.id = i;
     }
@@ -47,12 +49,13 @@ window.onload = function () {
     compileCommons();
     compileHeader();
     compileGeneralStats();
+    compileDamageModifiers();
     compileBuffStats();
     compileMechanics();
     compileGraphs();
     compilePlayerTab();
     compileTargetTab();
-    if (logData.combatReplay) {
+    if (typeof compileCombatReplay !== "undefined") {
         compileCombatReplay();
     }
     mainComponent = new Vue({
@@ -60,49 +63,57 @@ window.onload = function () {
         data: {
             logdata: simpleLogData,
             layout: layout,
+            wvw: !!logData.wvw,
             datatypes: DataTypes,
-            combatreplay: logData.combatReplay,
-            light: logData.lightTheme,
+            light: typeof (window.theme) !== "undefined" ? (window.theme === 'yeti') : logData.lightTheme,
             mode: 0,
             animate: false,
-            animator: null
+            animationStatus: null
         },
         methods: {
-            switchCombatReplayButtons: function(from, to) {          
+            switchCombatReplayButtons: function (from, to) {
                 var combatReplay = $('#combat-replay');
                 if (combatReplay) {
-                    var buttons = combatReplay.find('.'+from);
+                    var buttons = combatReplay.find('.' + from);
                     buttons.addClass(to).removeClass(from);
                 }
             },
-            switchTheme: function(state) {
+            switchTheme: function (state) {
                 if (state === this.light) {
                     return;
                 }
                 var style = this.light ? 'yeti' : 'slate';
                 this.light = state;
                 var newStyle = this.light ? 'yeti' : 'slate';
-                document.body.classList.remove("theme-"+style);
-                document.body.classList.add("theme-"+newStyle);
+                document.body.classList.remove("theme-" + style);
+                document.body.classList.add("theme-" + newStyle);
+                if (storeTheme) storeTheme(newStyle);
                 var theme = document.getElementById('theme');
-                theme.href = themes[newStyle];              
+                theme.href = themes[newStyle];
                 this.switchCombatReplayButtons(this.light ? 'btn-dark' : 'btn-light', this.light ? 'btn-light' : 'btn-dark');
             },
-            changeMode: function(iMode) {
+            changeMode: function (iMode) {
                 if (this.mode === iMode) {
                     return;
                 }
                 var oldMode = this.mode;
                 this.mode = iMode;
-                if (this.mode !== 1 && oldMode === 1) {
-                    this.animate = this.animator && this.animator.animation !== null;
-                    this.animator && this.animator.stopAnimate();
-                } else if (this.mode === 1 && this.animate) {
-                    this.animator && this.animator.startAnimate();
+                if (this.animator) {
+                    if (this.mode !== 1) {
+                        if (oldMode === 1) {
+                            // animation running when going out of CR
+                            this.animate = this.animator.animation !== null;
+                        }
+                    } else if (this.animate) {
+                        this.animator.toggleAnimate();
+                    }
                 }
             },
         },
         computed: {
+            animator: function () {
+                return this.animationStatus ? animator : null;
+            },
             activePhase: function () {
                 var phases = this.logdata.phases;
                 for (var i = 0; i < phases.length; i++) {

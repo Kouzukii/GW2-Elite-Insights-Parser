@@ -1,23 +1,24 @@
-﻿using LuckParser.Models.DataModels;
+﻿using LuckParser.Parser;
 
 namespace LuckParser.Models.ParseModels
 {
     public class CombatItem
     {
-        public long Time { get; set; }
-        public ulong SrcAgent { get; set; }
-        public ulong DstAgent { get; set; }
-        public int Value { get; }
+        public long Time { get; private set; }
+        public ulong SrcAgent { get; private set; }
+        public ulong DstAgent { get; private set; }
+        public int Value { get; set; }
         public int BuffDmg { get; }
         public uint OverstackValue { get; }
         public long SkillID { get; }
-        public ushort SrcInstid { get; set; }
-        public ushort DstInstid { get; set; }
-        public ushort SrcMasterInstid { get; set; }
-        public ushort DstMasterInstid { get; set; }
+        public ushort SrcInstid { get; private set; }
+        public ushort DstInstid { get; private set; }
+        public ushort SrcMasterInstid { get; private set; }
+        public ushort DstMasterInstid { get; private set; }
         public ParseEnum.IFF IFF { get; }
         public byte IsBuff { get; }
-        public ParseEnum.Result Result { get; }
+        public byte Result { get; }
+        public ParseEnum.Result ResultEnum { get; }
         public ParseEnum.Activation IsActivation { get; }
         public ParseEnum.BuffRemove IsBuffRemove { get; }
         public byte IsNinety { get; }
@@ -32,7 +33,7 @@ namespace LuckParser.Models.ParseModels
         public CombatItem(long time, ulong srcAgent, ulong dstAgent, int value, int buffDmg, uint overstackValue,
                long skillId, ushort srcInstid, ushort dstInstid, ushort srcMasterInstid, 
                ushort dstMasterInstid, ParseEnum.IFF iff, byte isBuff,
-               ParseEnum.Result result, ParseEnum.Activation isActivation,
+               byte result, ParseEnum.Activation isActivation,
                ParseEnum.BuffRemove isBuffRemove, byte isNinety, byte isFifty, byte isMoving,
                ParseEnum.StateChange isStateChange, byte isFlanking, byte isShields, byte isOffcycle)
         {
@@ -50,6 +51,7 @@ namespace LuckParser.Models.ParseModels
             IFF = iff;
             IsBuff = isBuff;
             Result = result;
+            ResultEnum = ParseEnum.GetResult(result);
             IsActivation = isActivation;
             IsBuffRemove = isBuffRemove;
             IsNinety = isNinety;
@@ -59,6 +61,37 @@ namespace LuckParser.Models.ParseModels
             IsFlanking = isFlanking;
             IsShields = isShields;
             IsOffcycle = isOffcycle;
+        }
+
+        public void OverrideTime(long time)
+        {
+            Time = time;
+        }
+
+        public void OverrideSrcValues(ulong agent, ushort instid)
+        {
+            SrcInstid = instid;
+            SrcAgent = agent;
+        }
+
+        public void OverrideSrcValues(ulong agent, ushort instid, ushort masterInstid)
+        {
+            SrcInstid = instid;
+            SrcAgent = agent;
+            SrcMasterInstid = masterInstid;
+        }
+
+        public void OverrideDstValues(ulong agent, ushort instid)
+        {
+            DstInstid = instid;
+            DstAgent = agent;
+        }
+
+        public void OverrideDstValues(ulong agent, ushort instid, ushort masterInstid)
+        {
+            DstInstid = instid;
+            DstAgent = agent;
+            DstMasterInstid = masterInstid;
         }
     }
 }

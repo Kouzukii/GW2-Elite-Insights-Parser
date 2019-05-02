@@ -1,4 +1,4 @@
-﻿using LuckParser.Models.DataModels;
+﻿using LuckParser.Parser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,17 +12,28 @@ namespace LuckParser.Models.ParseModels
         {
             public long Start { get; private set; }
             public long BoonDuration { get; private set; }
-            public ushort Src { get; private set; }
-            public ushort OriginalSrc { get; }
+            public AgentItem Src { get; private set; }
+            public AgentItem SeedSrc { get; }
+            public bool IsExtension { get; }
 
-            //private List<Tuple<ushort, long>> _extensions = new List<Tuple<ushort, long>>();
+            public List<(AgentItem src, long value)> Extensions { get; } = new List<(AgentItem src, long value)>();
 
-            public BoonStackItem(long start, long boonDuration, ushort srcinstid)
+            public BoonStackItem(long start, long boonDuration, AgentItem src, AgentItem seedSrc, bool isExtension)
             {
                 Start = start;
-                OriginalSrc = srcinstid;
+                SeedSrc = seedSrc;
                 BoonDuration = boonDuration;
-                Src = srcinstid;
+                Src = src;
+                IsExtension = isExtension;
+            }
+
+            public BoonStackItem(long start, long boonDuration, AgentItem src)
+            {
+                Start = start;
+                SeedSrc = src;
+                BoonDuration = boonDuration;
+                Src = src;
+                IsExtension = false;
             }
 
             public BoonStackItem(BoonStackItem other, long startShift, long durationShift)
@@ -30,24 +41,41 @@ namespace LuckParser.Models.ParseModels
                 Start = other.Start + startShift;
                 BoonDuration = other.BoonDuration - durationShift;
                 Src = other.Src;
-                OriginalSrc = other.OriginalSrc;
-                //_extensions = other._extensions;
+                SeedSrc = other.SeedSrc;
+                Extensions = other.Extensions;
+                IsExtension = other.IsExtension;
+                if (BoonDuration == 0 && Extensions.Count > 0)
+                {
+                    (AgentItem src, long value) = Extensions.First();
+                    Extensions.RemoveAt(0);
+                    Src = src;
+                    BoonDuration = value;
+                    IsExtension = true;
+                }
             }
 
-            public void Extend(long value, ushort src)
+            public long TotalBoonDuration()
             {
-                BoonDuration += value;
+                long res = BoonDuration;
+                foreach ((AgentItem src, long value) in Extensions)
+                {
+                    res += value;
+                }
+                return res;
+            }
+
+            public void Extend(long value, AgentItem src)
+            {
+                Extensions.Add((src, value));
             }
         }
 
         // Fields
         protected readonly List<BoonStackItem> BoonStack;
-        protected readonly List<BoonSimulationItem> GenerationSimulation = new List<BoonSimulationItem>();
-        public GenerationSimulationResult GenerationSimulationResult => new GenerationSimulationResult(GenerationSimulation);
+        public readonly List<BoonSimulationItem> GenerationSimulation = new List<BoonSimulationItem>();
         public readonly List<BoonSimulationItemOverstack> OverstackSimulationResult = new List<BoonSimulationItemOverstack>();
         public readonly List<BoonSimulationItemWasted> WasteSimulationResult = new List<BoonSimulationItemWasted>();
         public readonly List<BoonSimulationItemCleanse> CleanseSimulationResult = new List<BoonSimulationItemCleanse>();
-        public readonly List<BoonSimulationItemExtension> UnknownExtensionSimulationResult = new List<BoonSimulationItemExtension>();
         protected readonly int Capacity;
         private readonly ParsedLog _log;
         private readonly StackingLogic _logic;
@@ -107,9 +135,29 @@ namespace LuckParser.Models.ParseModels
 
         protected abstract void Update(long timePassed);
 
-        public void Add(long boonDuration, ushort srcinstid, long start, bool atFirst = false)
+        public void Add(long boonDuration, AgentItem src, long start)
         {
-            var toAdd = new BoonStackItem(start, boonDuration, srcinstid);
+            var toAdd = new BoonStackItem(start, boonDuration, src);
+            // Find empty slot
+            if (BoonStack.Count < Capacity)
+            {
+                BoonStack.Add(toAdd);
+                _logic.Sort(_log, BoonStack);
+            }
+            // Replace lowest value
+            else
+            {
+                bool found = _logic.StackEffect(_log, toAdd, BoonStack, WasteSimulationResult);
+                if (!found)
+                {
+                    OverstackSimulationResult.Add(new BoonSimulationItemOverstack(src, boonDuration, start));
+                }
+            }
+        }
+
+        protected void Add(long boonDuration, AgentItem srcinstid, AgentItem seedSrc, long start, bool atFirst, bool isExtension)
+        {
+            var toAdd = new BoonStackItem(start, boonDuration, srcinstid, seedSrc, isExtension);
             // Find empty slot
             if (BoonStack.Count < Capacity)
             {
@@ -135,7 +183,7 @@ namespace LuckParser.Models.ParseModels
             }
         }
 
-        public void Remove(ushort provokedBy, long boonDuration, long start, ParseEnum.BuffRemove removeType)
+        public void Remove(AgentItem provokedBy, long boonDuration, long start, ParseEnum.BuffRemove removeType)
         {
             if (GenerationSimulation.Count > 0)
             {
@@ -152,6 +200,14 @@ namespace LuckParser.Models.ParseModels
                     {
                         WasteSimulationResult.Add(new BoonSimulationItemWasted(stackItem.Src, stackItem.BoonDuration, start));
                         CleanseSimulationResult.Add(new BoonSimulationItemCleanse(provokedBy, stackItem.BoonDuration, start));
+                        if (stackItem.Extensions.Count > 0)
+                        {
+                            foreach ((AgentItem src, long value) in stackItem.Extensions)
+                            {
+                                WasteSimulationResult.Add(new BoonSimulationItemWasted(src, value, start));
+                                CleanseSimulationResult.Add(new BoonSimulationItemCleanse(provokedBy, value, start));
+                            }
+                        }
                     }
                     BoonStack.Clear();
                     break;
@@ -160,10 +216,18 @@ namespace LuckParser.Models.ParseModels
                     for (int i = 0; i < BoonStack.Count; i++)
                     {
                         BoonStackItem stackItem = BoonStack[i];
-                        if (Math.Abs(boonDuration - stackItem.BoonDuration) < 10)
+                        if (Math.Abs(boonDuration - stackItem.TotalBoonDuration()) < 10)
                         {
                             WasteSimulationResult.Add(new BoonSimulationItemWasted(stackItem.Src, stackItem.BoonDuration, start));
                             CleanseSimulationResult.Add(new BoonSimulationItemCleanse(provokedBy, stackItem.BoonDuration, start));
+                            if (stackItem.Extensions.Count > 0)
+                            {
+                                foreach ((AgentItem src, long value) in stackItem.Extensions)
+                                {
+                                    WasteSimulationResult.Add(new BoonSimulationItemWasted(src, value, start));
+                                    CleanseSimulationResult.Add(new BoonSimulationItemCleanse(provokedBy, value, start));
+                                }
+                            }
                             BoonStack.RemoveAt(i);
                             break;
                         }
@@ -173,9 +237,8 @@ namespace LuckParser.Models.ParseModels
                     break;
             }
             _logic.Sort(_log, BoonStack);
-            Update(0);
         }
 
-        public abstract void Extend(long extension, long oldValue, ushort src, long start);
+        public abstract void Extend(long extension, long oldValue, AgentItem src, long start);
     }
 }

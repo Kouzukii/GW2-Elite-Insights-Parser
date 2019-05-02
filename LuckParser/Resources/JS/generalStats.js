@@ -6,6 +6,7 @@ var compileGeneralStats = function () {
         template: `${tmplDamageTable}`,
         data: function () {
             return {
+                wvw: !!logData.wvw,
                 cacheTarget: new Map()
             };
         },
@@ -16,7 +17,7 @@ var compileGeneralStats = function () {
             updateTable("#dps-table");
         },
         computed: {
-            phase: function() {
+            phase: function () {
                 return logData.phases[this.phaseindex];
             },
             tableData: function () {
@@ -90,7 +91,7 @@ var compileGeneralStats = function () {
             updateTable("#def-table");
         },
         computed: {
-            phase: function() {
+            phase: function () {
                 return logData.phases[this.phaseindex];
             },
             tableData: function () {
@@ -158,7 +159,7 @@ var compileGeneralStats = function () {
             updateTable("#sup-table");
         },
         computed: {
-            phase: function() {
+            phase: function () {
                 return logData.phases[this.phaseindex];
             },
             tableData: function () {
@@ -216,7 +217,8 @@ var compileGeneralStats = function () {
         mixins: [roundingComponent],
         data: function () {
             return {
-                mode: 0,
+                wvw: !!logData.wvw,
+                mode: logData.wvw ? 0 :1,
                 cache: new Map(),
                 cacheTarget: new Map()
             };
@@ -228,7 +230,7 @@ var compileGeneralStats = function () {
             updateTable("#dmg-table");
         },
         computed: {
-            phase: function() {
+            phase: function () {
                 return logData.phases[this.phaseindex];
             },
             tableData: function () {
@@ -236,19 +238,41 @@ var compileGeneralStats = function () {
                     return this.cache.get(this.phaseindex);
                 }
                 var rows = [];
+                var sums = [];
+                var groups = [];
+                var total = {
+                    name: "Total",
+                    data: [],
+                    commons: [],
+                    count: 0
+                };
                 for (var i = 0; i < this.phase.dmgStats.length; i++) {
                     var commons = [];
-                    var data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                    var data = [];
                     var player = logData.players[i];
                     if (player.isConjure) {
                         continue;
                     }
+                    if (!groups[player.group]) {
+                        groups[player.group] = {
+                            name: "Group " + player.group,
+                            data: [],
+                            commons: [],
+                            count: 0
+                        };
+                    }
+                    groups[player.group].count++;
+                    total.count++;
                     var stats = this.phase.dmgStats[i];
                     for (var j = 0; j < stats.length; j++) {
-                        if (j >= 17) {
-                            commons[j - 17] = stats[j];
+                        if (j >= 9) {
+                            commons[j - 9] = stats[j];
+                            groups[player.group].commons[j - 9] = (groups[player.group].commons[j - 9] || 0) + commons[j - 9];
+                            total.commons[j - 9] = (total.commons[j - 9] || 0) + commons[j - 9];
                         } else {
                             data[j] = stats[j];
+                            groups[player.group].data[j] = (groups[player.group].data[j] || 0) + data[j];
+                            total.data[j] = (total.data[j] || 0) + data[j];
                         }
                     }
                     rows.push({
@@ -257,8 +281,18 @@ var compileGeneralStats = function () {
                         data: data
                     });
                 }
-                this.cache.set(this.phaseindex, rows);
-                return rows;
+                for (var i = 0; i < groups.length; i++) {
+                    if (groups[i]) {
+                        sums.push(groups[i]);
+                    }
+                }
+                sums.push(total);
+                var res = {
+                    rows: rows,
+                    sums: sums
+                };
+                this.cache.set(this.phaseindex, res);
+                return res;
             },
             tableDataTarget: function () {
                 var cacheID = this.phaseindex + '-';
@@ -267,22 +301,44 @@ var compileGeneralStats = function () {
                     return this.cacheTarget.get(cacheID);
                 }
                 var rows = [];
+                var sums = [];
+                var groups = [];
+                var total = {
+                    name: "Total",
+                    data: [],
+                    commons: [],
+                    count: 0
+                };
                 for (var i = 0; i < this.phase.dmgStats.length; i++) {
                     var commons = [];
-                    var data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                    var data = [];
                     var player = logData.players[i];
                     if (player.isConjure) {
                         continue;
                     }
+                    if (!groups[player.group]) {
+                        groups[player.group] = {
+                            name: "Group " + player.group,
+                            data: [],
+                            commons: [],
+                            count: 0
+                        };
+                    }
+                    groups[player.group].count++;
+                    total.count++;
                     var stats = this.phase.dmgStats[i];
                     for (var j = 0; j < stats.length; j++) {
-                        if (j >= 17) {
-                            commons[j - 17] = stats[j];
+                        if (j >= 9) {
+                            commons[j - 9] = stats[j];
+                            groups[player.group].commons[j - 9] = (groups[player.group].commons[j - 9] || 0) + commons[j - 9];
+                            total.commons[j - 9] = (total.commons[j - 9] || 0) + commons[j - 9];
                         } else {
                             for (var k = 0; k < this.activetargets.length; k++) {
                                 var tar = this.phase.dmgStatsTargets[i][this.activetargets[k]];
-                                data[j] += tar[j];
+                                data[j] = (data[j] || 0) + tar[j];
                             }
+                            groups[player.group].data[j] = (groups[player.group].data[j] || 0) + data[j];
+                            total.data[j] = (total.data[j] || 0) + data[j];
                         }
                     }
                     rows.push({
@@ -291,128 +347,19 @@ var compileGeneralStats = function () {
                         data: data
                     });
                 }
-                this.cacheTarget.set(cacheID, rows);
-                return rows;
+                for (var i = 0; i < groups.length; i++) {
+                    if (groups[i]) {
+                        sums.push(groups[i]);
+                    }
+                }
+                sums.push(total);
+                var res = {
+                    rows: rows,
+                    sums: sums
+                };
+                this.cacheTarget.set(cacheID, res);
+                return res;
             }
         }
-    });
-
-    Vue.component("dmgmodifier-stats-component", {
-        props: ['phaseindex', 'playerindex', 'activetargets'
-        ],
-        template: `${tmplDamageModifierTable}`,
-        data: function () {
-            return {
-                mode: 0,
-                cache: new Map(),
-                cacheTarget: new Map()
-            };
-        },
-        computed: {
-            phase: function() {
-                return logData.phases[this.phaseindex];
-            },
-            modifiers: function () {
-                var dmgModifiersCommon = logData.phases[0].dmgModifiersCommon;
-                if (!dmgModifiersCommon.length) {
-                    return [];
-                }
-                var dmgModifier = dmgModifiersCommon[0];
-                var buffs = [];
-                for (var i = 0; i < dmgModifier.length; i++) {
-                    var modifier = dmgModifier[i];
-                    buffs.push(findSkill(true, modifier[0]));
-                }
-                return buffs;
-            },
-            rows: function () {
-                if (this.cache.has(this.phaseindex)) {
-                    return this.cache.get(this.phaseindex);
-                }
-                var rows = [];
-                var j;
-                for (var i = 0; i < logData.players.length; i++) {
-                    var player = logData.players[i];
-                    if (player.isConjure) {
-                        continue;
-                    }
-                    var dmgModifier = this.phase.dmgModifiersCommon[i];
-                    var data = [];
-                    for (j = 0; j < this.modifiers.length; j++) {
-                        data.push([0, 0, 0, 0]);
-                    }
-                    for (j = 0; j < dmgModifier.length; j++) {
-                        data[j] = dmgModifier[j].slice(1);
-                    }
-                    rows.push({
-                        player: player,
-                        data: data
-                    });
-                }
-                this.cache.set(this.phaseindex, rows);
-                return rows;
-            },
-            rowsTarget: function () {
-                var cacheID = this.phaseindex + '-';
-                cacheID += getTargetCacheID(this.activetargets);
-                if (this.cacheTarget.has(cacheID)) {
-                    return this.cacheTarget.get(cacheID);
-                }
-                var rows = [];
-                var j;
-                for (var i = 0; i < logData.players.length; i++) {
-                    var player = logData.players[i];
-                    if (player.isConjure) {
-                        continue;
-                    }
-                    var dmgModifier = this.phase.dmgModifiersTargetsCommon[i];
-                    var data = [];
-                    for (j = 0; j < this.modifiers.length; j++) {
-                        data.push([0, 0, 0, 0]);
-                    }
-                    for (j = 0; j < this.activetargets.length; j++) {
-                        var modifier = dmgModifier[this.activetargets[j]];
-                        for (var k = 0; k < modifier.length; k++) {
-                            var targetData = modifier[k].slice(1);
-                            var curData = data[k];
-                            for (var l = 0; l < targetData.length; l++) {
-                                curData[l] += targetData[l];
-                            }
-                            data[k] = curData;
-                        }
-                    }
-                    rows.push({
-                        player: player,
-                        data: data
-                    });
-                }
-                this.cacheTarget.set(cacheID, rows);
-                return rows;
-            }
-        },
-        methods: {
-            getTooltip: function (item) {
-                var hits = item[0] + " out of " + item[1] + " hits";
-                if (item[3] > 0) {
-                    var gain = "Pure Damage: " + item[2];
-                    var damageIncrease = Math.round(100 * 100 * (item[3] / (item[3] - item[2]) - 1.0)) / 100;
-                    var increase = "Damage Gain: " + (isNaN(damageIncrease) ? "0" : damageIncrease) + "%";
-                    return hits + "<br>" + gain + "<br>" + increase;
-                } else {
-                    var done = "Damage Done: " + item[2];
-                    return hits + "<br>" + done;
-                }
-            },
-            getCellValue: function (item) {
-                var res = Math.round(100 * 100 * item[0] / Math.max(item[1], 1)) / 100;
-                return isNaN(res) ? 0 : res;
-            }
-        },
-        mounted() {
-            initTable("#dmgmodifier-table", 1, "asc");
-        },
-        updated() {
-            updateTable('#dmgmodifier-table');
-        },
     });
 };

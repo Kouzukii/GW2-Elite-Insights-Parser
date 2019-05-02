@@ -67,13 +67,6 @@ var compileLayout = function () {
             dataType: DataTypes.gameplayTable
         })
     );
-    if (logData.phases[0].dmgModifiersCommon.length > 0 && logData.phases[0].dmgModifiersCommon[0].length > 0) {
-        statsLayout.addTab(
-            new Tab("Damage Modifiers Stats", {
-                dataType: DataTypes.dmgModifiersTable
-            })
-        );
-    }
     statsLayout.addTab(
         new Tab("Defensive Stats", {
             dataType: DataTypes.defTable
@@ -121,8 +114,15 @@ var compileLayout = function () {
     }
     buffs.layout = buffLayout;
     layout.addTab(buffs);
+    // damage modifiers
+    if (!logData.wvw) {
+        var damageModifiers = new Tab("Damage Modifiers", {
+            dataType: DataTypes.dmgModifiersTable
+        });
+        layout.addTab(damageModifiers);
+    }
     // mechanics
-    if (mechanicMap.length > 0) {
+    if (mechanicMap.length > 0 && !logData.noMechanics) {
         var mechanics = new Tab("Mechanics", {
             dataType: DataTypes.mechanicTable
         });
@@ -134,10 +134,12 @@ var compileLayout = function () {
     });
     layout.addTab(graphs);
     // targets
-    var targets = new Tab("Targets Summary", {
-        dataType: DataTypes.targetTab
-    });
-    layout.addTab(targets);
+    if (!logData.wvw) {
+        var targets = new Tab("Targets Summary", {
+            dataType: DataTypes.targetTab
+        });
+        layout.addTab(targets);
+    }
     // player
     var player = new Tab("Player Summary", {
         dataType: DataTypes.playerTab

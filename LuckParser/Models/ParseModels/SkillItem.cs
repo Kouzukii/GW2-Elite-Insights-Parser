@@ -12,6 +12,9 @@ namespace LuckParser.Models.ParseModels
         public const long WeaponSwapId = -2;
         public const long DeathId = -4;
         public const long DownId = -3;
+        public const long DCId = -5;
+        public const long AliveId = -6;
+        public const long RespawnId = -7;
 
         readonly static Dictionary<long, string> _overrideNames = new Dictionary<long, string>()
         {
@@ -34,9 +37,9 @@ namespace LuckParser.Models.ParseModels
             { 34427, "Abomination Transformation"},
             { 34510, "Shield (Abomination)"},
             // Generic
-            {-5, "Phase out" },
+            //{-5, "Phase out" },
             // Deimos
-            {-6, "Roleplay" },
+            //{-6, "Roleplay" },
             // Dhuum
             {47396, "Major Soul Split" },
             // Keep Construct
@@ -60,11 +63,12 @@ namespace LuckParser.Models.ParseModels
         private const string _defaultIcon = "https://render.guildwars2.com/file/1D55D34FB4EE20B1962E315245E40CA5E1042D0E/62248.png";
 
         // Fields
-        public readonly long ID;
+        public long ID { get; private set; }
+        public int Range { get; private set; } = 0;
+        public bool AA => _apiSkill?.Slot == "Weapon_1" || _apiSkill?.Slot == "Downed_1";
         public string Name { get; private set; }
         public string Icon { get; private set; }
-        public GW2APISkill ApiSkill { get; private set; }
-        public int CC { get; private set; }
+        private GW2APISkill _apiSkill;
 
         // Constructor
         public SkillItem(long ID, string name)
@@ -78,39 +82,134 @@ namespace LuckParser.Models.ParseModels
         {
             this.ID = ID;
             Name = name.Replace("\0", "");
-            ApiSkill = apiController.GetSkill(ID);
+            _apiSkill = apiController.GetSkill(ID);
             CompleteItem();
+        }
+
+        public bool EstimateWeapons(string[] weapons, int swapped, bool swapCheck)
+        {
+            if (weapons.Length != 4)
+            {
+                throw new InvalidOperationException("Invalid count in weapons array");
+            }
+            if (!(_apiSkill != null && swapCheck))
+            {
+                return false;
+            }
+
+            if (_apiSkill.Type == "Weapon" && _apiSkill.Professions.Length > 0 && (_apiSkill.Categories == null || (_apiSkill.Categories.Length == 1 && (_apiSkill.Categories[0] == "Phantasm" || _apiSkill.Categories[0] == "DualWield"))))
+            {
+                if (_apiSkill.DualWield != null && _apiSkill.DualWield != "None" && _apiSkill.DualWield != "Nothing")
+                {
+                    if (swapped == 4)
+                    {
+                        weapons[0] = _apiSkill.WeaponType;
+                        weapons[1] = _apiSkill.DualWield;
+                    }
+                    else if (swapped == 5)
+                    {
+                        weapons[2] = _apiSkill.WeaponType;
+                        weapons[3] = _apiSkill.DualWield;
+                    }
+                }
+                else if (_apiSkill.WeaponType == "Greatsword" || _apiSkill.WeaponType == "Staff" || _apiSkill.WeaponType == "Rifle" || _apiSkill.WeaponType == "Longbow" || _apiSkill.WeaponType == "Shortbow" || _apiSkill.WeaponType == "Hammer"
+                    || _apiSkill.WeaponType == "Trident" || _apiSkill.WeaponType == "Speargun" || _apiSkill.WeaponType == "Spear")
+                {
+                    if (swapped == 4)
+                    {
+                        weapons[0] = _apiSkill.WeaponType;
+                        weapons[1] = "2Hand";
+                    }
+                    else if (swapped == 5)
+                    {
+                        weapons[2] = _apiSkill.WeaponType;
+                        weapons[3] = "2Hand";
+                    }
+                }//2 handed
+                else if (_apiSkill.WeaponType == "Focus" || _apiSkill.WeaponType == "Shield" || _apiSkill.WeaponType == "Torch" || _apiSkill.WeaponType == "Warhorn")
+                {
+                    if (swapped == 4)
+                    {
+
+                        weapons[1] = _apiSkill.WeaponType;
+                    }
+                    else if (swapped == 5)
+                    {
+
+                        weapons[3] = _apiSkill.WeaponType;
+                    }
+                }//OffHand
+                else if (_apiSkill.WeaponType == "Axe" || _apiSkill.WeaponType == "Dagger" || _apiSkill.WeaponType == "Mace" || _apiSkill.WeaponType == "Pistol" || _apiSkill.WeaponType == "Sword" || _apiSkill.WeaponType == "Scepter")
+                {
+                    if (_apiSkill.Slot == "Weapon_1" || _apiSkill.Slot == "Weapon_2" || _apiSkill.Slot == "Weapon_3")
+                    {
+                        if (swapped == 4)
+                        {
+
+                            weapons[0] = _apiSkill.WeaponType;
+                        }
+                        else if (swapped == 5)
+                        {
+
+                            weapons[2] = _apiSkill.WeaponType;
+                        }
+                    }
+                    if (_apiSkill.Slot == "Weapon_4" || _apiSkill.Slot == "Weapon_5")
+                    {
+                        if (swapped == 4)
+                        {
+
+                            weapons[1] = _apiSkill.WeaponType;
+                        }
+                        else if (swapped == 5)
+                        {
+
+                            weapons[3] = _apiSkill.WeaponType;
+                        }
+                    }
+                }// 1 handed
+            }
+            return true;
         }
 
         private void CompleteItem()
         {
-            if (ApiSkill == null && _overrideNames.TryGetValue(ID,out string name))
+            if (_apiSkill == null && _overrideNames.TryGetValue(ID,out string name))
             {
                 Name = name;
             }
-            else if (ApiSkill != null)
+            else if (_apiSkill != null)
             {
-                Name = ApiSkill.name;
-
+                Name = _apiSkill.Name;
+                if (_apiSkill.Facts != null)
+                {
+                    foreach (GW2APIFact fact in _apiSkill.Facts)
+                    {
+                        if (fact.Text != null && fact.Text == "Range" && fact.Value != null)
+                        {
+                            Range = Convert.ToInt32(fact.Value);
+                        }
+                    }
+                }
             }
-            if (ApiSkill == null && _overrideIcons.TryGetValue(ID, out string icon))
+            if (_apiSkill == null && _overrideIcons.TryGetValue(ID, out string icon))
             {
                 Icon = icon;
             } else
             {
-                Icon = ApiSkill != null ? ApiSkill.icon : _defaultIcon;
+                Icon = _apiSkill != null ? _apiSkill.Icon : _defaultIcon;
             }
         }
 
         // Public Methods
 
-        public void SetCCAPI()//this is 100% off the GW2 API is not a reliable source of finding skill CC
+        /*public void SetCCAPI()//this is 100% off the GW2 API is not a reliable source of finding skill CC
         {
             CC = 0;
-            if (ApiSkill != null)
+            if (_apiSkill != null)
             {
-                GW2APISkillDetailed apiskilldet = (GW2APISkillDetailed)ApiSkill;
-                GW2APISkillCheck apiskillchec = (GW2APISkillCheck)ApiSkill;
+                GW2APISkillDetailed apiskilldet = (GW2APISkillDetailed)_apiSkill;
+                GW2APISkillCheck apiskillchec = (GW2APISkillCheck)_apiSkill;
                 GW2APIfacts[] factsList = apiskilldet != null ? apiskilldet.facts : apiskillchec.facts;
                 bool daze = false;
                 bool stun = false;
@@ -237,6 +336,6 @@ namespace LuckParser.Models.ParseModels
                 }
                
             }
-        }
+        }*/
     }
 }

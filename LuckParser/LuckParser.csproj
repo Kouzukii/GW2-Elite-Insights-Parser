@@ -57,31 +57,20 @@
   <PropertyGroup>
     <ApplicationManifest>App.manifest</ApplicationManifest>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Production|AnyCPU' ">
-    <OutputPath>bin\Production\</OutputPath>
-    <DefineConstants>TRACE;PROD</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NUglify, Version=1.5.12.0, Culture=neutral, PublicKeyToken=15bc7810aec21b5e, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUglify.1.5.12\lib\net40\NUglify.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.6\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -93,6 +82,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\InvalidPlayerException.cs" />
+    <Compile Include="Exceptions\TooShortException.cs" />
     <Compile Include="Exceptions\SkipException.cs" />
     <Compile Include="Exceptions\CancellationException.cs" />
     <Compile Include="ConsoleProgram.cs" />
@@ -103,17 +94,79 @@
     <Compile Include="Builders\Helpers\CSVHelper.cs" />
     <Compile Include="GeneralHelper.cs" />
     <Compile Include="Controllers\FlashWindow.cs" />
+    <Compile Include="Models\FightLogic\EaterOfSouls.cs" />
+    <Compile Include="Models\FightLogic\DarkMaze.cs" />
+    <Compile Include="Models\FightLogic\BrokenKing.cs" />
+    <Compile Include="Models\FightLogic\River.cs" />
+    <Compile Include="Models\FightLogic\Escort.cs" />
+    <Compile Include="Models\FightLogic\WvWFight.cs" />
+    <Compile Include="Models\FightLogic\UnknownFightLogic.cs" />
+    <Compile Include="Models\FightLogic\BanditTrio.cs" />
+    <Compile Include="Models\FightLogic\Freezie.cs" />
+    <Compile Include="Models\HtmlModels\DamageModData.cs" />
+    <Compile Include="Models\HtmlModels\DamageModDto.cs" />
+    <Compile Include="Models\JsonModels\JsonActor.cs" />
+    <Compile Include="Models\JsonModels\JsonDeathRecap.cs" />
+    <Compile Include="Models\JsonModels\JsonBuffDamageModifierData.cs" />
+    <Compile Include="Models\JsonModels\JsonMechanics.cs" />
+    <Compile Include="Models\JsonModels\JsonRotation.cs" />
+    <Compile Include="Models\JsonModels\JsonStatistics.cs" />
+    <Compile Include="Models\ParseModels\Boons\BoonsContainer.cs" />
+    <Compile Include="Models\ParseModels\Boons\BoonSourceFinders\BoonSourceFinder11122018.cs" />
+    <Compile Include="Models\ParseModels\Boons\BoonSourceFinders\BoonSourceFinder05032019.cs" />
+    <Compile Include="Models\ParseModels\Boons\BoonSourceFinders\BoonSourceFinder.cs" />
+    <Compile Include="Models\ParseModels\CombatReplay\Actors\BackgroundActor.cs" />
+    <Compile Include="Models\ParseModels\CombatReplay\Actors\FacingRectangleActor.cs" />
+    <Compile Include="Models\ParseModels\CombatReplay\Actors\FacingActor.cs" />
+    <Compile Include="Models\ParseModels\CombatReplay\Actors\GenericActor.cs" />
+    <Compile Include="Models\ParseModels\CombatReplay\Actors\MovingPlatformActor.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\BuffDamageModifierTarget.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\BuffDamageModifier.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\BuffsTrackers\BuffsTrackerSingle.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\BuffsTrackers\BuffsTrackerMulti.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\BuffsTrackers\BuffsTracker.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\DamageLogDamageModifier.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\DamageModifiersContainer.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\DamageModifier.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\GainComputers\GainComputer.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\GainComputers\GainComputerByAbsence.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\GainComputers\GainComputerNonMultiplier.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\GainComputers\GainComputerByStack.cs" />
+    <Compile Include="Models\ParseModels\DamageModifiers\GainComputers\GainComputerByPresence.cs" />
     <Compile Include="Models\ParseModels\Logs\BoonExtensionLog.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\EnemyCastEndMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\EnemyCastStartMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\EnemyBoonRemoveMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\HitOnEnemyMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\MechanicsChecker\CombatItemResultChecker.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\MechanicsChecker\CombatItemValueChecker.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\MechanicsChecker\MechanicChecker.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\PlayerBoonApplyMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\PlayerCastEndMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\PlayerOnPlayerMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\PlayerBoonRemoveMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\PlayerCastStartMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\EnemyBoonApplyMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\SpawnMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\SkillOnPlayerMechanic.cs" />
+    <Compile Include="Models\ParseModels\Mechanics\PlayerStatusMechanic.cs" />
     <Compile Include="Models\ParseModels\Simulator\BoonSimulationItems\AbstractBoonSimulationItem.cs" />
-    <Compile Include="Models\ParseModels\Simulator\BoonSimulationItems\BoonSimulationItemExtension.cs" />
     <Compile Include="Models\ParseModels\Simulator\BoonSimulationItems\BoonSimulationItemOverstack.cs" />
     <Compile Include="Models\ParseModels\Simulator\BoonSimulationItems\AbstractBoonSimulationItemWasted.cs" />
-    <Compile Include="Parser\Parser.cs" />
     <Compile Include="Controllers\GW2APIController.cs" />
+    <Compile Include="Models\Statistics.cs" />
+    <Compile Include="Parser\ParsedLog.cs" />
+    <Compile Include="Parser\ParseEnum.cs" />
     <Compile Include="Parser\ParseHelper.cs" />
-    <Compile Include="Models\DataModels\StatisticsCalculator.cs" />
     <Compile Include="Controllers\UploadController.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="Parser\ParsingController.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.cs" />
+    <Compile Include="Settings\CustomSettingsManager.cs" />
     <Compile Include="GridRow.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -147,10 +200,6 @@
     <Compile Include="Models\FightLogic\Sabetha.cs" />
     <Compile Include="Models\FightLogic\Gorseval.cs" />
     <Compile Include="Models\FightLogic\ValeGuardian.cs" />
-    <Compile Include="Models\DataModels\ParseEnum.cs" />
-    <Compile Include="Models\DataModels\ParsedLog.cs" />
-    <Compile Include="Models\DataModels\SettingsContainer.cs" />
-    <Compile Include="Models\DataModels\Statistics.cs" />
     <Compile Include="Models\HtmlModels\AreaLabelDto.cs" />
     <Compile Include="Models\HtmlModels\DeathRecapDto.cs" />
     <Compile Include="Models\HtmlModels\FoodDto.cs" />
@@ -170,25 +219,18 @@
     <Compile Include="Models\HtmlModels\BoonData.cs" />
     <Compile Include="Models\HtmlModels\PhaseDto.cs" />
     <Compile Include="Models\HtmlModels\LogDataDto.cs" />
-    <Compile Include="Models\HtmlModels\PlayerDetailsDto.cs" />
+    <Compile Include="Models\HtmlModels\ActorDetailsDto.cs" />
     <Compile Include="Models\HtmlModels\PlayerDto.cs" />
     <Compile Include="Models\JsonModels\JsonConsumable.cs" />
     <Compile Include="Models\JsonModels\JsonDamageDist.cs" />
     <Compile Include="Models\JsonModels\JsonLog.cs" />
     <Compile Include="Models\JsonModels\JsonMinions.cs" />
-    <Compile Include="Models\JsonModels\JsonSkill.cs" />
-    <Compile Include="Models\JsonModels\JsonMechanic.cs" />
     <Compile Include="Models\JsonModels\JsonPlayer.cs" />
-    <Compile Include="Models\JsonModels\JsonStats.cs" />
-    <Compile Include="Models\JsonModels\JsonStatsAll.cs" />
     <Compile Include="Models\JsonModels\JsonTargetBuffs.cs" />
     <Compile Include="Models\JsonModels\JsonTarget.cs" />
-    <Compile Include="Models\JsonModels\JsonDps.cs" />
-    <Compile Include="Models\JsonModels\JsonDefenses.cs" />
     <Compile Include="Models\JsonModels\JsonPhase.cs" />
     <Compile Include="Models\JsonModels\JsonBuffs.cs" />
-    <Compile Include="Models\JsonModels\JsonSupport.cs" />
-    <Compile Include="Models\ParseModels\CombatReplay\Actors\Actor.cs" />
+    <Compile Include="Models\ParseModels\CombatReplay\Actors\FormActor.cs" />
     <Compile Include="Models\ParseModels\CombatReplay\Actors\Connector\AgentConnector.cs" />
     <Compile Include="Models\ParseModels\CombatReplay\Actors\Connector\Connector.cs" />
     <Compile Include="Models\ParseModels\CombatReplay\Actors\Connector\InterpolatedPositionConnector.cs" />
@@ -207,35 +249,29 @@
     <Compile Include="Models\ParseModels\Simulator\EffectStackingLogic\OverrideLogic.cs" />
     <Compile Include="Models\ParseModels\Simulator\EffectStackingLogic\QueueLogic.cs" />
     <Compile Include="Models\ParseModels\Simulator\EffectStackingLogic\StackingLogic.cs" />
-    <Compile Include="Controllers\GW2API\GW2APICategory.cs" />
     <Compile Include="Models\ParseModels\Logs\BoonRemovalLog.cs" />
     <Compile Include="Models\ParseModels\Logs\BoonApplicationLog.cs" />
     <Compile Include="Models\ParseModels\Mechanics\MechanicData.cs" />
-    <Compile Include="Models\ParseModels\Players\AbstractMasterPlayer.cs" />
-    <Compile Include="Models\ParseModels\Players\AbstractPlayer.cs" />
+    <Compile Include="Models\ParseModels\Actors\AbstractMasterActor.cs" />
+    <Compile Include="Models\ParseModels\Actors\AbstractActor.cs" />
     <Compile Include="Models\ParseModels\Boons\BoonsGraphModel.cs" />
     <Compile Include="Models\ParseModels\Boons\BoonDistribution.cs" />
-    <Compile Include="Models\ParseModels\Players\DummyPlayer.cs" />
-    <Compile Include="Models\ParseModels\Players\Minion.cs" />
-    <Compile Include="Models\ParseModels\Players\Minions.cs" />
+    <Compile Include="Models\ParseModels\Actors\DummyActor.cs" />
+    <Compile Include="Models\ParseModels\Actors\Minion.cs" />
+    <Compile Include="Models\ParseModels\Actors\Minions.cs" />
     <Compile Include="Models\ParseModels\PhaseData.cs" />
-    <Compile Include="Models\ParseModels\Players\Mob.cs" />
+    <Compile Include="Models\ParseModels\Actors\Mob.cs" />
     <Compile Include="Models\ParseModels\CombatReplay\Point3D.cs" />
     <Compile Include="Models\ParseModels\Simulator\BoonSimulationItems\BoonSimulationItem.cs" />
-    <Compile Include="Models\ParseModels\Players\Target.cs" />
+    <Compile Include="Models\ParseModels\Actors\Target.cs" />
     <Compile Include="Controllers\GW2API\GW2APISpec.cs" />
     <Compile Include="Models\ParseModels\Logs\DamageLogCondition.cs" />
-    <Compile Include="Controllers\GW2API\GW2APISkillCheck.cs" />
-    <Compile Include="Controllers\GW2API\GW2APISkillDetailed.cs" />
-    <Compile Include="Controllers\GW2API\GW2APIfacts.cs" />
-    <Compile Include="Controllers\GW2API\GW2APIfactsDetail.cs" />
+    <Compile Include="Controllers\GW2API\GW2APIFact.cs" />
     <Compile Include="Controllers\GW2API\GW2APISkill.cs" />
     <Compile Include="Models\ParseModels\Simulator\BoonSimulationItems\BoonSimulationItemDuration.cs" />
     <Compile Include="Models\ParseModels\Simulator\BoonSimulationItems\BoonSimulationItemIntensity.cs" />
     <Compile Include="Models\ParseModels\Simulator\BoonSimulationItems\BoonSimulationItemWasted.cs" />
-    <Compile Include="Models\ParseModels\Simulator\BoonSimulationResult.cs" />
     <Compile Include="Models\ParseModels\Simulator\BoonSimulator.cs" />
-    <Compile Include="Models\ParseModels\Agents\Agent.cs" />
     <Compile Include="Models\ParseModels\Agents\AgentData.cs" />
     <Compile Include="Models\ParseModels\Agents\AgentItem.cs" />
     <Compile Include="Models\ParseModels\Boons\Boon.cs" />
@@ -251,14 +287,12 @@
     <Compile Include="Models\ParseModels\LogData.cs" />
     <Compile Include="Models\ParseModels\Mechanics\Mechanic.cs" />
     <Compile Include="Models\ParseModels\Logs\MechanicLog.cs" />
-    <Compile Include="Models\ParseModels\Players\Player.cs" />
+    <Compile Include="Models\ParseModels\Actors\Player.cs" />
     <Compile Include="Models\ParseModels\Logs\DamageLogPower.cs" />
     <Compile Include="Models\ParseModels\SkillData.cs" />
     <Compile Include="Models\ParseModels\SkillItem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.cs" />
-    <Compile Include="Settings\Settings.cs" />
     <Compile Include="Settings\SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -268,12 +302,28 @@
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Settings\SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="App.manifest" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\DataSources\GridRow.datasource" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -283,75 +333,83 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Dodge_Instructor.png" />
-    <Content Include="Content\SkillList.xml">
+    <Content Include="Content\SkillList.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\SpecList.xml">
+    <Content Include="Content\SpecList.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\LI.ico" />
     <None Include="Settings\sample.conf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <EmbeddedResource Include="Resources\theme-cosmo.png" />
-    <EmbeddedResource Include="Resources\theme-slate.png" />
-    <EmbeddedResource Include="Resources\combatreplay.js" />
-    <EmbeddedResource Include="Resources\combatReplayTemplates\tmplCombatReplay.html" />
-    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayDamageTable.html" />
-    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayerRotation.html" />
-    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayerStatus.html" />
-    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayerBuffStats.html" />
-    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayData.html" />
-    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayerStats.html" />
-    <EmbeddedResource Include="Resources\ei.css" />
-    <EmbeddedResource Include="Resources\ei.js" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplGeneralLayout.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplBuffTable.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageDistTable.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplEncounter.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplPhase.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplGameplayTable.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplMechanicsTable.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplDefenseTable.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplSupportTable.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplBuffStats.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplPersonalBuffTable.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplBuffStatsTarget.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageDistTarget.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplTargetTab.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplTargetStats.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplDeathRecap.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplSimpleRotation.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplFood.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageDistPlayer.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplPlayerTab.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplPlayerStats.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplGraphStats.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplDPSGraph.html" />
-    <EmbeddedResource Include="Resources\combatReplayTemplates\tmplCombatReplayGroup.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplTargets.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageTable.html" />
-    <EmbeddedResource Include="Resources\combatReplayTemplates\tmplCombatReplayPlayer.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplPlayers.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageModifierTable.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplPlayerTabGraph.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplRotationLegend.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplTargetTabGraph.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplDamageTaken.html" />
-    <EmbeddedResource Include="Resources\htmlTemplates\tmplTargetData.html" />
-    <EmbeddedResource Include="Resources\JS\combatReplayStats.js" />
-    <EmbeddedResource Include="Resources\JS\generalStats.js" />
-    <EmbeddedResource Include="Resources\JS\buffStats.js" />
-    <EmbeddedResource Include="Resources\JS\graphs.js" />
-    <EmbeddedResource Include="Resources\JS\targetStats.js" />
-    <EmbeddedResource Include="Resources\JS\mechanics.js" />
-    <EmbeddedResource Include="Resources\JS\playerStats.js" />
-    <EmbeddedResource Include="Resources\JS\header.js" />
-    <EmbeddedResource Include="Resources\JS\layout.js" />
-    <EmbeddedResource Include="Resources\JS\commons.js" />
-    <EmbeddedResource Include="Resources\JS\global.js" />
+    <None Include="Resources\theme-cosmo.png" />
+    <None Include="Resources\theme-slate.png" />
+    <None Include="Resources\combatreplay.js" />
+    <None Include="Resources\combatReplayTemplates\tmplCombatReplay.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayDamageData.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayDamageTable.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayActorRotation.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayTargetsStats.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayersStats.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayTargetStatus.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayTargetStats.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayerStatus.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayActorBuffStats.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayerStats.html" />
+    <Content Include="Resources\combatReplayLinkTemplates\tmplCombatReplayStatusData.html" />
+    <Content Include="Resources\ei.css" />
+    <Content Include="Resources\ei.js" />
+    <None Include="Resources\htmlTemplates\tmplGeneralLayout.html" />
+    <None Include="Resources\htmlTemplates\tmplBuffTable.html" />
+    <None Include="Resources\htmlTemplates\tmplDamageDistTable.html" />
+    <None Include="Resources\htmlTemplates\tmplEncounter.html" />
+    <None Include="Resources\htmlTemplates\tmplPhase.html" />
+    <None Include="Resources\htmlTemplates\tmplGameplayTable.html" />
+    <None Include="Resources\htmlTemplates\tmplMechanicsTable.html" />
+    <None Include="Resources\htmlTemplates\tmplDefenseTable.html" />
+    <None Include="Resources\htmlTemplates\tmplSupportTable.html" />
+    <None Include="Resources\htmlTemplates\tmplBuffStats.html" />
+    <None Include="Resources\htmlTemplates\tmplPersonalBuffTable.html" />
+    <None Include="Resources\htmlTemplates\tmplBuffStatsTarget.html" />
+    <None Include="Resources\htmlTemplates\tmplDamageDistTarget.html" />
+    <None Include="Resources\htmlTemplates\tmplTargetTab.html" />
+    <None Include="Resources\htmlTemplates\tmplTargetStats.html" />
+    <None Include="Resources\htmlTemplates\tmplDeathRecap.html" />
+    <None Include="Resources\htmlTemplates\tmplSimpleRotation.html" />
+    <None Include="Resources\htmlTemplates\tmplFood.html" />
+    <None Include="Resources\htmlTemplates\tmplDamageDistPlayer.html" />
+    <None Include="Resources\htmlTemplates\tmplPlayerTab.html" />
+    <None Include="Resources\htmlTemplates\tmplPlayerStats.html" />
+    <None Include="Resources\htmlTemplates\tmplGraphStats.html" />
+    <None Include="Resources\htmlTemplates\tmplDPSGraph.html" />
+    <Content Include="Resources\combatReplayTemplates\tmplCombatReplayGroup.html" />
+    <None Include="Resources\htmlTemplates\tmplTargets.html" />
+    <Content Include="Resources\combatReplayTemplates\tmplCombatReplayPlayer.html" />
+    <None Include="Resources\htmlTemplates\tmplPlayers.html" />
+    <None Include="Resources\htmlTemplates\tmplDamageModifierTable.html" />
+    <None Include="Resources\htmlTemplates\tmplPlayerTabGraph.html" />
+    <None Include="Resources\htmlTemplates\tmplRotationLegend.html" />
+    <None Include="Resources\htmlTemplates\tmplTargetTabGraph.html" />
+    <None Include="Resources\htmlTemplates\tmplDamageTable.html" />
+    <None Include="Resources\htmlTemplates\tmplDamageModifierStats.html" />
+    <None Include="Resources\htmlTemplates\tmplDamageModifierPersStats.html" />
+    <Content Include="Resources\htmlTemplates\tmplDamageTaken.html" />
+    <Content Include="Resources\htmlTemplates\tmplTargetData.html" />
+    <Content Include="Resources\JS\combatReplayStats.js" />
+    <Content Include="Resources\JS\generalStats.js" />
+    <Content Include="Resources\JS\buffStats.js" />
+    <Content Include="Resources\JS\graphs.js" />
+    <Content Include="Resources\JS\damageModifierStats.js" />
+    <Content Include="Resources\JS\targetStats.js" />
+    <Content Include="Resources\JS\mechanics.js" />
+    <Content Include="Resources\JS\playerStats.js" />
+    <Content Include="Resources\JS\header.js" />
+    <Content Include="Resources\JS\layout.js" />
+    <Content Include="Resources\JS\commons.js" />
+    <Content Include="Resources\JS\global.js" />
     <Content Include="Resources\TODO.txt" />
-    <EmbeddedResource Include="Resources\template.html" />
+    <None Include="Resources\template.html" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">

@@ -1,17 +1,18 @@
 ﻿using LuckParser.Controllers;
 using System;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
-namespace LuckParser
+namespace LuckParser.Setting
 {
     public partial class SettingsForm : Form
     {
-        private MainForm mainForm;
+        public event EventHandler SettingsClosedEvent;
+        public event EventHandler WatchDirectoryUpdatedEvent;
 
         public SettingsForm(MainForm mainForm)
         {
-            this.mainForm = mainForm;
             InitializeComponent();
         }
         
@@ -22,15 +23,17 @@ namespace LuckParser
             {
                 e.Cancel = true;
                 Hide();
+                SettingsClosedEvent(this, null);
             }
         }
 
-        private void SettingsFormLoad(object sender, EventArgs e)
+        private void SetValues()
         {
-            chkDefaultOutputLoc.Checked =Properties.Settings.Default.SaveAtOut;
+
+            chkDefaultOutputLoc.Checked = Properties.Settings.Default.SaveAtOut;
             txtCustomSaveLoc.Text = Properties.Settings.Default.OutLocation;
             chkOutputHtml.Checked = Properties.Settings.Default.SaveOutHTML;
-            chkOutputCsv.Checked = Properties.Settings.Default.SaveOutCSV;  
+            chkOutputCsv.Checked = Properties.Settings.Default.SaveOutCSV;
             chkShowEstimates.Checked = Properties.Settings.Default.ShowEstimates;
             chkPhaseParsing.Checked = Properties.Settings.Default.ParsePhases;
             chkOneAtATime.Checked = Properties.Settings.Default.ParseOneAtATime;
@@ -52,11 +55,16 @@ namespace LuckParser
             chkAddDuration.Checked = Properties.Settings.Default.AddDuration;
 
             chkHtmlExternalScripts.Checked = Properties.Settings.Default.HtmlExternalScripts;
-            toolTip1.SetToolTip(chkHtmlExternalScripts, "Writes static css and js scripts in own files, which are shared between all logs. Log file size decreases, but the script files have to be kept along with the html.");
 
             panelHtml.Enabled = Properties.Settings.Default.SaveOutHTML;
             panelJson.Enabled = Properties.Settings.Default.SaveOutJSON;
             panelXML.Enabled = Properties.Settings.Default.SaveOutXML;
+        }
+
+        private void SettingsFormLoad(object sender, EventArgs e)
+        {
+            SetValues();
+            toolTip1.SetToolTip(chkHtmlExternalScripts, "Writes static css and js scripts in own files, which are shared between all logs. Log file size decreases, but the script files have to be kept along with the html.");
         }
 
         private void DefaultOutputLocationCheckedChanged(object sender, EventArgs e)
@@ -91,13 +99,15 @@ namespace LuckParser
             //Update skill list
             GW2APIController tempcontroller = new GW2APIController();
             tempcontroller.WriteSkillListToFile();
+            MessageBox.Show("Skill List has been redone");
         }
 
-        private void RetrySkillListClick(object sender, EventArgs e)
+        private void ResetSpecListClick(object sender, EventArgs e)
         {
             //Update skill list
             GW2APIController tempcontroller = new GW2APIController();
-            tempcontroller.RetryWriteSkillListtoFile();
+            tempcontroller.WriteSpecListToFile();
+            MessageBox.Show("Spec List has been redone");
         }
 
         private void OuputCheckedChanged(object sender, EventArgs e)
@@ -146,7 +156,7 @@ namespace LuckParser
             Properties.Settings.Default.UploadToDPSReportsRH = UploadDRRH_check.Checked;
         }
 
-        private void chkB_SkipFailedTries_CheckedChanged(object sender, EventArgs e)
+        private void ChkB_SkipFailedTries_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.SkipFailedTries = chkB_SkipFailedTries.Checked;
         }
@@ -162,34 +172,34 @@ namespace LuckParser
             panelXML.Enabled = Properties.Settings.Default.SaveOutXML;
         }
 
-        private void chkIndentJSONCheckedChanged(object sender, EventArgs e)
+        private void ChkIndentJSONCheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.IndentJSON = chkIndentJSON.Checked;
         }
 
-        private void chkIndentXMLCheckedChanged(object sender, EventArgs e)
+        private void ChkIndentXMLCheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.IndentXML = chkIndentXML.Checked;
         }
 
-        private void chkHtmlExternalScripts_CheckedChanged(object sender, EventArgs e)
+        private void ChkHtmlExternalScripts_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.HtmlExternalScripts = chkHtmlExternalScripts.Checked;
         }
 
-        private void radioThemeLight_CheckedChanged(object sender, EventArgs e)
+        private void RadioThemeLight_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.LightTheme = radioThemeLight.Checked;
             imgTheme.Image = Properties.Settings.Default.LightTheme ? Properties.Resources.theme_cosmo : Properties.Resources.theme_slate;
         }
 
-        private void radioThemeDark_CheckedChanged(object sender, EventArgs e)
+        private void RadioThemeDark_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.LightTheme = radioThemeLight.Checked;
             imgTheme.Image = Properties.Settings.Default.LightTheme ? Properties.Resources.theme_cosmo : Properties.Resources.theme_slate;
         }
 
-        private void cmdClose_Click(object sender, EventArgs e)
+        private void CmdClose_Click(object sender, EventArgs e)
         {
             this.Close();
         }
@@ -232,7 +242,7 @@ namespace LuckParser
                 }
             }
             Properties.Settings.Default.AutoAdd = chkAutoAdd.Checked;
-            mainForm.UpdateWatchDirectory();
+            WatchDirectoryUpdatedEvent(this, null);
         }
 
         private void ChkAutoParse_CheckedChanged(object sender, EventArgs e)
@@ -240,14 +250,47 @@ namespace LuckParser
             Properties.Settings.Default.AutoParse = chkAutoParse.Checked;
         }
 
-        private void chkAddPoVProf_CheckedChanged(object sender, EventArgs e)
+        private void ChkAddPoVProf_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.AddPoVProf = chkAddPoVProf.Checked;
         }
 
-        private void chkAddDuration_CheckedChanged(object sender, EventArgs e)
+        private void ChkAddDuration_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.AddDuration = chkAddDuration.Checked;
+        }
+
+        private void SettingsDump_Click(object sender, EventArgs e)
+        {
+            string dump = CustomSettingsManager.DumpSettings();
+            using (var saveFile = new SaveFileDialog())
+            {
+                saveFile.Filter = "Conf file|*.conf";
+                saveFile.Title = "Save a Configuration file";
+                DialogResult result = saveFile.ShowDialog();
+                if (saveFile.FileName != "")
+                {
+                    FileStream fs = (FileStream)saveFile.OpenFile();
+                    byte[] settings = new UTF8Encoding(true).GetBytes(dump);
+                    fs.Write(settings, 0, settings.Length);
+                    fs.Close();
+                }
+            }
+        }
+
+        private void SettingsLoad_Click(object sender, EventArgs e)
+        {
+            using (var loadFile = new OpenFileDialog())
+            {
+                loadFile.Filter = "Conf file|*.conf";
+                loadFile.Title = "Load a Configuration file";
+                DialogResult result = loadFile.ShowDialog();
+                if (loadFile.FileName != "")
+                {
+                    CustomSettingsManager.ReadConfig(loadFile.FileName);
+                    SetValues();
+                }
+            }
         }
     }
 }

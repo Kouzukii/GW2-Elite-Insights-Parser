@@ -4,23 +4,21 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using LuckParser.Models.DataModels;
+using LuckParser.Parser;
 using Newtonsoft.Json;
-using NUglify;
+using Newtonsoft.Json.Serialization;
 
 namespace LuckParser.Builders
 {
     class CombatReplayHelper
     {
-        public static SettingsContainer Settings;
-  
-        public static string CreateCombatReplayInterface(Tuple<int,int> canvasSize, ParsedLog log)
+        public static string CreateCombatReplayInterface((int width, int height) canvasSize, ParsedLog log)
         {
             string replayHTML = Properties.Resources.tmplCombatReplay;
-            replayHTML = replayHTML.Replace("${canvasX}", canvasSize.Item1.ToString());
-            replayHTML = replayHTML.Replace("${canvasY}", canvasSize.Item2.ToString());
-            replayHTML = replayHTML.Replace("${maxTime}", log.PlayerList.First().CombatReplay.Times.Last().ToString());
-            List<int> groups = log.PlayerList.Where(x => x.Account != ":Conjured Sword").Select(x => x.Group).Distinct().ToList();
+            replayHTML = replayHTML.Replace("${canvasX}", canvasSize.width.ToString());
+            replayHTML = replayHTML.Replace("${canvasY}", canvasSize.height.ToString());
+            replayHTML = replayHTML.Replace("${maxTime}", log.PlayerList.First().GetCombatReplayTimes(log).Last().ToString());
+            List<int> groups = log.PlayerList.Where(x => !x.IsFakeActor).Select(x => x.Group).Distinct().ToList();
             string groupsString = "";
             foreach (int group in groups)
             {
@@ -30,7 +28,7 @@ namespace LuckParser.Builders
                 foreach (Player p in log.PlayerList.Where(x => x.Group == group))
                 {
                     string replayPlayerHTML = Properties.Resources.tmplCombatReplayPlayer;
-                    replayPlayerHTML = replayPlayerHTML.Replace("${instid}", p.GetCombatReplayID().ToString());
+                    replayPlayerHTML = replayPlayerHTML.Replace("${instid}", p.GetCombatReplayID(log).ToString());
                     replayPlayerHTML = replayPlayerHTML.Replace("${playerName}", p.Character.Substring(0, Math.Min(10, p.Character.Length)));
                     replayPlayerHTML = replayPlayerHTML.Replace("${imageURL}", GeneralHelper.GetProfIcon(p.Prof));
                     replayPlayerHTML = replayPlayerHTML.Replace("${prof}", p.Prof);
@@ -43,9 +41,62 @@ namespace LuckParser.Builders
             return replayHTML;
         }
 
+        public static List<object> GetCombatReplayActors(ParsedLog log, CombatReplayMap map)
+        {
+            List<object> actors = new List<object>();
+            foreach (Player p in log.PlayerList)
+            {
+                if (p.IsFakeActor)
+                {
+                    continue;
+                }
+                if (p.GetCombatReplayPositions(log).Count == 0)
+                {
+                    continue;
+                }
+                actors.Add(p.GetCombatReplayJSON(map, log));
+                foreach (GenericActor a in p.GetCombatReplayActors(log))
+                {
+                    actors.Add(a.GetCombatReplayJSON(map, log));
+                }
+            }
+            foreach (Mob m in log.FightData.Logic.TrashMobs)
+            {
+                if (m.GetCombatReplayPositions(log).Count == 0)
+                {
+                    continue;
+                }
+                actors.Add(m.GetCombatReplayJSON(map, log));
+                foreach (GenericActor a in m.GetCombatReplayActors(log))
+                {
+                    actors.Add(a.GetCombatReplayJSON(map, log));
+                }
+            }
+            foreach (Target target in log.FightData.Logic.Targets)
+            {
+                if (target.GetCombatReplayPositions(log).Count == 0)
+                {
+                    continue;
+                }
+                actors.Add(target.GetCombatReplayJSON(map, log));
+                foreach (GenericActor a in target.GetCombatReplayActors(log))
+                {
+                    actors.Add(a.GetCombatReplayJSON(map, log));
+                }
+            }
+            return actors;
+        }
+
         public static string GetDynamicCombatReplayScript(ParsedLog log, int pollingRate, CombatReplayMap map)
         {
-
+            DefaultContractResolver contractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            };
+            JsonSerializerSettings settings = new JsonSerializerSettings()
+            {
+                ContractResolver = contractResolver
+            };
             Dictionary<string, object> options = new Dictionary<string, object>
             {
                 { "inch", map.GetInch() },
@@ -53,63 +104,10 @@ namespace LuckParser.Builders
                 { "mapLink", map.Link }
             };
 
-            string actors = "";
-            int count = 0;
-            foreach (Player p in log.PlayerList)
-            {
-                if (p.Account == ":Conjured Sword")
-                {
-                    continue;
-                }
-                if (p.CombatReplay.Positions.Count == 0)
-                {
-                    continue;
-                }
-                if (count > 0)
-                {
-                    actors += ",";
-                }
-                count++;
-                actors += p.GetCombatReplayJSON(map);
-                foreach (Actor a in p.CombatReplay.Actors)
-                {
-                    actors += ",";
-                    actors += a.GetCombatReplayJSON(map);
-                }
-            }
-            foreach (Mob m in log.FightData.Logic.TrashMobs)
-            {
-                if (m.CombatReplay.Positions.Count == 0)
-                {
-                    continue;
-                }
-                actors += ",";
-                actors += m.GetCombatReplayJSON(map);
-                foreach (Actor a in m.CombatReplay.Actors)
-                {
-                    actors += ",";
-                    actors += a.GetCombatReplayJSON(map);
-                }
-            }
-            foreach (Target target in log.FightData.Logic.Targets)
-            {
-                if (target.CombatReplay.Positions.Count == 0)
-                {
-                    continue;
-                }
-                actors += ",";
-                actors += target.GetCombatReplayJSON(map);
-                foreach (Actor a in target.CombatReplay.Actors)
-                {
-                    actors += ",";
-                    actors += a.GetCombatReplayJSON(map);
-                }
-            }
+            List<object> actors = GetCombatReplayActors(log, map);
+            
             string script = "var initialOnLoad = window.onload;";
-            script += "window.onload = function () { if (initialOnLoad) {initialOnLoad();} animator = new Animator(" + JsonConvert.SerializeObject(options)+", [" + actors + "]);};";
-#if !DEBUG
-            script = Uglify.Js(script, GeneralHelper.JSMinifySettings).Code;
-#endif
+            script += "window.onload = function () { if (initialOnLoad) {initialOnLoad();} animator = new Animator(" + JsonConvert.SerializeObject(options, settings) + "); animator.initActors(" + JsonConvert.SerializeObject(actors, settings) + ");};";
             return script;
         }
 
@@ -117,11 +115,9 @@ namespace LuckParser.Builders
         {
             string script = "";
             script += "<script>";
-#if DEBUG
+
             script += Properties.Resources.combatreplay_js;
-#else          
-            script += Uglify.Js(Properties.Resources.combatreplay_js, GeneralHelper.JSMinifySettings).Code;
-#endif
+
             script += "</script>";
 
             script += "<script>";

@@ -2,9 +2,6 @@
 
 
 function computeTargetDPS(target, damageData,lim, phasebreaks, cacheID, lastTime) {
-    if (!target.dpsGraphCache) {
-        target.dpsGraphCache = new Map();
-    }
     if (target.dpsGraphCache.has(cacheID)) {
         return target.dpsGraphCache.get(cacheID);
     }
@@ -228,8 +225,8 @@ var compileTargetTab = function () {
                     var tar = logData.targets[this.phase.targets[i]];
                     res.push(tar);
                 }
-                if (this.simplephase.focus === null) {
-                    this.simplephase.focus = res[0] ? res[0].id : null;
+                if (this.simplephase.focus === -1) {
+                    this.simplephase.focus = res[0] ? res[0].id : -1;
                 }
                 return res;
             }
@@ -277,7 +274,7 @@ var compileTargetTab = function () {
             {
                 var health = this.graph.targets[this.phaseTargetIndex].health;
                 var hpTexts = [];
-                for (j = 0; j < health.length; j++) {
+                for (var j = 0; j < health.length; j++) {
                     hpTexts[j] = health[j] + "% hp";
                 }
                 var res = {
@@ -288,7 +285,7 @@ var compileTargetTab = function () {
                         shape: 'spline',
                         dash: 'dashdot'
                     },
-                    hoverinfo: 'text',
+                    hoverinfo: 'text+x',
                     name: this.target.name + ' health',
                     yaxis: dpsY
                 };
@@ -303,7 +300,7 @@ var compileTargetTab = function () {
                     shape: 'spline'
                 },
                 yaxis: dpsY,
-                hoverinfo: 'name+y',
+                hoverinfo: 'name+y+x',
                 name: 'Total DPS'
             });
             this.layout = getActorGraphLayout(images, this.light ? '#495057' : '#cccccc');
@@ -380,7 +377,7 @@ var compileTargetTab = function () {
                 {
                     var health = this.graph.targets[this.phaseTargetIndex].health;
                     var hpPoints = [];
-                    for (j = 0; j < health.length; j++) {
+                    for (var j = 0; j < health.length; j++) {
                         hpPoints[j] = health[j] * dpsData.maxDPS / 100.0;
                     }
                     res[1] = hpPoints;

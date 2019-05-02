@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LuckParser.Parser;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,13 +21,13 @@ namespace LuckParser.Models.ParseModels
             Position = position;
         }
 
-        public override object GetConnectedTo(CombatReplayMap map)
+        public override object GetConnectedTo(CombatReplayMap map, ParsedLog log)
         {
-            Tuple<double, double> mapPos = map.GetMapCoord(Position.X, Position.Y);
+            (double x, double y) = map.GetMapCoord(Position.X, Position.Y);
             return new double[2]
                        {
-                        mapPos.Item1,
-                        mapPos.Item2
+                        x,
+                        y
                        };
         }
     }
