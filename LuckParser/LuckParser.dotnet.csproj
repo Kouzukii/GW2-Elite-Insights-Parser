@@ -3,9 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AssemblyName>LuckParser</AssemblyName>
+    <RootNamespace>LuckParser</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>LI.ico</ApplicationIcon>
+    <ApplicationIcon>Content/LI.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>App.manifest</ApplicationManifest>
@@ -19,15 +21,14 @@
     <Compile Remove="Properties\AssemblyInfo.cs" />
     <Compile Remove="MainForm.cs" />
     <Compile Remove="MainForm.Designer.cs" />
-    <Compile Remove="SettingsForm.cs" />
-    <Compile Remove="SettingsForm.Designer.cs" />
+    <Compile Remove="Settings/SettingsForm.cs" />
+    <Compile Remove="Settings/SettingsForm.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="MainForm.resx" />
-    <EmbeddedResource Remove="SettingsForm.resx" />
+    <EmbeddedResource Remove="Settings/SettingsForm.resx" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Resources\combatreplay.js" />
     <None Remove="Resources\combatreplay.js" />
     <None Remove="Resources\ei.css" />
     <None Remove="Resources\ei.js" />
@@ -90,14 +91,14 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Dodge_Instructor.png" />
-    <Content Include="Content\SkillList.txt">
+    <Content Include="Content\SkillList.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\SpecList.txt">
+    <Content Include="Content\SpecList.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="LI.ico" />
-    <None Include="sample.conf">
+    <Content Include="Content/LI.ico" />
+    <None Include="Settings/sample.conf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <EmbeddedResource Include="Resources\combatreplay.js" />
@@ -106,6 +107,7 @@
     <EmbeddedResource Include="Resources\JS\commons.js" />
     <EmbeddedResource Include="Resources\JS\global.js" />
     <EmbeddedResource Include="Resources\JS\generalStats.js" />
+    <EmbeddedResource Include="Resources\JS\combatReplayStats.js" />
     <EmbeddedResource Include="Resources\JS\buffStats.js" />
     <EmbeddedResource Include="Resources\JS\graphs.js" />
     <EmbeddedResource Include="Resources\JS\layout.js" />
@@ -149,6 +151,12 @@
     <EmbeddedResource Include="Resources\combatReplayTemplates\tmplCombatReplay.html" />
     <EmbeddedResource Include="Resources\combatReplayTemplates\tmplCombatReplayGroup.html" />
     <EmbeddedResource Include="Resources\combatReplayTemplates\tmplCombatReplayPlayer.html" />
+    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayDamageTable.html" />
+    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayerRotation.html" />
+    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayerStatus.html" />
+    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayerBuffStats.html" />
+    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayData.html" />
+    <EmbeddedResource Include="Resources\combatReplayLinkTemplates\tmplCombatReplayPlayerStats.html" />
     <Content Include="Resources\TODO.txt" />
   </ItemGroup>
   <ItemGroup>

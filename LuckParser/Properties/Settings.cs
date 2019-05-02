@@ -101,7 +101,7 @@ namespace LuckParser.Properties {
         
         public bool LightTheme { get; set; } = false;
         
-        public bool ParseCombatReplay { get; set; } = false;
+        public bool ParseCombatReplay { get; set; } = true;
         
         public bool UploadToDPSReports { get; set; } = false;
         

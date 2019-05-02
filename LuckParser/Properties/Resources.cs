@@ -137,6 +137,48 @@ namespace LuckParser.Properties {
             }
         }
         
+        internal static string tmplCombatReplayDamageTable {
+            get {
+                return GetString("LuckParser.Resources.combatReplayLinkTemplates.tmplCombatReplayDamageTable.html");
+            }
+        }
+        
+        internal static string tmplCombatReplayPlayerRotation {
+            get {
+                return GetString("LuckParser.Resources.combatReplayLinkTemplates.tmplCombatReplayPlayerRotation.html");
+            }
+        }
+        
+        internal static string tmplCombatReplayPlayerStatus {
+            get {
+                return GetString("LuckParser.Resources.combatReplayLinkTemplates.tmplCombatReplayPlayerStatus.html");
+            }
+        }
+        
+        internal static string tmplCombatReplayPlayerBuffStats {
+            get {
+                return GetString("LuckParser.Resources.combatReplayLinkTemplates.tmplCombatReplayPlayerBuffStats.html");
+            }
+        }
+        
+        internal static string tmplCombatReplayData {
+            get {
+                return GetString("LuckParser.Resources.combatReplayLinkTemplates.tmplCombatReplayData.html");
+            }
+        }
+        
+        internal static string tmplCombatReplayPlayerStats {
+            get {
+                return GetString("LuckParser.Resources.combatReplayLinkTemplates.tmplCombatReplayPlayerStats.html");
+            }
+        }
+        
+        internal static string combatReplayStatsJS {
+            get {
+                return GetString("LuckParser.Resources.JS.combatReplayStats.js");
+            }
+        }
+        
         internal static string tmplDamageDistPlayer {
             get {
                 return GetString("LuckParser.Resources.htmlTemplates.tmplDamageDistPlayer.html");
